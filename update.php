@@ -1,6 +1,7 @@
 <?php
 define('CRM_ROOT', __DIR__ . '/portal/crm');
 require_once __DIR__ . '/portal/crm/includes/config.php';
+require_once __DIR__ . '/portal/crm/includes/Database.php';
 $db = Database::getInstance();
 try {
     $db->query("ALTER TABLE usuarios_internos ADD COLUMN foto VARCHAR(255) NULL");
