@@ -1,4 +1,5 @@
 <?php
+define('CRM_ROOT', __DIR__ . '/portal/crm');
 require_once __DIR__ . '/portal/crm/includes/config.php';
 $db = Database::getInstance();
 try {
