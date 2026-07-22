@@ -582,9 +582,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
                     <div class="cf-section-title">Describa su situación legal</div>
 
                     <div class="cf-group">
-                        <label>Descripción del Caso <span class="req">*</span></label>
+                        <label>Tipo de Consulta <span class="req">*</span></label>
+                        <div class="cf-radio-grid">
+                            <?php
+                            $tipos = ['Civil','Penal','Laboral','Mercantil','Inmobiliario','Familia','Extranjería','Administrativo','Otro'];
+                            foreach ($tipos as $t):
+                                $sel = (($formData['tipo_problema'] ?? '') === $t) ? 'checked' : '';
+                            ?>
+                            <div class="cf-radio-item">
+                                <input type="radio" name="tipo_problema" id="tipo_<?php echo strtolower($t); ?>" value="<?php echo $t; ?>" <?php echo $sel; ?> required>
+                                <label for="tipo_<?php echo strtolower($t); ?>"><?php echo $t; ?></label>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+
+                    <div class="cf-group">
+                        <label>Describa Su Caso <span class="req">*</span></label>
                         <div class="cf-input-wrap">
-                            <textarea name="descripcion" rows="4" placeholder="Describa brevemente su situación legal..." required><?php echo esc($formData['descripcion']); ?></textarea>
+                            <textarea name="descripcion" rows="5" placeholder="Explique con detalle su situación legal. Cuanta más información nos proporcione, mejor podremos ayudarle (mín. 20 caracteres)..." required minlength="20"><?php echo esc($formData['descripcion']); ?></textarea>
                         </div>
                     </div>
 
