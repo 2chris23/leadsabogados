@@ -27,6 +27,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
         exit;
     }
 
+    if ($accion === 'eliminar' && $solicitudId > 0) {
+        $db->beginTransaction();
+        try {
+            // Eliminar archivos físicos primero
+            $archivosPortal = $db->fetchAll("SELECT * FROM solicitud_archivos WHERE solicitud_id = ?", [$solicitudId]);
+            foreach ($archivosPortal as $arch) {
+                // Borrar archivo físico: ruta relativa en public/
+                $rutaCompleta = CRM_ROOT . '/public/' . ltrim(str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $arch['ruta']), DIRECTORY_SEPARATOR);
+                if (file_exists($rutaCompleta) && is_file($rutaCompleta)) {
+                    @unlink($rutaCompleta);
+                }
+            }
+            
+            // Eliminar registros de la base de datos (ON DELETE CASCADE debería borrar en solicitud_archivos, pero aseguramos)
+            $db->query("DELETE FROM solicitud_archivos WHERE solicitud_id = ?", [$solicitudId]);
+            $db->query("DELETE FROM solicitudes WHERE id = ?", [$solicitudId]);
+            
+            AuditLog::registrar('eliminar_solicitud', 'solicitudes', $solicitudId, "Solicitud eliminada permanentemente.");
+            $db->commit();
+            setFlash('exito', 'Solicitud y sus archivos eliminados permanentemente.');
+        } catch (Exception $e) {
+            $db->rollBack();
+            setFlash('error', 'Error al eliminar: ' . $e->getMessage());
+        }
+        header('Location: ' . APP_URL . '/index.php?page=solicitudes');
+        exit;
+    }
+
     $estadosValidos = ['aceptada', 'denegada', 'archivada', 'cancelada'];
 
     if ($solicitudId > 0 && in_array($accion, $estadosValidos)) {
@@ -250,6 +278,15 @@ $solicitudes = $db->fetchAll(
                                     </button>
                                 </form>
                                 <?php endif; ?>
+                                <form method="POST" style="display:inline">
+                                    <?php echo CSRF::campo(); ?>
+                                    <input type="hidden" name="solicitud_id" value="<?php echo $sol['id']; ?>">
+                                    <input type="hidden" name="accion" value="eliminar">
+                                    <button type="submit" class="bg-danger-focus text-danger-main w-32-px h-32-px d-flex justify-content-center align-items-center rounded-circle border-0"
+                                        title="Eliminar permanentemente" data-confirm="¿Estás seguro de eliminar esta solicitud de forma permanente? Se borrarán sus archivos.">
+                                        <iconify-icon icon="mingcute:delete-2-line" class="icon"></iconify-icon>
+                                    </button>
+                                </form>
                             </div>
                         </td>
                     </tr>

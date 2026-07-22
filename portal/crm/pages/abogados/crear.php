@@ -26,8 +26,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'password_hash' => password_hash($password, PASSWORD_DEFAULT),
             'rol' => 'abogado', 
             'telefono' => $telefono, 
+            'especialidades' => trim($_POST['especialidades'] ?? ''),
+            'sitio_web' => trim($_POST['sitio_web'] ?? ''),
             'activo' => 1
         ]);
+        
+        // Manejar subida de foto si hay
+        if (!empty($_FILES['foto']['name'])) {
+            $ext = strtolower(pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION));
+            if (in_array($ext, ['jpg', 'jpeg', 'png', 'webp'])) {
+                $fotoName = 'abogado_' . $id . '_' . time() . '.' . $ext;
+                $fotoPath = CRM_ROOT . '/public/uploads/perfiles/';
+                if (!is_dir($fotoPath)) @mkdir($fotoPath, 0755, true);
+                if (move_uploaded_file($_FILES['foto']['tmp_name'], $fotoPath . $fotoName)) {
+                    $db->update('usuarios_internos', ['foto' => 'uploads/perfiles/' . $fotoName], 'id = ?', [$id]);
+                }
+            }
+        }
         AuditLog::registrar('crear', 'usuarios_internos', $id, "Nuevo abogado creado: $email");
         setFlash('exito', 'Abogado registrado correctamente');
         header('Location: ' . APP_URL . '/index.php?page=abogados'); exit;
@@ -55,7 +70,7 @@ include CRM_ROOT . '/templates/layout/header.php';
                 </div>
                 <?php endif; ?>
 
-                <form method="POST">
+                <form method="POST" enctype="multipart/form-data">
                     <?php echo CSRF::campo(); ?>
                     <div class="row gy-3">
                         <div class="col-sm-6">
@@ -73,6 +88,19 @@ include CRM_ROOT . '/templates/layout/header.php';
                         <div class="col-sm-6">
                             <label class="form-label fw-semibold">Teléfono / WhatsApp</label>
                             <input type="text" name="telefono" class="form-control radius-8" value="<?php echo e($_POST['telefono'] ?? ''); ?>" placeholder="+34 600 000 000">
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label fw-semibold">Foto de Perfil</label>
+                            <input type="file" name="foto" class="form-control radius-8" accept="image/jpeg, image/png, image/webp">
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label fw-semibold">Sitio Web</label>
+                            <input type="url" name="sitio_web" class="form-control radius-8" value="<?php echo e($_POST['sitio_web'] ?? ''); ?>" placeholder="https://miweb.com">
+                        </div>
+                        <div class="col-sm-12">
+                            <label class="form-label fw-semibold">Especialidades</label>
+                            <input type="text" name="especialidades" class="form-control radius-8" value="<?php echo e($_POST['especialidades'] ?? ''); ?>" placeholder="Derecho Penal, Civil, Familia...">
+                            <small class="text-secondary-light">Separa las especialidades por comas.</small>
                         </div>
                         <div class="col-sm-12">
                             <label class="form-label fw-semibold">Contraseña de Acceso <span class="text-danger">*</span></label>

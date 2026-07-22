@@ -29,25 +29,30 @@ if (!$archivo) {
     die('Archivo no encontrado en la base de datos.');
 }
 
-// Los archivos se guardan en portal/uploads/solicitudes/
-// CRM_ROOT = /ruta/crm, subimos un nivel para llegar a /ruta/portal/
-$rutaBase    = dirname(CRM_ROOT) . DIRECTORY_SEPARATOR . 'portal' . DIRECTORY_SEPARATOR;
-$rutaRelativa = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $archivo['ruta']);
-$rutaCompleta = $rutaBase . $rutaRelativa;
+$rutaRelativa = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, ltrim($archivo['ruta'], '/\\'));
+
+if (strpos($rutaRelativa, 'storage' . DIRECTORY_SEPARATOR) === 0) {
+    $rutaCompleta = CRM_ROOT . DIRECTORY_SEPARATOR . $rutaRelativa;
+} elseif (strpos($rutaRelativa, 'uploads' . DIRECTORY_SEPARATOR) === 0) {
+    $rutaCompleta = CRM_ROOT . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . $rutaRelativa;
+} else {
+    // Fallback legacy
+    $rutaCompleta = CRM_ROOT . DIRECTORY_SEPARATOR . $rutaRelativa;
+}
 
 if (!file_exists($rutaCompleta) || !is_file($rutaCompleta)) {
     http_response_code(404);
     echo '<h3>Archivo no encontrado</h3>';
     echo '<p>El archivo <strong>' . htmlspecialchars($archivo['nombre_original']) . '</strong> no existe en el servidor.</p>';
-    echo '<p style="font-size:.8rem;color:#999">Ruta esperada: ' . htmlspecialchars($rutaCompleta) . '</p>';
     exit;
 }
 
-// Seguridad: confirmar que la ruta está dentro del directorio permitido
-$dirUploads = realpath($rutaBase . 'uploads' . DIRECTORY_SEPARATOR . 'solicitudes');
+// Seguridad: confirmar que la ruta está dentro de los directorios permitidos
+$dirStorage = realpath(CRM_ROOT . DIRECTORY_SEPARATOR . 'storage');
+$dirUploads = realpath(CRM_ROOT . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . 'uploads');
 $rutaReal   = realpath($rutaCompleta);
 
-if (!$rutaReal || !$dirUploads || strpos($rutaReal, $dirUploads) !== 0) {
+if (!$rutaReal || (strpos($rutaReal, $dirStorage) !== 0 && strpos($rutaReal, $dirUploads) !== 0)) {
     http_response_code(403);
     die('Acceso no permitido.');
 }

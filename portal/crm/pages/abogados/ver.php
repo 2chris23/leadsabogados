@@ -91,9 +91,13 @@ include CRM_ROOT . '/templates/layout/header.php';
             <div class="card radius-16 border bg-white shadow-sm mb-24" style="overflow: visible;">
                 <div class="card-body p-24 text-center">
                     <div class="mb-16">
-                        <div class="w-120-px h-120-px bg-primary-100 text-primary-600 rounded-circle d-flex align-items-center justify-content-center text-4xl fw-bold mx-auto border shadow">
-                            <?php echo strtoupper(substr($abogado['nombre'], 0, 1)); ?>
-                        </div>
+                        <?php if (!empty($abogado['foto'])): ?>
+                            <img src="<?php echo APP_URL . '/../' . $abogado['foto']; ?>" class="w-120-px h-120-px rounded-circle object-fit-cover mx-auto border shadow" alt="Foto">
+                        <?php else: ?>
+                            <div class="w-120-px h-120-px bg-primary-100 text-primary-600 rounded-circle d-flex align-items-center justify-content-center text-4xl fw-bold mx-auto border shadow">
+                                <?php echo strtoupper(substr($abogado['nombre'], 0, 1)); ?>
+                            </div>
+                        <?php endif; ?>
                     </div>
                     <h4 class="mb-4 fw-bold"><?php echo e($abogado['nombre'] . ' ' . $abogado['apellidos']); ?></h4>
                     <span class="badge bg-primary-100 text-primary-600 px-16 py-6 radius-pill fw-bold text-xs uppercase mb-16">Abogado</span>
@@ -105,6 +109,19 @@ include CRM_ROOT . '/templates/layout/header.php';
                         <div class="d-flex align-items-center justify-content-center gap-2 text-sm">
                             <iconify-icon icon="solar:phone-outline"></iconify-icon> <?php echo e($abogado['telefono'] ?? '+00 000 000 000'); ?>
                         </div>
+                        <?php if (!empty($abogado['sitio_web'])): ?>
+                        <div class="d-flex align-items-center justify-content-center gap-2 text-sm mt-8">
+                            <iconify-icon icon="solar:global-outline"></iconify-icon> <a href="<?php echo e($abogado['sitio_web']); ?>" target="_blank" class="text-primary-600 hover-text-primary"><?php echo e($abogado['sitio_web']); ?></a>
+                        </div>
+                        <?php endif; ?>
+                        <?php if (!empty($abogado['especialidades'])): ?>
+                        <div class="mt-16 pt-16 border-top text-center">
+                            <div class="text-xs fw-bold text-secondary-light uppercase mb-8">Especialidades</div>
+                            <?php foreach(explode(',', $abogado['especialidades']) as $esp): ?>
+                                <span class="badge bg-neutral-100 text-neutral-600 radius-4 mb-4"><?php echo e(trim($esp)); ?></span>
+                            <?php endforeach; ?>
+                        </div>
+                        <?php endif; ?>
                     </div>
 
                     <!-- Configuración Financiera -->
