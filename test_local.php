@@ -1,0 +1,1 @@
+<?php define('CRM_ROOT', __DIR__ . '/portal/crm'); require_once CRM_ROOT . '/includes/config.php'; require_once CRM_ROOT . '/includes/Database.php'; try { $db = Database::getInstance(); $pdo = $db->getConnection(); echo 'CONEXION EXITOSA A LOCALHOST'; } catch (Exception $e) { echo 'ERROR: ' . $e->getMessage(); } ?>

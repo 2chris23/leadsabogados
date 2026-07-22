@@ -1,0 +1,68 @@
+/* ─── CASO VER — PREMIUM REDESIGN ─── */
+.cv-wrap{display:grid;grid-template-columns:1fr 320px;gap:24px;align-items:start}
+@media(max-width:991px){.cv-wrap{grid-template-columns:1fr}}
+.cv-card{background:#fff;border:1px solid #e2e8f0;border-radius:16px;margin-bottom:20px}
+.cv-card-header{padding:18px 22px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;gap:10px;border-radius:16px 16px 0 0}
+.cv-card-header h3{font-size:.9375rem !important;font-weight:700 !important;color:#1a1a2e !important;margin:0 !important;line-height:1.3 !important}
+.cv-card-body{padding:22px}
+.cv-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+/* Badge estado */
+.cv-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:8px;font-size:.8125rem;font-weight:700}
+.cv-state-study{background:#eff6ff;color:#2563eb}
+.cv-state-proc{background:#fffbeb;color:#d97706}
+.cv-state-tram{background:#f0f9ff;color:#0284c7}
+.cv-state-juic{background:#fef2f2;color:#dc2626}
+.cv-state-closed{background:#ecfdf5;color:#059669}
+.cv-state-arch{background:#f1f5f9;color:#64748b}
+/* Grid de datos */
+.cv-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media(max-width:640px){.cv-grid{grid-template-columns:1fr 1fr}}
+.cv-field label{font-size:.6875rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#94a3b8;margin-bottom:4px;display:block}
+.cv-field p{font-size:.9rem;font-weight:600;color:#1a1a2e;margin:0}
+.cv-desc{background:#f8fafc;border-radius:10px;padding:14px 16px;font-size:.875rem;color:#374151;line-height:1.7;border:1px solid #f1f5f9;margin-top:4px}
+/* Financiero */
+.cv-fin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.cv-fin-card{border-radius:12px;padding:16px;text-align:center}
+.cv-fin-label{font-size:.6875rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#94a3b8;margin-bottom:6px;display:block}
+.cv-fin-val{font-size:1.25rem;font-weight:800}
+/* Archivos */
+.cv-file{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:12px;transition:.2s}
+.cv-file:hover{border-color:#2e6edd;background:#f8fafc}
+.cv-file+.cv-file{margin-top:8px}
+.cv-file-ico{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:.625rem;font-weight:800;flex-shrink:0}
+.cv-file-name{font-size:.875rem;font-weight:600;color:#1a1a2e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cv-file-meta{font-size:.75rem;color:#94a3b8;margin-top:1px}
+.cv-dl{display:flex;align-items:center;gap:5px;padding:6px 14px;border:1.5px solid #2e6edd;border-radius:10px;color:#2e6edd;font-size:.8125rem;font-weight:700;text-decoration:none;transition:.2s;white-space:nowrap;flex-shrink:0}
+.cv-dl:hover{background:#2e6edd;color:#fff}
+/* Custom select estado */
+.cs-w{position:relative;user-select:none}
+.cs-btn{width:100%;padding:11px 38px 11px 14px;border:2px solid #e2e8f0;border-radius:12px;background:#f8fafc;font-size:.875rem;font-weight:500;color:#94a3b8;cursor:pointer;transition:.2s;display:flex;align-items:center;gap:8px;font-family:inherit}
+.cs-btn.hv{color:#1a1a2e}
+.cs-btn.op{border-color:#2e6edd;box-shadow:0 0 0 4px rgba(46,110,221,.1);background:#fff}
+.cs-arr{position:absolute;right:12px;top:50%;transform:translateY(-50%);pointer-events:none;color:#94a3b8;transition:.2s}
+.cs-btn.op~.cs-arr{transform:translateY(-50%) rotate(180deg)}
+.cs-drop{position:fixed;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.12);z-index:9999;display:none;min-width:220px;max-height:280px;overflow-y:auto}
+.cs-drop.op{display:block}
+.cs-item{padding:10px 14px;font-size:.875rem;font-weight:500;color:#374151;cursor:pointer;display:flex;align-items:center;gap:8px;transition:.15s}
+.cs-item:hover{background:#f0f7ff;color:#2e6edd}
+.cs-item.sel{background:#e8f0fe;color:#2e6edd;font-weight:700}
+.cs-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0}
+/* Historial */
+.cv-log{padding:10px 0;border-bottom:1px solid #f8fafc;display:flex;align-items:flex-start;gap:10px}
+.cv-log:last-child{border-bottom:none}
+.cv-log-dot{width:8px;height:8px;border-radius:50%;background:#2e6edd;flex-shrink:0;margin-top:5px}
+.cv-log-txt{font-size:.8125rem;color:#374151}
+.cv-log-date{font-size:.75rem;color:#94a3b8;margin-top:2px}
+/* Botones */
+.cv-btn{display:flex;align-items:center;justify-content:center;gap:6px;padding:11px 16px;border-radius:12px;font-size:.875rem;font-weight:700;cursor:pointer;border:none;font-family:inherit;transition:.25s;text-decoration:none;width:100%}
+.cv-btn-primary{background:#2e6edd;color:#fff}
+.cv-btn-primary:hover{background:#1e52ab;color:#fff;transform:translateY(-1px);box-shadow:0 6px 20px rgba(46,110,221,.25)}
+.cv-btn-ghost{background:#fff;color:#64748b;border:1.5px solid #e2e8f0}
+.cv-btn-ghost:hover{border-color:#2e6edd;color:#2e6edd}
+.cv-btn-success{background:#10b981;color:#fff}
+.cv-btn-success:hover{background:#059669;color:#fff;transform:translateY(-1px)}
+.cv-label{font-size:.75rem;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;display:block}
+.cv-divider{border:none;border-top:1px solid #f1f5f9;margin:16px 0}
+/* Honorarios input */
+.cv-input{width:100%;padding:11px 14px;border:2px solid #e2e8f0;border-radius:12px;font-size:.875rem;font-family:inherit;color:#1a1a2e;background:#f8fafc;outline:none;transition:.2s}
+.cv-input:focus{border-color:#2e6edd;box-shadow:0 0 0 4px rgba(46,110,221,.1);background:#fff}

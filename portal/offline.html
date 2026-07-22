@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sin Conexión — Mi Portal</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #0f172a; min-height: 100vh; display: flex; align-items: center; justify-content: center; color: #fff; }
+        .offline-card { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); backdrop-filter: blur(20px); border-radius: 24px; padding: 48px; max-width: 420px; width: 90%; text-align: center; }
+        .offline-icon { width: 80px; height: 80px; background: rgba(46,110,221,.15); border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; }
+        .offline-icon svg { width: 40px; height: 40px; color: #6ba3ff; }
+        h1 { font-size: 1.5rem; font-weight: 800; margin-bottom: 12px; }
+        p { font-size: .9375rem; color: rgba(255,255,255,.6); line-height: 1.6; margin-bottom: 24px; }
+        .retry-btn { display: inline-block; padding: 14px 32px; background: #2e6edd; color: #fff; border: none; border-radius: 14px; font-size: .9375rem; font-weight: 700; cursor: pointer; transition: all .2s; text-decoration: none; }
+        .retry-btn:hover { background: #1e52ab; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(46,110,221,.3); }
+    </style>
+</head>
+<body>
+    <div class="offline-card">
+        <div class="offline-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.56 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/>
+            </svg>
+        </div>
+        <h1>Sin Conexión</h1>
+        <p>No hay conexión a internet. Verifica tu red e intenta de nuevo.</p>
+        <button class="retry-btn" onclick="window.location.reload()">Reintentar</button>
+    </div>
+</body>
+</html>

@@ -1,0 +1,658 @@
+/* =====================================================
+   CRM Abogados — Estilos Premium Globales
+   Color Principal: #2e6edd
+   Diseño serio y profesional para despacho de abogados
+   ===================================================== */
+
+/* --- Variables Globales --- */
+:root {
+    --crm-primary: #2e6edd;
+    --crm-primary-dark: #1e52ab;
+    --crm-primary-light: #e8f0fe;
+    --crm-primary-rgb: 46, 110, 221;
+    --crm-text: #1a1a2e;
+    --crm-text-muted: #64748b;
+    --crm-bg: #f8fafc;
+    --crm-border: #e2e8f0;
+    --crm-success: #059669;
+    --crm-danger: #dc2626;
+    --crm-warning: #d97706;
+    --crm-info: #0284c7;
+    --crm-radius: 12px;
+    --crm-radius-lg: 16px;
+    --crm-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --crm-shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+    --crm-shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.04);
+    --crm-transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* --- Reset base --- */
+html, body { overflow-x: hidden; max-width: 100vw; }
+.dashboard-main-body { overflow-x: hidden; }
+
+/* =====================================================
+   SELECTORES PREMIUM — Reemplaza TODOS los nativos
+   ===================================================== */
+select,
+.form-select {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    background-color: #fff !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 12px center !important;
+    background-size: 16px !important;
+    border: 1.5px solid var(--crm-border) !important;
+    border-radius: var(--crm-radius) !important;
+    padding: 10px 40px 10px 14px !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    color: var(--crm-text) !important;
+    transition: var(--crm-transition) !important;
+    cursor: pointer !important;
+    line-height: 1.5 !important;
+}
+
+select:hover,
+.form-select:hover {
+    border-color: var(--crm-primary) !important;
+    box-shadow: 0 0 0 3px rgba(var(--crm-primary-rgb), 0.08) !important;
+}
+
+select:focus,
+.form-select:focus {
+    border-color: var(--crm-primary) !important;
+    box-shadow: 0 0 0 4px rgba(var(--crm-primary-rgb), 0.12) !important;
+    outline: none !important;
+}
+
+select option {
+    padding: 10px 14px;
+    font-weight: 500;
+}
+
+.form-select-sm {
+    padding: 7px 36px 7px 12px !important;
+    font-size: 0.8125rem !important;
+}
+
+/* =====================================================
+   INPUTS PREMIUM
+   ===================================================== */
+.form-control {
+    border: 1.5px solid var(--crm-border) !important;
+    border-radius: var(--crm-radius) !important;
+    padding: 10px 14px !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    color: var(--crm-text) !important;
+    background: #fff !important;
+    transition: var(--crm-transition) !important;
+}
+
+.form-control:hover {
+    border-color: #cbd5e1 !important;
+}
+
+.form-control:focus {
+    border-color: var(--crm-primary) !important;
+    box-shadow: 0 0 0 4px rgba(var(--crm-primary-rgb), 0.12) !important;
+    outline: none !important;
+}
+
+.form-control::placeholder {
+    color: #94a3b8 !important;
+    font-weight: 400 !important;
+}
+
+.form-control-sm {
+    padding: 7px 12px !important;
+    font-size: 0.8125rem !important;
+}
+
+.form-label {
+    font-size: 0.8125rem !important;
+    font-weight: 600 !important;
+    color: var(--crm-text) !important;
+    margin-bottom: 6px !important;
+    letter-spacing: 0.01em;
+}
+
+/* =====================================================
+   BOTONES PREMIUM
+   ===================================================== */
+.btn {
+    border-radius: var(--crm-radius) !important;
+    font-weight: 600 !important;
+    font-size: 0.875rem !important;
+    padding: 10px 20px !important;
+    transition: var(--crm-transition) !important;
+    letter-spacing: 0.01em;
+    border: 1.5px solid transparent !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0);
+    transition: var(--crm-transition);
+}
+
+.btn:hover::after {
+    background: rgba(255,255,255,0.1);
+}
+
+.btn-primary {
+    background: var(--crm-primary) !important;
+    border-color: var(--crm-primary) !important;
+    color: #fff !important;
+    box-shadow: 0 1px 2px rgba(var(--crm-primary-rgb), 0.2) !important;
+}
+
+.btn-primary:hover {
+    background: var(--crm-primary-dark) !important;
+    border-color: var(--crm-primary-dark) !important;
+    box-shadow: 0 4px 12px rgba(var(--crm-primary-rgb), 0.3) !important;
+    transform: translateY(-1px);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 2px rgba(var(--crm-primary-rgb), 0.2) !important;
+}
+
+.btn-outline-primary {
+    color: var(--crm-primary) !important;
+    border-color: var(--crm-primary) !important;
+    background: transparent !important;
+}
+
+.btn-outline-primary:hover {
+    background: var(--crm-primary) !important;
+    color: #fff !important;
+    box-shadow: 0 4px 12px rgba(var(--crm-primary-rgb), 0.2) !important;
+    transform: translateY(-1px);
+}
+
+.btn-success {
+    background: var(--crm-success) !important;
+    border-color: var(--crm-success) !important;
+}
+
+.btn-danger {
+    background: var(--crm-danger) !important;
+    border-color: var(--crm-danger) !important;
+}
+
+.btn-warning {
+    background: var(--crm-warning) !important;
+    border-color: var(--crm-warning) !important;
+    color: #fff !important;
+}
+
+.btn-sm {
+    padding: 7px 14px !important;
+    font-size: 0.8125rem !important;
+}
+
+.btn-lg {
+    padding: 14px 28px !important;
+    font-size: 1rem !important;
+}
+
+/* =====================================================
+   TABLAS PREMIUM
+   ===================================================== */
+.table {
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+}
+
+.table thead th {
+    background: #f8fafc !important;
+    border: none !important;
+    border-bottom: 2px solid var(--crm-border) !important;
+    font-size: 0.75rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.06em !important;
+    color: var(--crm-text-muted) !important;
+    padding: 14px 16px !important;
+    white-space: nowrap;
+}
+
+.table tbody tr {
+    transition: var(--crm-transition) !important;
+}
+
+.table tbody tr:hover {
+    background: rgba(var(--crm-primary-rgb), 0.03) !important;
+}
+
+.table tbody td {
+    border: none !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    padding: 14px 16px !important;
+    font-size: 0.875rem !important;
+    color: var(--crm-text) !important;
+    vertical-align: middle !important;
+}
+
+.table tbody tr:last-child td {
+    border-bottom: none !important;
+}
+
+/* =====================================================
+   CARDS PREMIUM
+   ===================================================== */
+.card {
+    border-radius: var(--crm-radius-lg) !important;
+    border: 1px solid var(--crm-border) !important;
+    box-shadow: var(--crm-shadow) !important;
+    background: #fff !important;
+    transition: var(--crm-transition) !important;
+}
+
+.card:hover {
+    box-shadow: var(--crm-shadow-md) !important;
+}
+
+.card-header {
+    background: transparent !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    padding: 20px 24px !important;
+}
+
+/* =====================================================
+   BADGES PREMIUM
+   ===================================================== */
+.badge {
+    font-weight: 600 !important;
+    letter-spacing: 0.02em !important;
+    border-radius: 8px !important;
+    padding: 5px 10px !important;
+    font-size: 0.75rem !important;
+}
+
+.badge-status-active,
+.badge.bg-success-100 {
+    background: #ecfdf5 !important;
+    color: var(--crm-success) !important;
+}
+
+.badge-status-pending,
+.badge.bg-warning-100 {
+    background: #fffbeb !important;
+    color: var(--crm-warning) !important;
+}
+
+.badge-status-danger,
+.badge.bg-danger-100 {
+    background: #fef2f2 !important;
+    color: var(--crm-danger) !important;
+}
+
+.badge.bg-primary-100 {
+    background: var(--crm-primary-light) !important;
+    color: var(--crm-primary) !important;
+}
+
+/* =====================================================
+   MODAL PREMIUM
+   ===================================================== */
+.modal-backdrop {
+    background-color: rgba(15, 23, 42, 0.6) !important;
+    backdrop-filter: blur(6px);
+}
+
+.modal-content {
+    border: none !important;
+    border-radius: 20px !important;
+    background: #fff !important;
+    box-shadow: var(--crm-shadow-lg), 0 25px 50px rgba(0,0,0,0.12) !important;
+}
+
+.modal.fade .modal-dialog {
+    transform: scale(0.96) translateY(10px);
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.modal.show .modal-dialog {
+    transform: scale(1) translateY(0);
+}
+
+.modal-header {
+    padding: 28px 28px 12px !important;
+    border-bottom: none !important;
+}
+
+.modal-title {
+    font-size: 1.125rem !important;
+    font-weight: 700 !important;
+    color: var(--crm-text) !important;
+}
+
+.modal-body { padding: 12px 28px 28px !important; }
+
+.modal-footer {
+    padding: 20px 28px !important;
+    background: #f8fafc !important;
+    border-top: 1px solid #f1f5f9 !important;
+    border-radius: 0 0 20px 20px !important;
+    gap: 10px;
+}
+
+.btn-close {
+    background-color: #f1f5f9 !important;
+    opacity: 1 !important;
+    border-radius: 50% !important;
+    padding: 8px !important;
+    background-size: 10px !important;
+    transition: var(--crm-transition);
+}
+
+.btn-close:hover {
+    background-color: #e2e8f0 !important;
+    transform: rotate(90deg);
+}
+
+/* =====================================================
+   SIDEBAR
+   ===================================================== */
+.sidebar-menu .sidebar-menu-list li a.active,
+.sidebar-menu .sidebar-menu-list li a:hover {
+    background: rgba(var(--crm-primary-rgb), 0.1) !important;
+    color: var(--crm-primary) !important;
+}
+
+/* =====================================================
+   DROPDOWN PREMIUM
+   ===================================================== */
+.dropdown-menu {
+    border: 1px solid var(--crm-border) !important;
+    border-radius: var(--crm-radius-lg) !important;
+    box-shadow: var(--crm-shadow-lg) !important;
+    padding: 8px !important;
+    animation: dropdownFadeIn 0.15s ease;
+}
+
+@keyframes dropdownFadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.dropdown-item {
+    border-radius: 8px !important;
+    padding: 8px 12px !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    transition: var(--crm-transition) !important;
+}
+
+.dropdown-item:hover {
+    background: var(--crm-primary-light) !important;
+    color: var(--crm-primary) !important;
+}
+
+/* =====================================================
+   PAGINATION
+   ===================================================== */
+.page-link {
+    border: 1px solid var(--crm-border) !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    font-size: 0.8125rem !important;
+    color: var(--crm-text-muted) !important;
+    padding: 6px 12px !important;
+    margin: 0 2px !important;
+    transition: var(--crm-transition) !important;
+}
+
+.page-link:hover {
+    background: var(--crm-primary-light) !important;
+    color: var(--crm-primary) !important;
+    border-color: var(--crm-primary) !important;
+}
+
+.page-item.active .page-link {
+    background: var(--crm-primary) !important;
+    border-color: var(--crm-primary) !important;
+    color: #fff !important;
+}
+
+/* =====================================================
+   DATATABLES PREMIUM
+   ===================================================== */
+.dataTables_wrapper { width: 100% !important; overflow: visible !important; }
+
+/* Ajustes para los controles (Mostrar / Buscar) */
+.dataTables_wrapper .dataTables_length {
+    margin-bottom: 1.25rem;
+}
+.dataTables_wrapper .dataTables_length label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--crm-text-muted);
+}
+.dataTables_wrapper .dataTables_length select {
+    width: auto !important;
+    min-width: 80px;
+    padding: 6px 36px 6px 12px !important;
+    background-position: right 8px center !important;
+}
+
+.dataTables_wrapper .dataTables_filter {
+    margin-bottom: 1.25rem;
+}
+.dataTables_wrapper .dataTables_filter label {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--crm-text-muted);
+}
+.dataTables_wrapper .dataTables_filter input {
+    width: 240px !important;
+    border-radius: var(--crm-radius) !important;
+    border: 1.5px solid var(--crm-border) !important;
+    padding: 8px 14px !important;
+    font-size: 0.875rem !important;
+    margin-left: 0 !important; /* Quitar margen por defecto de DT */
+}
+
+.dataTables_wrapper .dataTables_filter input:focus {
+    border-color: var(--crm-primary) !important;
+    box-shadow: 0 0 0 4px rgba(var(--crm-primary-rgb), 0.12) !important;
+    outline: none;
+}
+
+/* ── Encabezados de ordenación DataTables v2 ── */
+/* Más espacio entre texto y los iconos ▲▼ */
+table.dataTable thead > tr > th.dt-orderable-asc,
+table.dataTable thead > tr > th.dt-orderable-desc,
+table.dataTable thead > tr > th.dt-ordering-asc,
+table.dataTable thead > tr > th.dt-ordering-desc,
+table.dataTable thead > tr > td.dt-orderable-asc,
+table.dataTable thead > tr > td.dt-orderable-desc,
+table.dataTable thead > tr > td.dt-ordering-asc,
+table.dataTable thead > tr > td.dt-ordering-desc {
+    padding-right: 40px !important; /* Más espacio para separar texto del icono */
+}
+
+/* Reposicionar el span que contiene los iconos */
+table.dataTable thead > tr > th span.dt-column-order,
+table.dataTable thead > tr > td span.dt-column-order {
+    right: 16px !important; /* Más separación del borde derecho */
+    width: 14px !important;
+}
+
+/* Hacer los iconos más pequeños y discretos */
+table.dataTable thead > tr > th span.dt-column-order::before,
+table.dataTable thead > tr > th span.dt-column-order::after,
+table.dataTable thead > tr > td span.dt-column-order::before,
+table.dataTable thead > tr > td span.dt-column-order::after {
+    font-size: 0.6em !important;
+    opacity: 0.2 !important;
+    line-height: 9px !important;
+}
+
+/* Iconos activos más visibles con color primario */
+table.dataTable thead > tr > th.dt-ordering-asc span.dt-column-order::before,
+table.dataTable thead > tr > td.dt-ordering-asc span.dt-column-order::before {
+    opacity: 0.8 !important;
+    color: var(--crm-primary) !important;
+}
+table.dataTable thead > tr > th.dt-ordering-desc span.dt-column-order::after,
+table.dataTable thead > tr > td.dt-ordering-desc span.dt-column-order::after {
+    opacity: 0.8 !important;
+    color: var(--crm-primary) !important;
+}
+
+/* Quitar el outline feo al hacer hover */
+table.dataTable thead > tr > th.dt-orderable-asc:hover,
+table.dataTable thead > tr > th.dt-orderable-desc:hover,
+table.dataTable thead > tr > td.dt-orderable-asc:hover,
+table.dataTable thead > tr > td.dt-orderable-desc:hover {
+    outline: none !important;
+}
+
+
+.dataTables_wrapper .dataTables_paginate {
+    display: flex; flex-wrap: wrap; gap: 4px; margin-top: .75rem;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    padding: 6px 12px !important;
+    font-size: 0.8125rem !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+    background: var(--crm-primary) !important;
+    border-color: var(--crm-primary) !important;
+    color: #fff !important;
+}
+
+.dataTables_wrapper .dataTables_info {
+    font-size: 0.8125rem; color: var(--crm-text-muted); padding-top: .5rem;
+}
+
+/* =====================================================
+   PROGRESS BAR
+   ===================================================== */
+.progress {
+    background: #e2e8f0 !important;
+    border-radius: 99px !important;
+}
+
+.progress-bar {
+    border-radius: 99px !important;
+    background: var(--crm-primary) !important;
+}
+
+/* =====================================================
+   FORM SWITCH
+   ===================================================== */
+.form-check-input {
+    border: 1.5px solid var(--crm-border) !important;
+    transition: var(--crm-transition) !important;
+}
+
+.form-check-input:checked {
+    background-color: var(--crm-primary) !important;
+    border-color: var(--crm-primary) !important;
+}
+
+/* =====================================================
+   AUTH PAGES
+   ===================================================== */
+.auth-left {
+    background: linear-gradient(135deg, #1e52ab 0%, var(--crm-primary) 100%) !important;
+}
+
+/* =====================================================
+   RESPONSIVE
+   ===================================================== */
+@media (max-width: 991.98px) {
+    .auth-left { display: none !important; }
+    .auth-right { width: 100%; min-height: 100vh; }
+    .d-flex.flex-wrap.align-items-center.justify-content-between {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: .5rem;
+    }
+    .dashboard-main-body { padding: 12px !important; }
+}
+
+@media (max-width: 767.98px) {
+    .card-body .table thead { display: none !important; }
+    .card-body .table, .card-body .table tbody,
+    .card-body .table tr, .card-body .table td {
+        display: block; width: 100% !important;
+    }
+    .card-body .table tr {
+        border: 1px solid var(--crm-border);
+        border-radius: var(--crm-radius);
+        margin-bottom: 12px;
+        padding: 12px;
+        background: #fff;
+        box-shadow: var(--crm-shadow);
+    }
+    .card-body .table td {
+        padding: 6px 0 !important;
+        border: none !important;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.875rem;
+        gap: 8px;
+    }
+    .card-body .table td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: var(--crm-text-muted);
+        font-size: 0.8rem;
+        min-width: 100px;
+        flex-shrink: 0;
+    }
+    .card-body .table td:last-child {
+        justify-content: flex-end;
+        padding-top: 8px !important;
+        border-top: 1px solid #f1f5f9 !important;
+        margin-top: 4px;
+    }
+    .dataTables_wrapper .row:first-child,
+    .dataTables_wrapper .row:last-child { flex-direction: column; gap: .5rem; }
+    .dataTables_wrapper .col-sm-6 { width: 100% !important; text-align: left !important; }
+    .modal-dialog { margin: .5rem; }
+}
+
+@media (max-width: 575.98px) {
+    .dashboard-main-body { padding: 8px !important; }
+    .card-body { padding: 12px !important; }
+    h6.fw-semibold { font-size: 1rem; }
+}
+
+/* =====================================================
+   TABLE RESPONSIVE FIX
+   ===================================================== */
+.table-responsive {
+    overflow-x: visible !important;
+    overflow-y: visible !important;
+}
+
+/* =====================================================
+   MISC UTILS
+   ===================================================== */
+.cursor-pointer { cursor: pointer; }
+.transition-all { transition: var(--crm-transition); }

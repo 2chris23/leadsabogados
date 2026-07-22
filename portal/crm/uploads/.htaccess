@@ -1,0 +1,24 @@
+# Prevent PHP execution in uploads directory
+# This blocks any uploaded malicious PHP file from being executed
+php_flag engine off
+
+# Deny access to hidden files
+<FilesMatch "^\.">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Only allow safe file types to be served
+<FilesMatch "\.(php|phtml|php3|php4|php5|phps|cgi|pl|py|sh|bash)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Disable directory listing
+Options -Indexes
+
+# Force download instead of rendering
+<IfModule mod_headers.c>
+    Header set Content-Disposition "attachment"
+    Header set X-Content-Type-Options "nosniff"
+</IfModule>

@@ -1,0 +1,2 @@
+<?php
+// Telegram functionality removed

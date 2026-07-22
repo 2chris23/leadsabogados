@@ -1,0 +1,15 @@
+# Allow static assets needed for PWA
+<FilesMatch "\.(json|js|png|jpg|jpeg|gif|svg|css|woff2?|ttf|ico|webp)$">
+    Order allow,deny
+    Allow from all
+    Satisfy any
+</FilesMatch>
+
+# Disable directory listing
+Options -Indexes
+
+# Security: block dotfiles
+<FilesMatch "^\.">
+    Order allow,deny
+    Deny from all
+</FilesMatch>

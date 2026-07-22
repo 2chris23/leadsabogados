@@ -1,0 +1,9 @@
+
+
+# Disable directory listing
+Options -Indexes
+
+# Security: block dotfiles
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>

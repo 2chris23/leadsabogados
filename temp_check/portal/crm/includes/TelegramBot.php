@@ -1,0 +1,2 @@
+<?php
+// TelegramBot functionality removed

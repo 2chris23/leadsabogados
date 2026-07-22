@@ -1,0 +1,32 @@
+# Seguridad: Bloquear acceso directo a carpetas internas
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Bloquear acceso a archivos sensibles
+    RewriteRule ^\.env$ - [F,L]
+    RewriteRule ^\.env\.example$ - [F,L]
+    RewriteRule ^includes/ - [F,L]
+    RewriteRule ^database/ - [F,L]
+    RewriteRule ^templates/ - [F,L]
+
+    # Proteger uploads de ejecución PHP
+    RewriteRule ^uploads/.*\.(php|phtml|php3|php4|php5|phps)$ - [F,L]
+</IfModule>
+
+# Desactivar listado de directorios
+Options -Indexes
+
+# Proteger archivos de configuración (sintaxis Apache 2.4)
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+
+# Seguridad de cabeceras
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set X-XSS-Protection "1; mode=block"
+</IfModule>
+
+# Charset UTF-8
+AddDefaultCharset UTF-8

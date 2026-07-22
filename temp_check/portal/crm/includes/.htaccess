@@ -1,0 +1,3 @@
+# Deny direct access to PHP include files
+Order deny,allow
+Deny from all
