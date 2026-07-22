@@ -187,11 +187,18 @@ $solicitudes = $db->fetchAll(
 <!-- Breadcrumb -->
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
     <h6 class="fw-semibold mb-0">Solicitudes</h6>
-    <ul class="d-flex align-items-center gap-2">
-        <li class="fw-medium"><a href="<?php echo APP_URL; ?>/index.php?page=dashboard" class="hover-text-primary">Dashboard</a></li>
-        <li>-</li>
-        <li class="fw-medium">Solicitudes</li>
-    </ul>
+    <div class="d-flex align-items-center gap-16">
+        <ul class="d-flex align-items-center gap-2">
+            <li class="fw-medium"><a href="<?php echo APP_URL; ?>/index.php?page=dashboard" class="hover-text-primary">Dashboard</a></li>
+            <li>-</li>
+            <li class="fw-medium">Solicitudes</li>
+        </ul>
+        <?php if ($auth->esAdmin()): ?>
+        <a href="<?php echo APP_URL; ?>/index.php?page=solicitudes/crear" class="btn btn-primary d-flex align-items-center gap-2 radius-8">
+            <iconify-icon icon="solar:add-circle-outline"></iconify-icon> Añadir Solicitud
+        </a>
+        <?php endif; ?>
+    </div>
 </div>
 
 <!-- Filtros -->
@@ -278,6 +285,14 @@ $solicitudes = $db->fetchAll(
                                     </button>
                                 </form>
                                 <?php endif; ?>
+                                <?php if ($auth->esAdmin()): ?>
+                                <a href="<?php echo APP_URL; ?>/index.php?page=solicitudes/editar&id=<?php echo $sol['id']; ?>"
+                                    class="bg-warning-focus text-warning-main w-32-px h-32-px d-flex justify-content-center align-items-center rounded-circle"
+                                    title="Editar">
+                                    <iconify-icon icon="lucide:edit" class="icon"></iconify-icon>
+                                </a>
+                                <?php endif; ?>
+                                <?php if ($auth->esAdmin() || $sol['estado'] === 'pendiente'): ?>
                                 <form method="POST" style="display:inline">
                                     <?php echo CSRF::campo(); ?>
                                     <input type="hidden" name="solicitud_id" value="<?php echo $sol['id']; ?>">
@@ -287,6 +302,7 @@ $solicitudes = $db->fetchAll(
                                         <iconify-icon icon="mingcute:delete-2-line" class="icon"></iconify-icon>
                                     </button>
                                 </form>
+                                <?php endif; ?>
                             </div>
                         </td>
                     </tr>
