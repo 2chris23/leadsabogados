@@ -526,6 +526,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
                     <input type="hidden" name="consulta_submit" value="1">
                     <div class="ohnohoney"><label>Website</label><input type="text" name="website_url" tabindex="-1" autocomplete="off"></div>
 
+                    <div class="cf-section-title">DATOS PERSONALES</div>
+
                     <div class="cf-row">
                         <div class="cf-group">
                             <label>Nombre <span class="req">*</span></label>
@@ -603,6 +605,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
                             <textarea name="descripcion" rows="5" placeholder="Explique con detalle su situación legal. Cuanta más información nos proporcione, mejor podremos ayudarle (mín. 20 caracteres)..." required minlength="20"><?php echo esc($formData['descripcion']); ?></textarea>
                         </div>
                     </div>
+
+                    <div class="cf-section-title">DOCUMENTACIÓN ADICIONAL</div>
 
                     <div class="cf-group">
                         <label>Documentos Adjuntos <span style="color:#94a3b8;font-weight:400">(opcional — máx. 10 MB)</span></label>
