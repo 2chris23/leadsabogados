@@ -105,30 +105,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_portal_cuenta'
     $portalId = (int)$_POST['portal_id'];
     if ($portalId) {
         try {
-            $pdo = $db->getConnection();
-            $pdo->beginTransaction();
+            // No iniciamos transacción con $pdo directamente para evitar problemas si falla
+            $db->beginTransaction();
 
-            // Borrar archivos adjuntos (si la tabla existe)
-            $tablaExiste = $db->fetchColumn("SHOW TABLES LIKE 'solicitud_archivos'");
-            if ($tablaExiste) {
-                $db->query(
-                    "DELETE FROM solicitud_archivos WHERE solicitud_id IN (SELECT id FROM solicitudes WHERE portal_cuenta_id = ?)",
-                    [$portalId]
-                );
-            }
-
-            // Borrar solicitudes vinculadas
-            $db->query("DELETE FROM solicitudes WHERE portal_cuenta_id = ?", [$portalId]);
+            // En lugar de borrar las solicitudes, simplemente las desvinculamos para no perder historial
+            // ni romper las foreign keys si ya fueron aceptadas y convertidas en cliente/caso.
+            $db->query("UPDATE solicitudes SET portal_cuenta_id = NULL WHERE portal_cuenta_id = ?", [$portalId]);
 
             // Borrar la cuenta
             $db->query("DELETE FROM portal_cuentas WHERE id = ?", [$portalId]);
 
-            $pdo->commit();
+            $db->commit();
             AuditLog::registrar('eliminar', 'portal_cuentas', $portalId, 'Cuenta de cliente eliminada por admin');
             setFlash('exito', 'Cuenta eliminada correctamente.');
         } catch (Exception $e) {
-            if ($pdo->inTransaction()) $pdo->rollBack();
-            setFlash('error', 'No se pudo eliminar la cuenta. Inténtalo de nuevo.');
+            $db->rollBack();
+            setFlash('error', 'No se pudo eliminar la cuenta. Error: ' . $e->getMessage());
         }
     }
     header('Location: ' . APP_URL . '/index.php?page=usuarios'); exit;
