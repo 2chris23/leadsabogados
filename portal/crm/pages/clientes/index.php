@@ -122,40 +122,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['eliminar_cliente'])) 
     $did = (int)$_POST['cliente_id'];
     if ($did) {
         try {
-            $db->beginTransaction();
+            // Desactivar FK checks temporalmente para poder borrar en cascada
+            $db->query("SET FOREIGN_KEY_CHECKS = 0");
 
-            // 1. Desvincular solicitudes del cliente (FK solicitud_id en clientes)
-            $db->query("UPDATE clientes SET solicitud_id = NULL WHERE id = ?", [$did]);
-
-            // 2. Obtener los casos del cliente para borrar sus pagos primero
+            // Obtener los casos del cliente
             $casosIds = $db->fetchAll("SELECT id FROM casos WHERE cliente_id = ?", [$did]);
             foreach ($casosIds as $caso) {
-                // Borrar pagos vinculados al caso
-                $db->query("DELETE FROM pagos WHERE caso_id = ?", [$caso['id']]);
+                $cid = $caso['id'];
+                // Borrar documentos del caso
+                $db->query("DELETE FROM documentos WHERE caso_id = ?", [$cid]);
+                // Borrar pagos programados del caso
+                $db->query("DELETE FROM pagos_programados WHERE caso_id = ?", [$cid]);
+                // Borrar pagos del caso
+                $db->query("DELETE FROM pagos WHERE caso_id = ?", [$cid]);
             }
-
-            // 3. Eliminar los casos del cliente
+            // Borrar casos del cliente
             $db->query("DELETE FROM casos WHERE cliente_id = ?", [$did]);
 
-            // 4. Obtener IDs de cuentas de portal vinculadas y desvincular sus solicitudes
-            $portalIds = $db->fetchAll("SELECT id FROM portal_cuentas WHERE cliente_id = ?", [$did]);
-            foreach ($portalIds as $pc) {
-                try {
-                    $db->query("UPDATE solicitudes SET portal_cuenta_id = NULL WHERE portal_cuenta_id = ?", [$pc['id']]);
-                } catch (\Throwable $e) { /* columna no existe, ignorar */ }
-            }
+            // Borrar cuenta del portal vinculada
+            $db->query("DELETE FROM portal_cuentas WHERE cliente_id = ?", [$did]);
 
-            // 5. Eliminar cuentas del portal vinculadas
-            $db->delete('portal_cuentas', 'cliente_id = ?', [$did]);
+            // Borrar el cliente
+            $db->query("DELETE FROM clientes WHERE id = ?", [$did]);
 
-            // 6. Eliminar el cliente
-            $db->delete('clientes', 'id = ?', [$did]);
+            // Reactivar FK checks
+            $db->query("SET FOREIGN_KEY_CHECKS = 1");
 
-            $db->commit();
-            AuditLog::registrar('eliminar', 'clientes', $did, 'Cliente eliminado con todos sus casos, pagos y cuenta de portal');
+            AuditLog::registrar('eliminar', 'clientes', $did, 'Cliente eliminado con todos sus casos, pagos y documentos');
             setFlash('exito', 'Cliente eliminado correctamente.');
         } catch (\Throwable $e) {
-            $db->rollBack();
+            // Asegurarse de reactivar FK checks aunque falle
+            try { $db->query("SET FOREIGN_KEY_CHECKS = 1"); } catch (\Throwable $e2) {}
             setFlash('error', 'Error al eliminar el cliente: ' . $e->getMessage());
         }
     }
