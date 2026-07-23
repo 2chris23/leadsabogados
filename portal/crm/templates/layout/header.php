@@ -87,11 +87,11 @@ $logoVersion = @filemtime(CRM_ROOT . '/assets/images/logo.png') ?: time();
                     $totalNotif = $notifDb->fetchColumn("SELECT COUNT(*) FROM solicitudes WHERE estado = 'pendiente'");
                     ?>
                     <div class="dropdown">
-                        <button class="has-indicator w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center position-relative"
+                        <button class="w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center position-relative border-0"
                             type="button" data-bs-toggle="dropdown">
                             <iconify-icon icon="iconoir:bell" class="text-primary-light text-xl"></iconify-icon>
                             <?php if ($totalNotif > 0): ?>
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem; transform: translate(-30%, 30%) !important;">
+                            <span class="position-absolute badge rounded-pill bg-danger d-flex align-items-center justify-content-center" style="top: -2px; right: -2px; font-size: 0.65rem; min-width: 18px; height: 18px; padding: 0;">
                                 <?php echo $totalNotif > 9 ? '+9' : $totalNotif; ?>
                             </span>
                             <?php endif; ?>

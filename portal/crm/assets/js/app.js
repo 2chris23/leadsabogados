@@ -244,15 +244,26 @@
     const form = e.target;
     const btn = form.querySelector('[type="submit"]');
     if (!btn) return;
+    
+    // Si otro script ya previno el envío (ej: el modal de confirmación), no mostrar "Enviando..."
+    if (e.defaultPrevented) return;
+
     if (!navigator.onLine) {
       e.preventDefault();
       alert('No hay conexión a internet. Espera a que se restablezca antes de enviar.');
       return;
     }
+    
     setTimeout(() => {
       btn.disabled = true;
       btn.dataset.originalText = btn.innerHTML;
-      btn.innerHTML = '<span style="opacity:.7">Enviando...</span>';
+      if (btn.classList.contains('w-32-px')) {
+          // Botón circular pequeño, solo poner un spinner
+          btn.innerHTML = '<iconify-icon icon="line-md:loading-twotone-loop" style="font-size:18px"></iconify-icon>';
+      } else {
+          // Botón normal
+          btn.innerHTML = '<span style="opacity:.7">Enviando...</span>';
+      }
     }, 10);
   });
   // =========================== Anti doble-submit End ================================
