@@ -124,30 +124,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['eliminar_cliente'])) 
         try {
             $db->beginTransaction();
 
-            // 1. Desvincular solicitudes del cliente (FK: clientes.solicitud_id)
+            // 1. Desvincular solicitudes del cliente (FK solicitud_id en clientes)
             $db->query("UPDATE clientes SET solicitud_id = NULL WHERE id = ?", [$did]);
 
-            // 2. Obtener IDs de cuentas de portal vinculadas
-            $portalIds = $db->fetchAll("SELECT id FROM portal_cuentas WHERE cliente_id = ?", [$did]);
+            // 2. Obtener los casos del cliente para borrar sus pagos primero
+            $casosIds = $db->fetchAll("SELECT id FROM casos WHERE cliente_id = ?", [$did]);
+            foreach ($casosIds as $caso) {
+                // Borrar pagos vinculados al caso
+                $db->query("DELETE FROM pagos WHERE caso_id = ?", [$caso['id']]);
+            }
 
-            // 3. Para cada cuenta portal, desvincular sus solicitudes (si la columna existe)
+            // 3. Eliminar los casos del cliente
+            $db->query("DELETE FROM casos WHERE cliente_id = ?", [$did]);
+
+            // 4. Obtener IDs de cuentas de portal vinculadas y desvincular sus solicitudes
+            $portalIds = $db->fetchAll("SELECT id FROM portal_cuentas WHERE cliente_id = ?", [$did]);
             foreach ($portalIds as $pc) {
                 try {
                     $db->query("UPDATE solicitudes SET portal_cuenta_id = NULL WHERE portal_cuenta_id = ?", [$pc['id']]);
                 } catch (\Throwable $e) { /* columna no existe, ignorar */ }
             }
 
-            // 4. Eliminar cuentas del portal vinculadas
+            // 5. Eliminar cuentas del portal vinculadas
             $db->delete('portal_cuentas', 'cliente_id = ?', [$did]);
-
-            // 5. Desvincular casos del cliente (poner cliente_id a NULL para no borrar historial)
-            $db->query("UPDATE casos SET cliente_id = NULL WHERE cliente_id = ?", [$did]);
 
             // 6. Eliminar el cliente
             $db->delete('clientes', 'id = ?', [$did]);
 
             $db->commit();
-            AuditLog::registrar('eliminar', 'clientes', $did, 'Cliente eliminado (y su cuenta de portal si existía)');
+            AuditLog::registrar('eliminar', 'clientes', $did, 'Cliente eliminado con todos sus casos, pagos y cuenta de portal');
             setFlash('exito', 'Cliente eliminado correctamente.');
         } catch (\Throwable $e) {
             $db->rollBack();
@@ -156,7 +161,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['eliminar_cliente'])) 
     }
     header('Location: ' . APP_URL . '/index.php?page=clientes'); exit;
 }
-
 
 
 include CRM_ROOT . '/templates/layout/header.php';
