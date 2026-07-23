@@ -121,17 +121,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['eliminar_cliente'])) 
     RoleGuard::requireRole('admin');
     $did = (int)$_POST['cliente_id'];
     if ($did) {
-        // 1. Eliminar cuenta del portal vinculada
-        $db->delete('portal_cuentas', 'cliente_id = ?', [$did]);
-        
-        // 2. Eliminar el cliente
-        $db->delete('clientes', 'id = ?', [$did]);
-        
-        AuditLog::registrar('eliminar', 'clientes', $did, 'Cliente eliminado (y su cuenta de portal si existía)');
-        setFlash('exito', 'Cliente eliminado correctamente.');
+        try {
+            $db->beginTransaction();
+
+            // 1. Desvincular solicitudes del cliente (FK: clientes.solicitud_id)
+            $db->query("UPDATE clientes SET solicitud_id = NULL WHERE id = ?", [$did]);
+
+            // 2. Obtener IDs de cuentas de portal vinculadas
+            $portalIds = $db->fetchAll("SELECT id FROM portal_cuentas WHERE cliente_id = ?", [$did]);
+
+            // 3. Para cada cuenta portal, desvincular sus solicitudes (si la columna existe)
+            foreach ($portalIds as $pc) {
+                try {
+                    $db->query("UPDATE solicitudes SET portal_cuenta_id = NULL WHERE portal_cuenta_id = ?", [$pc['id']]);
+                } catch (\Throwable $e) { /* columna no existe, ignorar */ }
+            }
+
+            // 4. Eliminar cuentas del portal vinculadas
+            $db->delete('portal_cuentas', 'cliente_id = ?', [$did]);
+
+            // 5. Desvincular casos del cliente (poner cliente_id a NULL para no borrar historial)
+            $db->query("UPDATE casos SET cliente_id = NULL WHERE cliente_id = ?", [$did]);
+
+            // 6. Eliminar el cliente
+            $db->delete('clientes', 'id = ?', [$did]);
+
+            $db->commit();
+            AuditLog::registrar('eliminar', 'clientes', $did, 'Cliente eliminado (y su cuenta de portal si existía)');
+            setFlash('exito', 'Cliente eliminado correctamente.');
+        } catch (\Throwable $e) {
+            $db->rollBack();
+            setFlash('error', 'Error al eliminar el cliente: ' . $e->getMessage());
+        }
     }
     header('Location: ' . APP_URL . '/index.php?page=clientes'); exit;
 }
+
 
 
 include CRM_ROOT . '/templates/layout/header.php';
