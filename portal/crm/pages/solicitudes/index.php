@@ -28,6 +28,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
     }
 
     if ($accion === 'eliminar' && $solicitudId > 0) {
+        // Ejecutar ALTER TABLE fuera de la transacción porque los DDL causan implicit commit en MySQL
+        try {
+            $db->query("ALTER TABLE clientes MODIFY solicitud_id INT DEFAULT NULL");
+        } catch (Exception $e) {}
+
         $db->beginTransaction();
         try {
             // Eliminar archivos físicos primero
@@ -41,12 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
             }
             
             // Desvincular de clientes para evitar error de foreign key (constraint 1451)
-            try {
-                $db->query("ALTER TABLE clientes MODIFY solicitud_id INT DEFAULT NULL");
-                $db->query("UPDATE clientes SET solicitud_id = NULL WHERE solicitud_id = ?", [$solicitudId]);
-            } catch (Exception $e) {
-                // Si falla (por permisos o sintaxis), ignorar el error del schema.
-            }
+            $db->query("UPDATE clientes SET solicitud_id = NULL WHERE solicitud_id = ?", [$solicitudId]);
             
             // Eliminar registros de la base de datos (ON DELETE CASCADE debería borrar en solicitud_archivos, pero aseguramos)
             $db->query("DELETE FROM solicitud_archivos WHERE solicitud_id = ?", [$solicitudId]);
