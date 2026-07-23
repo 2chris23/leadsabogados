@@ -30,11 +30,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($resultado['exito']) {
                 $rolUsuario = $auth->getRol();
                 if ($rolUsuario === 'admin') {
-                    header('Location: /portal/crm/index.php?page=dashboard');
+                    header('Location: ' . APP_URL . '/index.php?page=dashboard');
                 } elseif ($rolUsuario === 'gestor') {
-                    header('Location: /portal/crm/index.php?page=solicitudes');
+                    header('Location: ' . APP_URL . '/index.php?page=solicitudes');
                 } else {
-                    header('Location: /portal/crm/index.php?page=casos');
+                    header('Location: ' . APP_URL . '/index.php?page=casos');
                 }
                 exit;
             } else {
@@ -50,10 +50,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar Sesión — <?php echo e($nombreDespacho); ?></title>
-    <link rel="icon" type="image/png" href="assets/images/logo.png?v=<?php echo $logoVersion; ?>">
-    <link rel="stylesheet" href="assets/css/remixicon.css">
-    <link rel="stylesheet" href="assets/css/lib/bootstrap.min.css">
-    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="icon" type="image/png" href="<?php echo APP_URL; ?>/assets/images/logo.png?v=<?php echo $logoVersion; ?>">
+    <link rel="stylesheet" href="<?php echo APP_URL; ?>/assets/css/remixicon.css">
+    <link rel="stylesheet" href="<?php echo APP_URL; ?>/assets/css/lib/bootstrap.min.css">
+    <link rel="stylesheet" href="<?php echo APP_URL; ?>/assets/css/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -327,7 +327,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div class="login-wrapper">
     <!-- Imagen Lateral -->
     <div class="login-image-side">
-        <img src="/portal/crm/assets/images/steptodown.com753320.jpg?v=<?php echo time(); ?>" alt="Consulta jurídica">
+        <img src="<?php echo APP_URL; ?>/assets/images/steptodown.com753320.jpg?v=<?php echo time(); ?>" alt="Consulta jurídica">
         <div class="login-image-overlay">
             <h2>Gestión Jurídica<br>Profesional</h2>
             <p>Panel de administración exclusivo para abogados y personal autorizado del despacho.</p>
@@ -337,7 +337,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Formulario -->
     <div class="login-form-side">
         <div class="login-logo">
-            <img src="/portal/crm/assets/images/logo.png?v=<?php echo time(); ?>" alt="Logo">
+            <img src="<?php echo APP_URL; ?>/assets/images/logo.png?v=<?php echo time(); ?>" alt="Logo">
             <span><?php echo e($nombreDespacho); ?></span>
         </div>
 
@@ -351,7 +351,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
         <?php endif; ?>
 
-        <form action="/portal/crm/index.php?page=login" method="POST">
+        <form action="<?php echo APP_URL; ?>/index.php?page=login" method="POST">
             <?php echo CSRF::campo(); ?>
 
             <div class="login-field">
