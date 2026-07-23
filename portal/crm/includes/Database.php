@@ -60,6 +60,10 @@ class Database {
      */
     public function query($sql, $params = []) {
         $stmt = $this->pdo->prepare($sql);
+        if ($stmt === false) {
+            $error = $this->pdo->errorInfo();
+            throw new PDOException("Prepare failed: " . ($error[2] ?? 'Unknown error') . " - SQL: " . $sql);
+        }
         $stmt->execute($params);
         return $stmt;
     }

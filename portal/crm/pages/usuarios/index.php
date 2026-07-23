@@ -108,10 +108,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_portal_cuenta'
             // No iniciamos transacción con $pdo directamente para evitar problemas si falla
             $db->beginTransaction();
 
-            // En lugar de borrar las solicitudes, simplemente las desvinculamos para no perder historial
-            // ni romper las foreign keys si ya fueron aceptadas y convertidas en cliente/caso.
-            $db->query("UPDATE solicitudes SET portal_cuenta_id = NULL WHERE portal_cuenta_id = ?", [$portalId]);
-
             // Borrar la cuenta
             $db->query("DELETE FROM portal_cuentas WHERE id = ?", [$portalId]);
 
