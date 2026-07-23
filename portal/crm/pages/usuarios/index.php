@@ -12,8 +12,7 @@ if ($filtroRol === 'abogado') {
     $tituloPagina = 'Usuarios';
 }
 
-include CRM_ROOT . '/templates/layout/header.php';
-
+// ── Procesar acciones POST ANTES de cualquier output (incluyendo header) ──
 // Procesar desactivación
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle_activo'])) {
     CSRF::verificarOAbortar();
@@ -122,11 +121,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_portal_cuenta'
     header('Location: ' . APP_URL . '/index.php?page=usuarios'); exit;
 }
 
+// ── Fin de manejadores POST — ahora cargamos el HTML ──
 if ($filtroRol) {
     $usuarios = $db->fetchAll("SELECT * FROM usuarios_internos WHERE rol = ? ORDER BY created_at DESC", [$filtroRol]);
 } else {
     $usuarios = $db->fetchAll("SELECT * FROM usuarios_internos ORDER BY created_at DESC");
 }
+
+include CRM_ROOT . '/templates/layout/header.php';
 
 // Cuentas del portal (clientes)
 $portalCuentas = $db->fetchAll(
