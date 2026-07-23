@@ -38,6 +38,66 @@ class RoleGuard {
     }
     
     /**
+     * Verificar si el usuario actual tiene un permiso especifico.
+     * El rol admin SIEMPRE retorna true sin consultar la BD.
+     * Los permisos del rol actual se leen una vez y se cachean en sesion.
+     *
+     * @param string $permiso  Ej: 'solicitudes.eliminar', 'clientes.crear'
+     * @return bool
+     */
+    public static function can($permiso) {
+        $rol = $_SESSION['usuario_rol'] ?? '';
+        // Admin puede todo
+        if ($rol === 'admin') return true;
+        // Cargar cache si no existe
+        if (!isset($_SESSION['_permisos_cache'])) {
+            self::_cargarPermisos();
+        }
+        return !empty($_SESSION['_permisos_cache'][$permiso]);
+    }
+
+    /**
+     * Como can() pero aborta con 403 si no tiene permiso.
+     */
+    public static function requirePermission($permiso) {
+        if (!self::can($permiso)) {
+            AuditLog::registrar('acceso_denegado', null, null,
+                'Sin permiso "' . $permiso . '" - rol: ' . ($_SESSION['usuario_rol'] ?? ''));
+            http_response_code(403);
+            include CRM_ROOT . '/pages/acceso-denegado.php';
+            exit;
+        }
+    }
+
+    /**
+     * Borrar cache de permisos (llamar tras guardar cambios en role_permisos).
+     */
+    public static function clearPermissionCache() {
+        unset($_SESSION['_permisos_cache']);
+    }
+
+    /**
+     * Carga todos los permisos del rol actual desde la BD y los guarda en sesion.
+     */
+    private static function _cargarPermisos() {
+        $rol = $_SESSION['usuario_rol'] ?? '';
+        $_SESSION['_permisos_cache'] = [];
+        if (!$rol) return;
+        try {
+            $db = Database::getInstance();
+            $rows = $db->fetchAll(
+                "SELECT permiso, activo FROM role_permisos WHERE rol = ?",
+                [$rol]
+            );
+            foreach ($rows as $row) {
+                $_SESSION['_permisos_cache'][$row['permiso']] = (bool)$row['activo'];
+            }
+        } catch (\Throwable $e) {
+            // Tabla aun no creada: sin restricciones
+        }
+    }
+
+    /**
      * Verificar si el usuario actual es administrador
      */
     public static function esAdmin() {
@@ -136,10 +196,11 @@ class RoleGuard {
                 'icono'     => 'solar:settings-outline',
                 'roles'     => ['admin'],
                 'submenu'   => [
-                    ['titulo' => 'Usuarios',      'url' => 'usuarios',              'icono_color' => 'text-primary-600'],
-                    ['titulo' => 'Configuración', 'url' => 'configuracion/tema',   'icono_color' => 'text-warning-main'],
-                    ['titulo' => 'Correo',        'url' => 'configuracion/correo', 'icono_color' => 'text-success-main'],
-                    ['titulo' => 'Auditoría',     'url' => 'auditoria',             'icono_color' => 'text-info-main'],
+                    ['titulo' => 'Usuarios',       'url' => 'usuarios',              'icono_color' => 'text-primary-600'],
+                    ['titulo' => 'Permisos',        'url' => 'permisos',              'icono_color' => 'text-purple-600'],
+                    ['titulo' => 'Configuración',  'url' => 'configuracion/tema',   'icono_color' => 'text-warning-main'],
+                    ['titulo' => 'Correo',          'url' => 'configuracion/correo', 'icono_color' => 'text-success-main'],
+                    ['titulo' => 'Auditoría',       'url' => 'auditoria',            'icono_color' => 'text-info-main'],
                 ],
             ],
         ];
