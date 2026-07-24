@@ -1,12 +1,6 @@
 <?php
 ob_start();
-// Serve manifest as JSON via PHP (InfinityFree blocks static .json)
-
-$crmBase = '';
-if (isset($_SERVER['HTTP_HOST'])) {
-    $proto = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-    $crmBase = $proto . '://' . $_SERVER['HTTP_HOST'] . '/portal/crm';
-}
+// Serve manifest as JSON via PHP
 
 $manifest = json_encode([
     'name'             => 'CRM Abogados',
@@ -21,13 +15,13 @@ $manifest = json_encode([
     'lang'             => 'es',
     'icons'            => [
         [
-            'src'     => $crmBase . '/assets/images/icon-192.png',
+            'src'     => 'assets/images/icon-192.png',
             'sizes'   => '192x192',
             'type'    => 'image/png',
             'purpose' => 'any maskable'
         ],
         [
-            'src'     => $crmBase . '/assets/images/icon-512.png',
+            'src'     => 'assets/images/icon-512.png',
             'sizes'   => '512x512',
             'type'    => 'image/png',
             'purpose' => 'any maskable'

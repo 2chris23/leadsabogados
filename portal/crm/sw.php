@@ -1,7 +1,7 @@
 <?php
-// Serve Service Worker as JS via PHP (InfinityFree blocks static .js in some dirs)
+// Serve Service Worker as JS via PHP
 header('Content-Type: application/javascript');
-header('Service-Worker-Allowed: /portal/crm/');
+header('Service-Worker-Allowed: /');
 header('Cache-Control: no-cache');
 ?>
 // Service Worker — CRM Abogados

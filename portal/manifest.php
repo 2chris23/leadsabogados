@@ -3,13 +3,6 @@
 header('Content-Type: application/manifest+json');
 header('Cache-Control: public, max-age=86400');
 
-$portalBase = '';
-// Detect base URL
-if (isset($_SERVER['HTTP_HOST'])) {
-    $proto = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-    $portalBase = $proto . '://' . $_SERVER['HTTP_HOST'] . portalUrl();
-}
-
 echo json_encode([
     'name' => 'Portal del Cliente',
     'short_name' => 'Mi Portal',
@@ -23,13 +16,13 @@ echo json_encode([
     'lang' => 'es',
     'icons' => [
         [
-            'src' => $portalBase . '/assets/icon-192.png',
+            'src' => './assets/icon-192.png',
             'sizes' => '192x192',
             'type' => 'image/png',
             'purpose' => 'any maskable'
         ],
         [
-            'src' => $portalBase . '/assets/icon-512.png',
+            'src' => './assets/icon-512.png',
             'sizes' => '512x512',
             'type' => 'image/png',
             'purpose' => 'any maskable'
