@@ -177,10 +177,9 @@ if ($filtroEstado && in_array($filtroEstado, ['pendiente', 'aceptada', 'denegada
     $params[] = $filtroEstado;
 }
 
-if ($auth->esAbogado()) {
-    $whereEstado .= ($whereEstado ? ' AND ' : 'WHERE ') . 's.abogado_id = ?';
-    $params[] = $usuario['id'];
-}
+// El sistema de permisos ya controla quién puede acceder a esta página.
+// Si un abogado tiene acceso, ve todas las solicitudes (como admin/gestor).
+// Si se quiere restringir a solo sus solicitudes asignadas, configurar en Permisos.
 
 $solicitudes = $db->fetchAll(
     "SELECT s.*, u.nombre as procesada_nombre, u.apellidos as procesada_apellidos
