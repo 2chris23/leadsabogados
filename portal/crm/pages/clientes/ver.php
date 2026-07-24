@@ -192,14 +192,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['eliminar_caso'])) {
         
         // 1. Obtener y eliminar documentos físicos
         try {
-            $documentos = $db->fetchAll("SELECT ruta FROM caso_documentos WHERE caso_id = ?", [$casoId]);
+            $documentos = $db->fetchAll("SELECT ruta FROM documentos WHERE caso_id = ?", [$casoId]);
             foreach ($documentos as $doc) {
                 $rutaFisica = CRM_ROOT . '/public/' . $doc['ruta'];
                 if (file_exists($rutaFisica)) {
                     @unlink($rutaFisica);
                 }
             }
-            $db->delete('caso_documentos', 'caso_id = ?', [$casoId]);
+            $db->delete('documentos', 'caso_id = ?', [$casoId]);
         } catch (\Throwable $e) {}
         
         // 2. Eliminar otros registros asociados
