@@ -132,8 +132,8 @@ $rutas = [
     'dashboard'             => ['archivo' => 'pages/dashboard.php',              'roles' => ['admin', 'abogado']],
     
     // Solicitudes
-    'solicitudes'           => ['archivo' => 'pages/solicitudes/index.php',      'roles' => ['admin', 'gestor']],
-    'solicitudes/ver'       => ['archivo' => 'pages/solicitudes/ver.php',        'roles' => ['admin', 'gestor']],
+    'solicitudes'           => ['archivo' => 'pages/solicitudes/index.php',      'roles' => ['admin', 'abogado', 'gestor']],
+    'solicitudes/ver'       => ['archivo' => 'pages/solicitudes/ver.php',        'roles' => ['admin', 'abogado', 'gestor']],
     'solicitudes/descargar' => ['archivo' => 'pages/solicitudes/descargar.php',  'roles' => ['admin', 'abogado', 'gestor']],
     
     // Clientes

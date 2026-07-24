@@ -29,30 +29,41 @@ if (!$archivo) {
     die('Archivo no encontrado en la base de datos.');
 }
 
-$rutaRelativa = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, ltrim($archivo['ruta'], '/\\'));
+$rutaGuardada = ltrim(str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $archivo['ruta']), DIRECTORY_SEPARATOR . '/');
 
-if (strpos($rutaRelativa, 'storage' . DIRECTORY_SEPARATOR) === 0) {
-    $rutaCompleta = CRM_ROOT . DIRECTORY_SEPARATOR . $rutaRelativa;
-} elseif (strpos($rutaRelativa, 'uploads' . DIRECTORY_SEPARATOR) === 0) {
-    $rutaCompleta = CRM_ROOT . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . $rutaRelativa;
-} else {
-    // Fallback legacy
-    $rutaCompleta = CRM_ROOT . DIRECTORY_SEPARATOR . $rutaRelativa;
+// Intentar múltiples ubicaciones posibles donde puede estar el archivo
+$candidatos = [
+    // 1. Ruta directa desde CRM_ROOT
+    CRM_ROOT . DIRECTORY_SEPARATOR . $rutaGuardada,
+    // 2. Dentro de public/ (ej: uploads/solicitudes/...)
+    CRM_ROOT . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . $rutaGuardada,
+    // 3. Dentro de storage/ (legacy)
+    CRM_ROOT . DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR . $rutaGuardada,
+    // 4. Ruta absoluta si comienza por storage/
+    CRM_ROOT . DIRECTORY_SEPARATOR . str_replace('storage' . DIRECTORY_SEPARATOR, '', $rutaGuardada),
+];
+
+$rutaCompleta = null;
+foreach ($candidatos as $candidato) {
+    if (file_exists($candidato) && is_file($candidato)) {
+        $rutaCompleta = $candidato;
+        break;
+    }
 }
 
-if (!file_exists($rutaCompleta) || !is_file($rutaCompleta)) {
+if (!$rutaCompleta) {
     http_response_code(404);
     echo '<h3>Archivo no encontrado</h3>';
     echo '<p>El archivo <strong>' . htmlspecialchars($archivo['nombre_original']) . '</strong> no existe en el servidor.</p>';
+    echo '<p style="color:#888;font-size:.85em">Ruta buscada: ' . htmlspecialchars($rutaGuardada) . '</p>';
     exit;
 }
 
 // Seguridad: confirmar que la ruta está dentro de los directorios permitidos
-$dirStorage = realpath(CRM_ROOT . DIRECTORY_SEPARATOR . 'storage');
-$dirUploads = realpath(CRM_ROOT . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . 'uploads');
+$dirCrm     = realpath(CRM_ROOT);
 $rutaReal   = realpath($rutaCompleta);
 
-if (!$rutaReal || (strpos($rutaReal, $dirStorage) !== 0 && strpos($rutaReal, $dirUploads) !== 0)) {
+if (!$rutaReal || strpos($rutaReal, $dirCrm) !== 0) {
     http_response_code(403);
     die('Acceso no permitido.');
 }

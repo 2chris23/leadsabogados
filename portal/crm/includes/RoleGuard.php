@@ -148,66 +148,96 @@ class RoleGuard {
     }
     
     /**
-     * Obtener menú filtrado por rol
-     * @return array Elementos del menú visibles para el rol actual
+     * Obtener menú filtrado por rol y permisos configurados
+     * Admin siempre ve todo. Otros roles ven según role_permisos.
      */
     public static function getMenuItems() {
         $rol = $_SESSION['usuario_rol'] ?? '';
-        
-        $menu = [
-            [
-                'titulo'  => 'Dashboard',
-                'icono'   => 'solar:home-smile-outline',
-                'url'     => 'dashboard',
-                'roles'   => ['admin', 'abogado'],
-            ],
-            [
-                'titulo'  => 'Solicitudes',
-                'icono'   => 'solar:inbox-outline',
-                'url'     => 'solicitudes',
-                'roles'   => ['admin', 'gestor'],
-            ],
-            [
-                'titulo'  => 'Clientes',
-                'icono'   => 'solar:users-group-rounded-outline',
-                'url'     => 'clientes',
-                'roles'   => ['admin', 'abogado', 'gestor'],
-            ],
-            [
-                'titulo'  => 'Casos',
-                'icono'   => 'solar:case-minimalistic-outline',
-                'url'     => 'casos',
-                'roles'   => ['admin', 'abogado'],
-            ],
-            [
-                'titulo'  => 'Pagos',
-                'icono'   => 'solar:wallet-money-outline',
-                'url'     => 'pagos',
-                'roles'   => ['admin'],
-            ],
-            [
-                'titulo'  => 'Abogados',
-                'icono'   => 'solar:user-id-outline',
-                'url'     => 'abogados',
-                'roles'   => ['admin'],
-            ],
+
+        // Menú completo del admin (siempre todo)
+        $menuAdmin = [
+            ['titulo'=>'Dashboard',    'icono'=>'solar:home-smile-outline',             'url'=>'dashboard'],
+            ['titulo'=>'Solicitudes',  'icono'=>'solar:inbox-outline',                  'url'=>'solicitudes'],
+            ['titulo'=>'Clientes',     'icono'=>'solar:users-group-rounded-outline',    'url'=>'clientes'],
+            ['titulo'=>'Casos',        'icono'=>'solar:case-minimalistic-outline',      'url'=>'casos'],
+            ['titulo'=>'Pagos',        'icono'=>'solar:wallet-money-outline',           'url'=>'pagos'],
+            ['titulo'=>'Abogados',     'icono'=>'solar:user-id-outline',                'url'=>'abogados'],
             [
                 'titulo'    => 'Administración',
                 'icono'     => 'solar:settings-outline',
-                'roles'     => ['admin'],
                 'submenu'   => [
-                    ['titulo' => 'Usuarios',       'url' => 'usuarios',              'icono_color' => 'text-primary-600'],
-                    ['titulo' => 'Permisos',        'url' => 'permisos',              'icono_color' => 'text-purple-600'],
-                    ['titulo' => 'Configuración',  'url' => 'configuracion/tema',   'icono_color' => 'text-warning-main'],
-                    ['titulo' => 'Correo',          'url' => 'configuracion/correo', 'icono_color' => 'text-success-main'],
-                    ['titulo' => 'Auditoría',       'url' => 'auditoria',            'icono_color' => 'text-info-main'],
+                    ['titulo'=>'Usuarios',      'url'=>'usuarios',              'icono_color'=>'text-primary-600'],
+                    ['titulo'=>'Permisos',       'url'=>'permisos',              'icono_color'=>'text-purple-600'],
+                    ['titulo'=>'Configuración', 'url'=>'configuracion/tema',   'icono_color'=>'text-warning-main'],
+                    ['titulo'=>'Correo',         'url'=>'configuracion/correo', 'icono_color'=>'text-success-main'],
+                    ['titulo'=>'Auditoría',      'url'=>'auditoria',            'icono_color'=>'text-info-main'],
                 ],
             ],
         ];
-        
-        // Filtrar por rol
-        return array_filter($menu, function($item) use ($rol) {
-            return in_array($rol, $item['roles']);
-        });
+
+        if ($rol === 'admin') {
+            return $menuAdmin;
+        }
+
+        // Para otros roles: cargar permisos configurados
+        $permisos = [];
+        try {
+            $db = Database::getInstance();
+            $rows = $db->fetchAll(
+                "SELECT permiso, activo FROM role_permisos WHERE rol = ?",
+                [$rol]
+            );
+            foreach ($rows as $r) {
+                $permisos[$r['permiso']] = (bool)$r['activo'];
+            }
+        } catch (\Throwable $e) {
+            // Si la tabla no existe aún, usar permisos por rol como fallback
+        }
+
+        // Helper: ¿tiene al menos uno de los permisos?
+        $tiene = function(array $claves) use ($permisos, $rol) {
+            // Si no hay configuración en BD, usar roles por defecto
+            if (empty($permisos)) {
+                return in_array($rol, ['abogado', 'gestor']);
+            }
+            foreach ($claves as $c) {
+                if (!empty($permisos[$c])) return true;
+            }
+            return false;
+        };
+
+        $items = [];
+
+        // Dashboard — siempre visible para abogados
+        if ($rol === 'abogado') {
+            $items[] = ['titulo'=>'Dashboard', 'icono'=>'solar:home-smile-outline', 'url'=>'dashboard'];
+        }
+
+        // Solicitudes
+        if ($tiene(['solicitudes.ver', 'solicitudes.crear', 'solicitudes.editar', 'solicitudes.cambiar_estado'])) {
+            $items[] = ['titulo'=>'Solicitudes', 'icono'=>'solar:inbox-outline', 'url'=>'solicitudes'];
+        }
+
+        // Clientes
+        if ($tiene(['clientes.ver', 'clientes.crear', 'clientes.editar'])) {
+            $items[] = ['titulo'=>'Clientes', 'icono'=>'solar:users-group-rounded-outline', 'url'=>'clientes'];
+        }
+
+        // Casos
+        if ($tiene(['casos.ver', 'casos.crear', 'casos.editar']) || $rol === 'abogado') {
+            $items[] = ['titulo'=>'Casos', 'icono'=>'solar:case-minimalistic-outline', 'url'=>'casos'];
+        }
+
+        // Pagos — solo si tiene permiso explícito
+        if ($tiene(['pagos.ver', 'pagos.registrar'])) {
+            $items[] = ['titulo'=>'Pagos', 'icono'=>'solar:wallet-money-outline', 'url'=>'pagos'];
+        }
+
+        // Abogados — visible para abogado en su propio perfil
+        if ($rol === 'abogado') {
+            $items[] = ['titulo'=>'Abogados', 'icono'=>'solar:user-id-outline', 'url'=>'abogados'];
+        }
+
+        return $items;
     }
 }
