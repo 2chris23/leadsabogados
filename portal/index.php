@@ -25,7 +25,17 @@ $page = isset($_GET['page']) ? preg_replace('/[^a-zA-Z0-9\-\/]/', '', trim($_GET
 // Helpers
 function e($s) { return htmlspecialchars($s ?? '', ENT_QUOTES, 'UTF-8'); }
 function portalUrl() { 
-    return rtrim(APP_URL, '/') . '/portal';
+    $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https://' : 'http://';
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    
+    // Si la request uri incluye /portal, devolvemos hasta /portal
+    $scriptDir = dirname($_SERVER['SCRIPT_NAME']);
+    $scriptDir = str_replace('\\', '/', $scriptDir);
+    if ($scriptDir === '/' || $scriptDir === '\\') {
+        $scriptDir = '';
+    }
+    
+    return $protocol . $host . $scriptDir;
 }
 function setFlash($t, $m) { $_SESSION['flash'] = ['tipo'=>$t,'mensaje'=>$m]; }
 function getFlash() { if(isset($_SESSION['flash'])){$f=$_SESSION['flash'];unset($_SESSION['flash']);return $f;} return null; }
