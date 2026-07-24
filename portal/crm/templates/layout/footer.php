@@ -68,13 +68,13 @@ $(function() {
     <?php echo $scriptsExtra; ?>
 <?php endif; ?>
 
-<!-- PWA Service Worker -->
+<!-- PWA Service Worker — desactivado, limpiar SWs viejos automáticamente -->
 <script>
 if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-        navigator.serviceWorker.register('<?php echo APP_URL; ?>/sw.php')
-            .then(function(reg) { console.log('SW registrado:', reg.scope); })
-            .catch(function(err) { console.log('SW error:', err); });
+    navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for (var reg of registrations) {
+            reg.unregister();
+        }
     });
 }
 </script>
