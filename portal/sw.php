@@ -5,7 +5,7 @@ header('Service-Worker-Allowed: /');
 header('Cache-Control: no-cache');
 ?>
 // Service Worker — Portal del Cliente
-const CACHE_NAME = 'portal-cliente-v1';
+const CACHE_NAME = 'portal-cliente-v2';
 const OFFLINE_URL = 'offline.html';
 
 const PRECACHE_ASSETS = [

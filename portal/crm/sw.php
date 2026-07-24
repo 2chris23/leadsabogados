@@ -5,7 +5,7 @@ header('Service-Worker-Allowed: /');
 header('Cache-Control: no-cache');
 ?>
 // Service Worker — CRM Abogados
-const CACHE_NAME = 'crm-abogados-v1';
+const CACHE_NAME = 'crm-abogados-v2';
 const OFFLINE_URL = 'offline.html';
 
 const PRECACHE_ASSETS = [
