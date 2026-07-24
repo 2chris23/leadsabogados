@@ -154,6 +154,9 @@ $rutas = [
     'usuarios'              => ['archivo' => 'pages/usuarios/index.php',         'roles' => ['admin']],
     'usuarios/crear'        => ['archivo' => 'pages/usuarios/crear.php',         'roles' => ['admin']],
     'usuarios/editar'       => ['archivo' => 'pages/usuarios/editar.php',        'roles' => ['admin']],
+
+    // Permisos de Roles (solo admin)
+    'permisos'              => ['archivo' => 'pages/permisos/index.php',         'roles' => ['admin']],
     
     // Abogados (Módulo dedicado)
     'abogados'              => ['archivo' => 'pages/abogados/index.php',         'roles' => ['admin']],
