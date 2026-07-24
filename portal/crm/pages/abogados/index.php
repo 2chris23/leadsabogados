@@ -61,7 +61,7 @@ include CRM_ROOT . '/templates/layout/header.php';
                                     <iconify-icon icon="entypo:dots-three-vertical" class="text-xl"></iconify-icon>
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
-                                    <li><a class="dropdown-item py-8 px-16 d-flex align-items-center gap-2" href="<?php echo APP_URL; ?>/index.php?page=usuarios/editar&id=<?php echo $abogado['id']; ?>">
+                                    <li><a class="dropdown-item py-8 px-16 d-flex align-items-center gap-2" href="<?php echo APP_URL; ?>/index.php?page=abogados/editar&id=<?php echo $abogado['id']; ?>">
                                         <iconify-icon icon="solar:pen-new-square-outline"></iconify-icon> Editar
                                     </a></li>
                                     <li>
@@ -82,8 +82,8 @@ include CRM_ROOT . '/templates/layout/header.php';
                         <div class="text-center">
                             <a href="<?php echo APP_URL; ?>/index.php?page=abogados/ver&id=<?php echo $abogado['id']; ?>" class="stretched-link"></a>
                             <div class="mb-16 d-inline-block position-relative">
-                                <?php if ($abogado['avatar']): ?>
-                                    <img src="<?php echo APP_URL . '/' . e($abogado['avatar']); ?>" alt="" class="w-80-px h-80-px rounded-circle object-fit-cover border-2 border-white shadow-sm">
+                                <?php if (!empty($abogado['foto'])): ?>
+                                    <img src="<?php echo APP_URL . '/public/' . e($abogado['foto']); ?>" alt="Foto" class="w-80-px h-80-px rounded-circle object-fit-cover border-2 border-white shadow-sm">
                                 <?php else: ?>
                                     <div class="w-80-px h-80-px rounded-circle bg-neutral-100 text-secondary-light d-flex justify-content-center align-items-center text-3xl fw-bold border-2 border-white shadow-sm">
                                         <?php echo strtoupper(substr($abogado['nombre'], 0, 1)); ?>

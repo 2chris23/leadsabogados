@@ -162,6 +162,7 @@ $rutas = [
     'abogados'              => ['archivo' => 'pages/abogados/index.php',         'roles' => ['admin']],
     'abogados/ver'          => ['archivo' => 'pages/abogados/ver.php',           'roles' => ['admin', 'abogado']],
     'abogados/crear'        => ['archivo' => 'pages/abogados/crear.php',         'roles' => ['admin']],
+    'abogados/editar'       => ['archivo' => 'pages/abogados/editar.php',        'roles' => ['admin']],
     
     
     // Configuración (solo admin)

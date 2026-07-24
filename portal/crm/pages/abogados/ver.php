@@ -92,7 +92,7 @@ include CRM_ROOT . '/templates/layout/header.php';
                 <div class="card-body p-24 text-center">
                     <div class="mb-16">
                         <?php if (!empty($abogado['foto'])): ?>
-                            <img src="<?php echo APP_URL . '/../' . $abogado['foto']; ?>" class="w-120-px h-120-px rounded-circle object-fit-cover mx-auto border shadow" alt="Foto">
+                            <img src="<?php echo APP_URL . '/public/' . e($abogado['foto']); ?>" class="w-120-px h-120-px rounded-circle object-fit-cover mx-auto border shadow" alt="Foto">
                         <?php else: ?>
                             <div class="w-120-px h-120-px bg-primary-100 text-primary-600 rounded-circle d-flex align-items-center justify-content-center text-4xl fw-bold mx-auto border shadow">
                                 <?php echo strtoupper(substr($abogado['nombre'], 0, 1)); ?>
