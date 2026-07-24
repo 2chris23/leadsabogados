@@ -159,10 +159,10 @@ $rutas = [
     'permisos'              => ['archivo' => 'pages/permisos/index.php',         'roles' => ['admin']],
     
     // Abogados (Módulo dedicado)
-    'abogados'              => ['archivo' => 'pages/abogados/index.php',         'roles' => ['admin']],
+    'abogados'              => ['archivo' => 'pages/abogados/index.php',         'roles' => ['admin', 'abogado']],
     'abogados/ver'          => ['archivo' => 'pages/abogados/ver.php',           'roles' => ['admin', 'abogado']],
     'abogados/crear'        => ['archivo' => 'pages/abogados/crear.php',         'roles' => ['admin']],
-    'abogados/editar'       => ['archivo' => 'pages/abogados/editar.php',        'roles' => ['admin']],
+    'abogados/editar'       => ['archivo' => 'pages/abogados/editar.php',        'roles' => ['admin', 'abogado']],
     
     
     // Configuración (solo admin)

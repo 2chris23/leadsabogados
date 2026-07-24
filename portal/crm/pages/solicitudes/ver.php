@@ -291,8 +291,11 @@ function downloadArchivo(id, nombreOriginal) {
   btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Descargando...';
 
   fetch(url, { credentials: 'same-origin' })
-    .then(res => {
-      if (!res.ok) throw new Error('Error ' + res.status);
+    .then(async res => {
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || 'Error ' + res.status);
+      }
       return res.blob();
     })
     .then(blob => {
@@ -305,10 +308,12 @@ function downloadArchivo(id, nombreOriginal) {
       setTimeout(() => { URL.revokeObjectURL(objUrl); a.remove(); }, 1000);
     })
     .catch(err => {
+      // Remover etiquetas HTML básicas si el error viene con formato
+      const errorText = err.message.replace(/<[^>]*>?/gm, ' ');
       if (typeof Swal !== 'undefined') {
-        Swal.fire({icon: 'error', title: 'Error', text: 'No se pudo descargar el archivo. Inténtalo de nuevo.', confirmButtonColor: '#2e6edd'});
+        Swal.fire({icon: 'error', title: 'Error', text: errorText, confirmButtonColor: '#2e6edd'});
       } else {
-        alert('No se pudo descargar el archivo. Inténtalo de nuevo.');
+        alert(errorText);
       }
       console.error(err);
     })
