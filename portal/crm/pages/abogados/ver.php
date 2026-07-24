@@ -70,6 +70,7 @@ $beneficioEstimado = $totalHonorariosClientes - $totalHonorariosAbogado;
 
 $casos = $db->fetchAll("SELECT c.*, cl.nombre as cliente_nombre, cl.apellidos as cliente_apellidos, (SELECT SUM(cantidad) FROM pagos WHERE caso_id = c.id AND (tipo_pago IS NULL OR tipo_pago != 'pago_abogado')) as cobrado FROM casos c JOIN clientes cl ON c.cliente_id = cl.id WHERE c.abogado_id = ? ORDER BY c.created_at DESC", [$id]);
 $pagos = $db->fetchAll("SELECT p.*, c.titulo as caso_titulo, cl.nombre as cliente_nombre FROM pagos p JOIN casos c ON p.caso_id = c.id JOIN clientes cl ON c.cliente_id = cl.id WHERE c.abogado_id = ? ORDER BY p.fecha_pago DESC LIMIT 10", [$id]);
+$solicitudes = $db->fetchAll("SELECT * FROM solicitudes WHERE abogado_id = ? AND estado IN ('pendiente', 'aceptada', 'denegada') ORDER BY created_at DESC", [$id]);
 
 // Estadísticas por estado
 $estadisticaRows = $db->fetchAll("SELECT estado, COUNT(*) as total FROM casos WHERE abogado_id = ? GROUP BY estado", [$id]);
@@ -213,6 +214,40 @@ include CRM_ROOT . '/templates/layout/header.php';
                 <?php endforeach;?>
                 </div>
             </div>
+
+            <?php if (!empty($solicitudes)): ?>
+            <div class="mb-24"><div style="font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase;">Solicitudes Asignadas</div></div>
+            <div class="row gy-24 mb-32">
+                <?php foreach ($solicitudes as $sol): 
+                    $badgeClass = match($sol['estado']) {
+                        'pendiente' => 'bg-warning-50 text-warning-main',
+                        'aceptada'  => 'bg-success-50 text-success-main',
+                        'denegada'  => 'bg-danger-50 text-danger-main',
+                        default     => 'bg-neutral-200 text-neutral-600'
+                    };
+                    $solUrl = APP_URL . '/index.php?page=solicitudes/ver&id=' . $sol['id'];
+                ?>
+                <div class="col-md-6 col-xxl-4">
+                    <div class="card radius-24 border-0 shadow-sm bg-white p-24" style="cursor:pointer;transition:.2s" onmouseover="this.style.boxShadow='0 8px 30px rgba(0,0,0,.12)'" onmouseout="this.style.boxShadow=''" onclick="window.location='<?php echo $solUrl; ?>'">
+                        <div class="d-flex justify-content-between mb-16">
+                            <span class="badge <?php echo $badgeClass; ?> px-12 py-6 radius-8 fw-bold text-xs"><?php echo ucfirst($sol['estado']); ?></span>
+                            <span class="text-xs text-secondary-light"><?php echo date('d M', strtotime($sol['created_at'])); ?></span>
+                        </div>
+                        <div class="bg-neutral-50 p-12 radius-16 mb-20 d-flex align-items-center gap-2">
+                            <div class="w-24-px h-24-px bg-primary-600 text-white rounded-circle d-flex align-items-center justify-content-center text-xs fw-bold"><?php echo strtoupper(substr($sol['nombre'],0,1)); ?></div>
+                            <span class="text-sm fw-semibold"><?php echo e($sol['nombre'] . ' ' . $sol['apellidos']); ?></span>
+                        </div>
+                        <div class="mb-16 text-sm text-secondary-light text-truncate">
+                            <strong>Problema:</strong> <?php echo e($sol['tipo_problema']); ?>
+                        </div>
+                        <div class="d-flex pt-12 border-top" onclick="event.stopPropagation()">
+                            <a href="<?php echo $solUrl; ?>" class="btn btn-sm btn-outline-primary flex-grow-1 radius-12 fw-bold">Ver Solicitud</a>
+                        </div>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+            <?php endif; ?>
 
             <div class="mb-24"><div style="font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase;">Cartera de Casos</div></div>
             <div class="row gy-24 mb-24">

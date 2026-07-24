@@ -378,7 +378,12 @@ $extColors = ['PDF'=>['#fef2f2','#dc2626'],'DOC'=>['#e8f0fe','#2e6edd'],'DOCX'=>
           $ext=strtoupper(pathinfo($doc['nombre_original'],PATHINFO_EXTENSION));
           [$bg,$clr]=$extColors[$ext]??['#f1f5f9','#64748b'];
           $kb=round($doc['tamano_bytes']/1024,1);
-          $dlUrl=APP_URL.'/'.$doc['ruta'];
+          
+          if (isset($doc['origen']) && $doc['origen'] === 'portal') {
+              $dlUrl = APP_URL . '/index.php?page=solicitudes/descargar&id=' . $doc['id'];
+          } else {
+              $dlUrl = APP_URL . '/index.php?page=casos/descargar&id=' . $doc['id'];
+          }
         ?>
         <div class="cv-file">
           <div class="cv-file-ico" style="background:<?php echo $bg;?>;color:<?php echo $clr;?>"><?php echo $ext;?></div>
