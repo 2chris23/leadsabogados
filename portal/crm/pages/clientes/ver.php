@@ -187,10 +187,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['eliminar_caso'])) {
     CSRF::verificarOAbortar();
     $casoId = (int)$_POST['caso_id'];
     
-    $db->delete('casos', 'id = ?', [$casoId]);
+    try {
+        $db->delete('casos', 'id = ?', [$casoId]);
+        AuditLog::registrar('eliminar', 'casos', $casoId, 'Caso eliminado desde ficha de cliente');
+        setFlash('exito', 'Caso eliminado correctamente');
+    } catch (Exception $e) {
+        setFlash('error', 'No se puede eliminar el caso porque tiene registros asociados (pagos, documentos, etc). Debe eliminarlos primero.');
+    }
     
-    AuditLog::registrar('eliminar', 'casos', $casoId, 'Caso eliminado desde ficha de cliente');
-    setFlash('exito', 'Caso eliminado correctamente');
     header('Location: ' . APP_URL . '/index.php?page=clientes/ver&id=' . $id);
     exit;
 }
