@@ -106,16 +106,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_portal_cuenta'
         try {
             // No iniciamos transacción con $pdo directamente para evitar problemas si falla
             $db->beginTransaction();
+            
+            // Obtener cliente_id vinculado a la cuenta
+            $clienteId = $db->fetchColumn("SELECT cliente_id FROM portal_cuentas WHERE id = ?", [$portalId]);
 
-            // Borrar la cuenta
-            $db->query("DELETE FROM portal_cuentas WHERE id = ?", [$portalId]);
+            if ($clienteId) {
+                // Desactivar FK checks temporalmente para poder borrar en cascada
+                $db->query("SET FOREIGN_KEY_CHECKS = 0");
+
+                // Obtener los casos del cliente
+                $casosIds = $db->fetchAll("SELECT id FROM casos WHERE cliente_id = ?", [$clienteId]);
+                foreach ($casosIds as $caso) {
+                    $cid = $caso['id'];
+                    $db->query("DELETE FROM actuaciones WHERE caso_id = ?", [$cid]);
+                    $db->query("DELETE FROM documentos WHERE caso_id = ?", [$cid]);
+                    $db->query("DELETE FROM pagos_programados WHERE caso_id = ?", [$cid]);
+                    $db->query("DELETE FROM pagos WHERE caso_id = ?", [$cid]);
+                }
+                // Borrar casos del cliente
+                $db->query("DELETE FROM casos WHERE cliente_id = ?", [$clienteId]);
+                // Borrar portal_cuentas
+                $db->query("DELETE FROM portal_cuentas WHERE cliente_id = ?", [$clienteId]);
+                // Finalmente, borrar al cliente
+                $db->query("DELETE FROM clientes WHERE id = ?", [$clienteId]);
+                
+                $db->query("SET FOREIGN_KEY_CHECKS = 1");
+                AuditLog::registrar('eliminar', 'clientes', $clienteId, 'Cliente y portal eliminados desde usuarios');
+            } else {
+                // Borrar solo la cuenta si no tuviera cliente_id
+                $db->query("DELETE FROM portal_cuentas WHERE id = ?", [$portalId]);
+                AuditLog::registrar('eliminar', 'portal_cuentas', $portalId, 'Cuenta de cliente eliminada por admin');
+            }
 
             $db->commit();
-            AuditLog::registrar('eliminar', 'portal_cuentas', $portalId, 'Cuenta de cliente eliminada por admin');
-            setFlash('exito', 'Cuenta eliminada correctamente.');
+            setFlash('exito', 'Cliente eliminado completamente del CRM y del portal.');
         } catch (Exception $e) {
             $db->rollBack();
-            setFlash('error', 'No se pudo eliminar la cuenta. Error: ' . $e->getMessage());
+            setFlash('error', 'No se pudo eliminar el cliente. Error: ' . $e->getMessage());
         }
     }
     header('Location: ' . APP_URL . '/index.php?page=usuarios'); exit;

@@ -123,14 +123,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['enviar_recovery'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['eliminar_cliente'])) {
     RoleGuard::requireRole('admin');
     CSRF::verificarOAbortar();
-    
-    // 1. Eliminar cuenta del portal vinculada
+    // Desactivar FK checks temporalmente
+    $db->query("SET FOREIGN_KEY_CHECKS = 0");
+
+    // 1. Eliminar todos los casos del cliente y sus registros asociados
+    $casosIds = $db->fetchAll("SELECT id FROM casos WHERE cliente_id = ?", [$id]);
+    foreach ($casosIds as $caso) {
+        $cid = $caso['id'];
+        $db->query("DELETE FROM actuaciones WHERE caso_id = ?", [$cid]);
+        $db->query("DELETE FROM documentos WHERE caso_id = ?", [$cid]);
+        $db->query("DELETE FROM pagos_programados WHERE caso_id = ?", [$cid]);
+        $db->query("DELETE FROM pagos WHERE caso_id = ?", [$cid]);
+    }
+    $db->query("DELETE FROM casos WHERE cliente_id = ?", [$id]);
+
+    // 2. Eliminar cuenta del portal vinculada
     $db->delete('portal_cuentas', 'cliente_id = ?', [$id]);
     
-    // 2. Eliminar el cliente
+    // 3. Eliminar el cliente
     $db->delete('clientes', 'id = ?', [$id]);
     
-    AuditLog::registrar('eliminar', 'clientes', $id, 'Cliente eliminado desde su ficha');
+    $db->query("SET FOREIGN_KEY_CHECKS = 1");
+    
+    AuditLog::registrar('eliminar', 'clientes', $id, 'Cliente y todo su historial eliminado desde su ficha');
     setFlash('exito', 'Cliente eliminado correctamente');
     header('Location: ' . APP_URL . '/index.php?page=clientes');
     exit;
