@@ -115,7 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
         if (empty($formError)) {
             $existe = $db->fetchOne("SELECT id FROM portal_cuentas WHERE email = ?", [$formData['email']]);
             if ($existe) {
-                $formError = 'Ya existe una cuenta con este correo. <a href="https://app.leadsabogados.com/portal/index.php?page=login" style="color:#2e6edd;font-weight:700">Inicie sesión aquí</a>';
+                $formError = 'Ya existe una cuenta con este correo. <a href="https://leadsabogados.com/portal/" style="color:#2e6edd;font-weight:700">Inicie sesión aquí</a>';
             }
         }
 
@@ -471,7 +471,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
         <div class="nav-links">
             <a href="#servicios">Servicios</a>
             <a href="#consulta">Consulta Gratis</a>
-            <a href="https://app.leadsabogados.com/portal/" class="nav-cta">Portal del Cliente</a>
+            <a href="https://leadsabogados.com/portal/" class="nav-cta">Portal del Cliente</a>
         </div>
     </div>
 </nav>
@@ -484,7 +484,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
             <p class="hero-text">Más de 15 años defendiendo los derechos de nuestros clientes con profesionalismo, ética y resultados comprobados. Acceda a su caso desde nuestro portal seguro.</p>
             <div class="hero-btns">
                 <a href="#consulta" class="btn-hero btn-hero-primary">Consulta Gratuita</a>
-                <a href="https://app.leadsabogados.com/portal/" class="btn-hero btn-hero-outline">Ya Soy Cliente</a>
+                <a href="https://leadsabogados.com/portal/" class="btn-hero btn-hero-outline">Ya Soy Cliente</a>
             </div>
         </div>
         <div class="hero-img">
@@ -513,7 +513,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
                     <div class="cf-success-icon">✓</div>
                     <h3>Solicitud Enviada</h3>
                     <p>Su cuenta ha sido creada y su consulta ha sido registrada. Nuestro equipo la revisará en las próximas 24-48 horas.</p>
-                    <a href="https://app.leadsabogados.com/portal/index.php?page=login">Acceder a Mi Portal</a>
+                    <a href="https://leadsabogados.com/portal/">Acceder a Mi Portal</a>
                 </div>
                 <?php else: ?>
 
