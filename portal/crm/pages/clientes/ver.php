@@ -188,11 +188,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['eliminar_caso'])) {
     $casoId = (int)$_POST['caso_id'];
     
     try {
+        $db->beginTransaction();
+        
+        // 1. Obtener y eliminar documentos físicos
+        try {
+            $documentos = $db->fetchAll("SELECT ruta FROM caso_documentos WHERE caso_id = ?", [$casoId]);
+            foreach ($documentos as $doc) {
+                $rutaFisica = CRM_ROOT . '/public/' . $doc['ruta'];
+                if (file_exists($rutaFisica)) {
+                    @unlink($rutaFisica);
+                }
+            }
+            $db->delete('caso_documentos', 'caso_id = ?', [$casoId]);
+        } catch (\Throwable $e) {}
+        
+        // 2. Eliminar otros registros asociados
+        try { $db->delete('actuaciones', 'caso_id = ?', [$casoId]); } catch (\Throwable $e) {}
+        try { $db->delete('pagos_programados', 'caso_id = ?', [$casoId]); } catch (\Throwable $e) {}
+        try { $db->delete('pagos', 'caso_id = ?', [$casoId]); } catch (\Throwable $e) {}
+        
+        // 3. Finalmente eliminar el caso
         $db->delete('casos', 'id = ?', [$casoId]);
-        AuditLog::registrar('eliminar', 'casos', $casoId, 'Caso eliminado desde ficha de cliente');
-        setFlash('exito', 'Caso eliminado correctamente');
+        
+        $db->commit();
+        AuditLog::registrar('eliminar', 'casos', $casoId, 'Caso y registros asociados eliminados desde ficha de cliente');
+        setFlash('exito', 'Caso y todos sus registros asociados eliminados correctamente');
     } catch (Exception $e) {
-        setFlash('error', 'No se puede eliminar el caso porque tiene registros asociados (pagos, documentos, etc). Debe eliminarlos primero.');
+        $db->rollBack();
+        setFlash('error', 'Error al eliminar el caso: ' . $e->getMessage());
     }
     
     header('Location: ' . APP_URL . '/index.php?page=clientes/ver&id=' . $id);
