@@ -139,6 +139,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['eliminar_cliente'])) 
             // Borrar casos del cliente
             $db->query("DELETE FROM casos WHERE cliente_id = ?", [$did]);
 
+            // Obtener email del cliente para borrar sus solicitudes originales
+            $email = $db->fetchColumn("SELECT email FROM clientes WHERE id = ?", [$did]);
+            if ($email) {
+                $sols = $db->fetchAll("SELECT id FROM solicitudes WHERE email = ?", [$email]);
+                foreach ($sols as $sol) {
+                    $db->query("DELETE FROM solicitud_archivos WHERE solicitud_id = ?", [$sol['id']]);
+                }
+                $db->query("DELETE FROM solicitudes WHERE email = ?", [$email]);
+            }
+
             // Borrar cuenta del portal vinculada
             $db->query("DELETE FROM portal_cuentas WHERE cliente_id = ?", [$did]);
 

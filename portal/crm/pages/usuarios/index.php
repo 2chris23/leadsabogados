@@ -125,6 +125,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_portal_cuenta'
                 }
                 // Borrar casos del cliente
                 $db->query("DELETE FROM casos WHERE cliente_id = ?", [$clienteId]);
+                
+                // Borrar solicitudes originales
+                $emailCliente = $db->fetchColumn("SELECT email FROM clientes WHERE id = ?", [$clienteId]);
+                if ($emailCliente) {
+                    $sols = $db->fetchAll("SELECT id FROM solicitudes WHERE email = ?", [$emailCliente]);
+                    foreach ($sols as $sol) {
+                        $db->query("DELETE FROM solicitud_archivos WHERE solicitud_id = ?", [$sol['id']]);
+                    }
+                    $db->query("DELETE FROM solicitudes WHERE email = ?", [$emailCliente]);
+                }
+                
                 // Borrar portal_cuentas
                 $db->query("DELETE FROM portal_cuentas WHERE cliente_id = ?", [$clienteId]);
                 // Finalmente, borrar al cliente

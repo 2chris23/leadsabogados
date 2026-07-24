@@ -43,6 +43,18 @@ $candidatos = [
     CRM_ROOT . DIRECTORY_SEPARATOR . str_replace('storage' . DIRECTORY_SEPARATOR, '', $rutaGuardada),
     // 5. Portal ROOT (archivos subidos desde el portal de clientes)
     dirname(CRM_ROOT) . DIRECTORY_SEPARATOR . $rutaGuardada,
+    
+    // Fallbacks para Plesk con diferentes DocumentRoots
+    '/var/www/vhosts/leadsabogados.com/httpdocs/public/' . $rutaGuardada,
+    '/var/www/vhosts/leadsabogados.com/app.leadsabogados.com/public/' . $rutaGuardada,
+    '/var/www/vhosts/leadsabogados.com/httpdocs/portal/crm/public/' . $rutaGuardada,
+    '/var/www/vhosts/leadsabogados.com/app.leadsabogados.com/portal/crm/public/' . $rutaGuardada,
+    '/var/www/vhosts/leadsabogados.com/httpdocs/' . $rutaGuardada,
+    '/var/www/vhosts/leadsabogados.com/app.leadsabogados.com/' . $rutaGuardada,
+    
+    // Intentar buscar asumiendo que public/ está un nivel más arriba
+    dirname(CRM_ROOT) . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . $rutaGuardada,
+    dirname(dirname(CRM_ROOT)) . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . $rutaGuardada,
 ];
 
 $rutaCompleta = null;
