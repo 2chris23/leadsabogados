@@ -225,7 +225,6 @@ foreach($abogados as $ab){ if($ab['id']==$abogadoSel){ $abogadoNom=$ab['nombre']
     <?php endif;?>
 
     <!-- Acciones -->
-    <?php if($solicitud['estado']==='pendiente'):?>
     <div class="sv-card">
       <div class="sv-card-header">
         <div class="sv-hicon" style="background:#fef2f2;color:#dc2626">
@@ -240,18 +239,26 @@ foreach($abogados as $ab){ if($ab['id']==$abogadoSel){ $abogadoNom=$ab['nombre']
           <span class="sv-label">Motivo (opcional)</span>
           <textarea name="motivo" class="sv-textarea" placeholder="Escriba el motivo de la decisión..."></textarea>
           <div class="sv-actions-row" style="margin-top:14px">
+            <?php if($solicitud['estado'] !== 'aceptada'): ?>
             <button type="submit" name="accion" value="aceptada" class="sv-btn sv-btn-ok" data-confirm="¿Aceptar esta solicitud? Se creará un caso automáticamente.">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Aceptar
             </button>
+            <?php endif; ?>
+            <?php if($solicitud['estado'] !== 'denegada'): ?>
             <button type="submit" name="accion" value="denegada" class="sv-btn sv-btn-no" data-confirm="¿Denegar esta solicitud?">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Denegar
             </button>
+            <?php endif; ?>
           </div>
+          <?php if($solicitud['estado'] !== 'archivada'): ?>
           <button type="submit" name="accion" value="archivada" class="sv-btn sv-btn-arc" style="margin-top:10px">Archivar</button>
+          <?php endif; ?>
+          <?php if($solicitud['estado'] !== 'pendiente'): ?>
+          <button type="submit" name="accion" value="pendiente" class="sv-btn sv-btn-arc" style="margin-top:10px;background:#f8fafc;color:#64748b;border:1px solid #e2e8f0" data-confirm="¿Volver a poner esta solicitud como pendiente?">Volver a Pendiente</button>
+          <?php endif; ?>
         </form>
       </div>
     </div>
-    <?php endif;?>
   </div>
 </div>
 

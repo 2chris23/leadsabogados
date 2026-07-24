@@ -135,12 +135,25 @@ document.addEventListener('DOMContentLoaded', function() {
     // Forms
     document.body.addEventListener('submit', function(e) {
         var form = e.target;
-        var btn  = document.activeElement;
+        var btn  = e.submitter || document.activeElement;
         var msg  = (btn && btn.dataset && btn.dataset.confirm) ? btn.dataset.confirm
                  : (form.dataset.confirm || null);
         if (!msg) return;
         e.preventDefault();
-        confirmAction(msg, function() { form.submit(); });
+        
+        var actionName = btn ? btn.name : null;
+        var actionValue = btn ? btn.value : null;
+
+        confirmAction(msg, function() { 
+            if (actionName) {
+                var hidden = document.createElement('input');
+                hidden.type = 'hidden';
+                hidden.name = actionName;
+                hidden.value = actionValue;
+                form.appendChild(hidden);
+            }
+            form.submit(); 
+        });
     }, true);
 
     // Links

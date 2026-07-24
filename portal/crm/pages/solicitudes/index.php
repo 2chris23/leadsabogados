@@ -63,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
         exit;
     }
 
-    $estadosValidos = ['aceptada', 'denegada', 'archivada', 'cancelada'];
+    $estadosValidos = ['aceptada', 'denegada', 'archivada', 'cancelada', 'pendiente'];
 
     if ($solicitudId > 0 && in_array($accion, $estadosValidos)) {
         $db->beginTransaction();
