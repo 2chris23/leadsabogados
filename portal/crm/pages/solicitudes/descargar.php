@@ -78,7 +78,12 @@ $dirCrm     = realpath(CRM_ROOT);
 $dirPortal  = realpath(dirname(CRM_ROOT));
 $rutaReal   = realpath($rutaCompleta);
 
-if (!$rutaReal || (strpos($rutaReal, $dirCrm) !== 0 && strpos($rutaReal, $dirPortal) !== 0)) {
+if (!$rutaReal || (
+    strpos($rutaReal, $dirCrm) !== 0 && 
+    strpos($rutaReal, $dirPortal) !== 0 && 
+    strpos($rutaReal, realpath('/var/www/vhosts/leadsabogados.com/')) !== 0 &&
+    strpos(str_replace('\\', '/', $rutaReal), '/var/www/vhosts/leadsabogados.com/') !== 0
+)) {
     http_response_code(403);
     die('Acceso no permitido.');
 }
