@@ -41,6 +41,8 @@ $candidatos = [
     CRM_ROOT . DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR . $rutaGuardada,
     // 4. Ruta absoluta si comienza por storage/
     CRM_ROOT . DIRECTORY_SEPARATOR . str_replace('storage' . DIRECTORY_SEPARATOR, '', $rutaGuardada),
+    // 5. Portal ROOT (archivos subidos desde el portal de clientes)
+    dirname(CRM_ROOT) . DIRECTORY_SEPARATOR . $rutaGuardada,
 ];
 
 $rutaCompleta = null;
@@ -61,9 +63,10 @@ if (!$rutaCompleta) {
 
 // Seguridad: confirmar que la ruta está dentro de los directorios permitidos
 $dirCrm     = realpath(CRM_ROOT);
+$dirPortal  = realpath(dirname(CRM_ROOT));
 $rutaReal   = realpath($rutaCompleta);
 
-if (!$rutaReal || strpos($rutaReal, $dirCrm) !== 0) {
+if (!$rutaReal || (strpos($rutaReal, $dirCrm) !== 0 && strpos($rutaReal, $dirPortal) !== 0)) {
     http_response_code(403);
     die('Acceso no permitido.');
 }
