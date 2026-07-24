@@ -8,13 +8,17 @@ RoleGuard::requireRole('admin');
 $db = Database::getInstance();
 
 // ── Crear tabla si no existe y poblar valores por defecto ──
-$db->query("CREATE TABLE IF NOT EXISTS role_permisos (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    rol ENUM('admin','abogado','gestor') NOT NULL,
-    permiso VARCHAR(100) NOT NULL,
-    activo TINYINT(1) NOT NULL DEFAULT 1,
-    UNIQUE KEY uk_rol_permiso (rol, permiso)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+try {
+    $db->query("CREATE TABLE IF NOT EXISTS role_permisos (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        rol ENUM('admin','abogado','gestor') NOT NULL,
+        permiso VARCHAR(100) NOT NULL,
+        activo TINYINT(1) NOT NULL DEFAULT 1,
+        UNIQUE KEY uk_rol_permiso (rol, permiso)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+} catch (\Throwable $e) {
+    error_log("Error al crear tabla role_permisos: " . $e->getMessage());
+}
 
 // Permisos disponibles agrupados por módulo
 $PERMISOS_DEFINIDOS = [
@@ -103,9 +107,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['guardar_permisos'])) 
 
 // Cargar permisos actuales
 $permisosActuales = [];
-$rows = $db->fetchAll("SELECT rol, permiso, activo FROM role_permisos");
-foreach ($rows as $row) {
-    $permisosActuales[$row['rol']][$row['permiso']] = (bool)$row['activo'];
+$setupError = '';
+try {
+    $rows = $db->fetchAll("SELECT rol, permiso, activo FROM role_permisos");
+    foreach ($rows as $row) {
+        $permisosActuales[$row['rol']][$row['permiso']] = (bool)$row['activo'];
+    }
+} catch (\Throwable $e) {
+    $setupError = "Error en base de datos: " . $e->getMessage();
 }
 
 $tituloPagina = 'Permisos de Roles';
@@ -229,6 +238,13 @@ include CRM_ROOT . '/templates/layout/header.php';
         Admin: acceso total garantizado
     </div>
 </div>
+
+<?php if ($setupError): ?>
+<div class="alert alert-danger d-flex align-items-center gap-2 mb-24 radius-12" role="alert">
+    <iconify-icon icon="solar:danger-triangle-outline"></iconify-icon>
+    <?php echo htmlspecialchars($setupError); ?>
+</div>
+<?php endif; ?>
 
 <?php
 $flash = getFlash();
