@@ -47,7 +47,16 @@ $docPortal = $db->fetchAll(
      WHERE s.portal_cuenta_id = ? AND s.estado = 'aceptada' 
      ORDER BY sa.created_at DESC", [$portalId]
 );
-$todosDocumentos = array_merge($documentos, $docPortal);
+$todosDocumentos = [];
+$nombresVistos = [];
+
+foreach (array_merge($documentos, $docPortal) as $doc) {
+    $n = $doc['nombre_original'] ?? $doc['nombre_archivo'] ?? '';
+    if (!empty($n) && !isset($nombresVistos[$n])) {
+        $nombresVistos[$n] = true;
+        $todosDocumentos[] = $doc;
+    }
+}
 
 // Historial
 $historial = $db->fetchAll(

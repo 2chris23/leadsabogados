@@ -105,33 +105,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
                 $abogadoActual = $db->fetchColumn("SELECT abogado_id FROM solicitudes WHERE id = ?", [$solicitudId]);
 
                 $referencia = 'CASO-' . date('Y') . '-' . str_pad($solicitudId, 5, '0', STR_PAD_LEFT);
-                $casoId = $db->insert('casos', [
-                    'cliente_id'     => $clienteId,
-                    'abogado_id'     => $abogadoActual ?: null,
-                    'titulo'         => $solicitud['tipo_problema'] . ' - ' . $solicitud['nombre'] . ' ' . $solicitud['apellidos'],
-                    'tipo_caso'      => $solicitud['tipo_problema'],
-                    'descripcion'    => $solicitud['descripcion'],
-                    'referencia'     => $referencia,
-                    'estado'         => 'en_estudio',
-                    'fecha_apertura' => date('Y-m-d')
-                ]);
-
-                // Copiar archivos del portal (solicitud_archivos) → documentos del caso
-                // Copiar archivos del portal → documentos del caso (si la tabla existe)
-                $tieneTablaArchivos = $db->fetchColumn("SHOW TABLES LIKE 'solicitud_archivos'");
-                if ($tieneTablaArchivos) {
-                    $archivosPortal = $db->fetchAll("SELECT * FROM solicitud_archivos WHERE solicitud_id = ?", [$solicitudId]);
-                    foreach ($archivosPortal as $arch) {
-                        $db->insert('documentos', [
-                            'caso_id'        => $casoId,
-                            'nombre_archivo' => $arch['nombre_archivo'],
-                            'nombre_original'=> $arch['nombre_original'],
-                            'ruta'           => '../portal/' . $arch['ruta'],
-                            'tipo_mime'      => $arch['tipo_mime'],
-                            'tamano_bytes'   => $arch['tamano_bytes'],
-                            'descripcion'    => 'Documento aportado por el cliente',
-                            'subido_por'     => null,
-                        ]);
+                
+                // Verificar si ya existe un caso asociado a esta solicitud (por ejemplo, si fue aceptada, luego denegada, y ahora re-aceptada)
+                $casoExistente = $db->fetchOne("SELECT id FROM casos WHERE referencia = ?", [$referencia]);
+                
+                if ($casoExistente) {
+                    $casoId = $casoExistente['id'];
+                    $db->update('casos', [
+                        'estado' => 'en_estudio',
+                        'cliente_id' => $clienteId,
+                        'abogado_id' => $abogadoActual ?: null
+                    ], 'id = ?', [$casoId]);
+                    $logMsg .= " (Caso reactivado)";
+                } else {
+                    $casoId = $db->insert('casos', [
+                        'cliente_id'     => $clienteId,
+                        'abogado_id'     => $abogadoActual ?: null,
+                        'titulo'         => $solicitud['tipo_problema'] . ' - ' . $solicitud['nombre'] . ' ' . $solicitud['apellidos'],
+                        'tipo_caso'      => $solicitud['tipo_problema'],
+                        'descripcion'    => $solicitud['descripcion'],
+                        'referencia'     => $referencia,
+                        'estado'         => 'en_estudio',
+                        'fecha_apertura' => date('Y-m-d')
+                    ]);
+    
+                    // Copiar archivos del portal (solicitud_archivos) → documentos del caso
+                    $tieneTablaArchivos = $db->fetchColumn("SHOW TABLES LIKE 'solicitud_archivos'");
+                    if ($tieneTablaArchivos) {
+                        $archivosPortal = $db->fetchAll("SELECT * FROM solicitud_archivos WHERE solicitud_id = ?", [$solicitudId]);
+                        foreach ($archivosPortal as $arch) {
+                            $db->insert('documentos', [
+                                'caso_id'        => $casoId,
+                                'nombre_archivo' => $arch['nombre_archivo'],
+                                'nombre_original'=> $arch['nombre_original'],
+                                'ruta'           => '../portal/' . $arch['ruta'],
+                                'tipo_mime'      => $arch['tipo_mime'],
+                                'tamano_bytes'   => $arch['tamano_bytes'],
+                                'descripcion'    => 'Documento aportado por el cliente',
+                                'subido_por'     => null,
+                            ]);
+                        }
                     }
                 }
 
