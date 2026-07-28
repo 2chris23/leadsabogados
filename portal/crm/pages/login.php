@@ -256,9 +256,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .login-options label input[type="checkbox"] {
             width: 16px;
             height: 16px;
-            border-radius: 4px;
-            border: 1.5px solid #e2e8f0;
             accent-color: #2e6edd;
+            cursor: pointer;
         }
 
         .login-options a {
