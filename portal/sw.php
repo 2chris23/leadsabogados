@@ -5,7 +5,7 @@ header('Service-Worker-Allowed: /');
 header('Cache-Control: no-cache');
 ?>
 // Service Worker — Portal del Cliente
-const CACHE_NAME = 'portal-cliente-v2';
+const CACHE_NAME = 'portal-cliente-v3';
 const OFFLINE_URL = 'offline.html';
 
 const PRECACHE_ASSETS = [
@@ -30,22 +30,19 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   const { request } = event;
+  
   if (request.method !== 'GET') return;
   if (new URL(request.url).origin !== location.origin) return;
 
+  // NETWORK-ONLY para navegación (PHP dinámico)
   if (request.mode === 'navigate') {
     event.respondWith(
-      fetch(request)
-        .then((res) => {
-          const clone = res.clone();
-          caches.open(CACHE_NAME).then((c) => c.put(request, clone));
-          return res;
-        })
-        .catch(() => caches.match(request).then((c) => c || caches.match(OFFLINE_URL)))
+      fetch(request).catch(() => caches.match(OFFLINE_URL))
     );
     return;
   }
 
+  // CACHE-FIRST para recursos estáticos
   if (request.url.match(/\.(css|js|png|jpg|svg|woff2?)$/)) {
     event.respondWith(
       caches.match(request).then((cached) => {

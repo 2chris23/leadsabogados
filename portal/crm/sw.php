@@ -5,7 +5,7 @@ header('Service-Worker-Allowed: /');
 header('Cache-Control: no-cache');
 ?>
 // Service Worker — CRM Abogados
-const CACHE_NAME = 'crm-abogados-v2';
+const CACHE_NAME = 'crm-abogados-v3';
 const OFFLINE_URL = 'offline.html';
 
 const PRECACHE_ASSETS = [
@@ -30,22 +30,19 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   const { request } = event;
+  
   if (request.method !== 'GET') return;
   if (new URL(request.url).origin !== location.origin) return;
 
+  // NETWORK-ONLY para navegación (PHP dinámico) para evitar sesiones rotas o datos desactualizados
   if (request.mode === 'navigate') {
     event.respondWith(
-      fetch(request)
-        .then((response) => {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-          return response;
-        })
-        .catch(() => caches.match(request).then((cached) => cached || caches.match(OFFLINE_URL)))
+      fetch(request).catch(() => caches.match(OFFLINE_URL))
     );
     return;
   }
 
+  // CACHE-FIRST para recursos estáticos (imágenes, CSS, JS)
   if (request.url.match(/\.(css|js|png|jpg|jpeg|gif|svg|webp|woff2?|ttf|eot)$/)) {
     event.respondWith(
       caches.match(request).then((cached) => {

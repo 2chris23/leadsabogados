@@ -21,10 +21,9 @@ function portalPwaScript() {
     return '
 <script>
 if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.getRegistrations().then(function(registrations) {
-        for(let registration of registrations) {
-            registration.unregister();
-        }
+    window.addEventListener("load", () => {
+        navigator.serviceWorker.register("' . $portalBase . '/sw.php")
+            .catch(err => console.error("SW Error:", err));
     });
 }
 </script>';

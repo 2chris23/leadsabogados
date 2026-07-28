@@ -23,7 +23,15 @@ $logoVersion = @filemtime(CRM_ROOT . '/assets/images/logo.png') ?: time();
     <meta name="apple-mobile-web-app-title" content="CRM Abogados">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="application-name" content="CRM Abogados">
-    <!-- manifest/PWA desactivado para evitar errores de Service Worker -->
+    <link rel="manifest" href="<?php echo APP_URL; ?>/manifest.php">
+    <script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('<?php echo APP_URL; ?>/sw.php')
+                .catch(err => console.error('SW Error:', err));
+        });
+    }
+    </script>
     <title><?php echo e($tituloPagina ?? 'Dashboard'); ?> — <?php echo e($nombreDespacho); ?></title>
     <link rel="icon" type="image/png" href="<?php echo APP_URL; ?>/assets/images/logo.png?v=<?php echo $logoVersion; ?>" sizes="16x16">
     
