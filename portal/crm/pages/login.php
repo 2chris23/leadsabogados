@@ -378,7 +378,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
 
             <div class="login-options">
-                <label><input type="checkbox" name="remember"> Recordarme</label>
+                <label><input type="checkbox" name="remember" value="1"> Recordarme</label>
                 <a href="<?php echo APP_URL; ?>/index.php?page=forgot-password">¿Olvidó su contraseña?</a>
             </div>
 

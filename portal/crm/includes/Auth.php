@@ -215,9 +215,7 @@ class Auth {
             $cookieValue = $usuario['id'] . ':' . $token;
             // Marcar sesión como restaurada por cookie → no aplica timeout de inactividad
             $_SESSION['via_remember'] = true;
-            $esHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
-                    || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
-            setcookie('crm_remember', $cookieValue, time() + (30 * 24 * 3600), '/', '', $esHttps, true);
+            setcookie('crm_remember', $cookieValue, time() + (30 * 24 * 3600), '/');
         } else {
             $_SESSION['via_remember'] = false;
         }
