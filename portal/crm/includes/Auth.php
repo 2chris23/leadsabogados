@@ -216,6 +216,8 @@ class Auth {
             // Marcar sesión como restaurada por cookie → no aplica timeout de inactividad
             $_SESSION['via_remember'] = true;
             setcookie('crm_remember', $cookieValue, time() + (30 * 24 * 3600), '/');
+            // También extender la cookie de sesión nativa de PHP
+            setcookie(session_name(), session_id(), time() + (30 * 24 * 3600), '/');
         } else {
             $_SESSION['via_remember'] = false;
         }
