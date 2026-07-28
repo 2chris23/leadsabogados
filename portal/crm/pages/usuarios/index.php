@@ -118,7 +118,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_portal_cuenta'
                 $casosIds = $db->fetchAll("SELECT id FROM casos WHERE cliente_id = ?", [$clienteId]);
                 foreach ($casosIds as $caso) {
                     $cid = $caso['id'];
-                    $db->query("DELETE FROM actuaciones WHERE caso_id = ?", [$cid]);
+
                     $db->query("DELETE FROM documentos WHERE caso_id = ?", [$cid]);
                     $db->query("DELETE FROM pagos_programados WHERE caso_id = ?", [$cid]);
                     $db->query("DELETE FROM pagos WHERE caso_id = ?", [$cid]);
