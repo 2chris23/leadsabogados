@@ -258,6 +258,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             height: 16px;
             accent-color: #2e6edd;
             cursor: pointer;
+            -webkit-appearance: auto;
+            appearance: auto;
         }
 
         .login-options a {
