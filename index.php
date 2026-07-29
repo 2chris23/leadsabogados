@@ -43,7 +43,7 @@ $csrfToken = $_SESSION['landing_csrf'];
 function esc($s) { return htmlspecialchars($s ?? '', ENT_QUOTES, 'UTF-8'); }
 
 $db = Database::getInstance();
-$crmUrl = APP_URL; // Usar el APP_URL definido en config.php (https://app.leadsabogados.com/portal/crm o similar)
+$crmUrl = APP_URL; // Usar el APP_URL definido en config.php (https://leadsabogados.com/portal/crm o similar)
 $logoUrl = '/portal/crm/assets/images/logo.png';
 $heroUrl = '/portal/crm/assets/images/hero-abogados.png';
 
@@ -622,7 +622,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
                     <button type="submit" class="cf-submit">Enviar Solicitud</button>
 
                     <p style="text-align:center;margin-top:16px;font-size:.8125rem;color:#94a3b8">
-                        ¿Ya tiene cuenta? <a href="https://app.leadsabogados.com/portal/index.php?page=login" style="color:var(--primary);font-weight:700">Inicie sesión aquí</a>
+                        ¿Ya tiene cuenta? <a href="https://leadsabogados.com/portal/index.php?page=login" style="color:var(--primary);font-weight:700">Inicie sesión aquí</a>
                     </p>
                 </form>
                 <?php endif; ?>
@@ -652,7 +652,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
     <div class="container">
         <h2>¿Ya es cliente del despacho?</h2>
         <p>Acceda a nuestro portal seguro para consultar el estado de su caso, revisar pagos y subir documentos.</p>
-        <a href="https://app.leadsabogados.com/portal/" class="cta-btn">Acceder al Portal del Cliente</a>
+        <a href="https://leadsabogados.com/portal/" class="cta-btn">Acceder al Portal del Cliente</a>
     </div>
 </section>
 
@@ -669,7 +669,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
         </div>
         <div>
             <h4>Acceso</h4>
-            <a href="https://app.leadsabogados.com/portal/">Portal del Cliente</a>
+            <a href="https://leadsabogados.com/portal/">Portal del Cliente</a>
             <a href="https://app.leadsabogados.com/">Panel de Gestión (CRM)</a>
         </div>
     </div>
