@@ -581,7 +581,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
                         </div>
                     </div>
 
-                    <div class="cf-section-title">Describa su situación legal</div>
+                    <div class="cf-section-title">ELIJA SU TIPO DE CONSULTA LEGAL</div>
 
                     <div class="cf-group">
                         <label>Tipo de Consulta <span class="req">*</span></label>
@@ -600,7 +600,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
                     </div>
 
                     <div class="cf-group">
-                        <label>Describa Su Caso <span class="req">*</span></label>
+                        <label>Describa su situación legal <span class="req">*</span></label>
                         <div class="cf-input-wrap">
                             <textarea name="descripcion" rows="5" placeholder="Explique con detalle su situación legal. Cuanta más información nos proporcione, mejor podremos ayudarle (mín. 20 caracteres)..." required minlength="20"><?php echo esc($formData['descripcion']); ?></textarea>
                         </div>
