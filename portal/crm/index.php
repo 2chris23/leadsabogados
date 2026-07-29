@@ -133,6 +133,7 @@ $rutas = [
     
     // Solicitudes
     'solicitudes'           => ['archivo' => 'pages/solicitudes/index.php',      'roles' => ['admin', 'abogado', 'gestor']],
+    'solicitudes/crear'     => ['archivo' => 'pages/solicitudes/crear.php',      'roles' => ['admin']],
     'solicitudes/ver'       => ['archivo' => 'pages/solicitudes/ver.php',        'roles' => ['admin', 'abogado', 'gestor']],
     'solicitudes/descargar' => ['archivo' => 'pages/solicitudes/descargar.php',  'roles' => ['admin', 'abogado', 'gestor']],
     
