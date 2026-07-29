@@ -44,8 +44,8 @@ function esc($s) { return htmlspecialchars($s ?? '', ENT_QUOTES, 'UTF-8'); }
 
 $db = Database::getInstance();
 $crmUrl = APP_URL; // Usar el APP_URL definido en config.php (https://app.leadsabogados.com/portal/crm o similar)
-$logoUrl = 'https://app.leadsabogados.com/portal/crm/assets/images/logo.png';
-$heroUrl = 'https://app.leadsabogados.com/portal/crm/assets/images/hero-abogados.png';
+$logoUrl = '/portal/crm/assets/images/logo.png';
+$heroUrl = '/portal/crm/assets/images/hero-abogados.png';
 
 // Migración: agregar columna password_plain y fecha_nacimiento si no existen
 try {
