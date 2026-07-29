@@ -666,12 +666,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
             <h4>Servicios</h4>
             <a href="#servicios">Derecho Civil</a>
             <a href="#servicios">Derecho Penal</a>
-        </div>
-        <div>
-            <h4>Acceso</h4>
-            <a href="https://leadsabogados.com/portal/">Portal del Cliente</a>
-            <a href="https://app.leadsabogados.com/">Panel de Gestión (CRM)</a>
-        </div>
     </div>
     <div class="footer-bottom">
         <p>&copy; <?php echo date('Y'); ?> CRM Abogados. Todos los derechos reservados.</p>
