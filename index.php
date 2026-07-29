@@ -599,6 +599,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
                         </div>
                     </div>
 
+                    <div class="cf-section-title">DESCRIBA SU SITUACIÓN LEGAL</div>
+
                     <div class="cf-group">
                         <label>Describa su situación legal <span class="req">*</span></label>
                         <div class="cf-input-wrap">
