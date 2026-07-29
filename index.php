@@ -585,17 +585,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
 
                     <div class="cf-group">
                         <label>Tipo de Consulta <span class="req">*</span></label>
-                        <div class="cf-radio-grid">
-                            <?php
-                            $tipos = ['Civil','Penal','Laboral','Mercantil','Inmobiliario','Familia','Extranjería','Administrativo','Otro'];
-                            foreach ($tipos as $t):
-                                $sel = (($formData['tipo_problema'] ?? '') === $t) ? 'checked' : '';
-                            ?>
-                            <div class="cf-radio-item">
-                                <input type="radio" name="tipo_problema" id="tipo_<?php echo strtolower($t); ?>" value="<?php echo $t; ?>" <?php echo $sel; ?> required>
-                                <label for="tipo_<?php echo strtolower($t); ?>"><?php echo $t; ?></label>
-                            </div>
-                            <?php endforeach; ?>
+                        <div class="cf-input-wrap">
+                            <input type="text" name="tipo_problema" placeholder="Ej: Civil, Penal, Laboral, Familiar..." value="<?php echo esc($formData['tipo_problema']); ?>" required>
                         </div>
                     </div>
 
