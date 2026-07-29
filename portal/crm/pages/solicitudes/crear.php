@@ -92,16 +92,7 @@ include CRM_ROOT . '/templates/layout/header.php';
                         </div>
                         <div class="col-sm-12">
                             <label class="form-label fw-semibold">Tipo de Consulta <span class="text-danger">*</span></label>
-                            <select name="tipo_problema" class="form-control radius-8" required>
-                                <option value="">Seleccione...</option>
-                                <?php
-                                $tipos = ['Civil','Penal','Laboral','Mercantil','Inmobiliario','Familia','Extranjería','Administrativo','Otro'];
-                                foreach ($tipos as $t):
-                                    $sel = (($_POST['tipo_problema'] ?? '') === $t) ? 'selected' : '';
-                                    echo "<option value=\"$t\" $sel>$t</option>";
-                                endforeach;
-                                ?>
-                            </select>
+                            <input type="text" name="tipo_problema" class="form-control radius-8" placeholder="Ej: Civil, Penal, Laboral, Familiar..." value="<?php echo e($_POST['tipo_problema'] ?? ''); ?>" required>
                         </div>
                         <div class="col-sm-12">
                             <label class="form-label fw-semibold">Descripción del Caso</label>
