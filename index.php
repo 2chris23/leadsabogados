@@ -512,7 +512,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
                 <div class="cf-success">
                     <div class="cf-success-icon">✓</div>
                     <h3>Solicitud Enviada</h3>
-                    <p>Su cuenta ha sido creada y su consulta ha sido registrada. Nuestro equipo la revisará en las próximas 24-48 horas.</p>
+                    <p>Su consulta ha sido registrada y nuestro equipo la revisará a la brevedad posible.</p>
                     <a href="https://leadsabogados.com/portal/">Acceder a Mi Portal</a>
                 </div>
                 <?php else: ?>
