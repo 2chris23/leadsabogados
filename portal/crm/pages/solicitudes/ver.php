@@ -76,6 +76,8 @@ foreach($abogados as $ab){ if($ab['id']==$abogadoSel){ $abogadoNom=$ab['nombre']
         <div class="sv-grid">
           <div class="sv-field"><label>Nombre completo</label><p><?php echo e($solicitud['nombre'].' '.$solicitud['apellidos']); ?></p></div>
           <div class="sv-field"><label>Fecha de Nacimiento</label><p><?php echo $solicitud['fecha_nacimiento'] ? date('d/m/Y', strtotime($solicitud['fecha_nacimiento'])) : 'No proporcionada'; ?></p></div>
+          <div class="sv-field"><label>DNI / NIF</label><p><?php echo e($solicitud['dni_nif'] ?? 'No proporcionado'); ?></p></div>
+          <div class="sv-field"><label>Dirección</label><p><?php echo e($solicitud['direccion'] ?? 'No proporcionada'); ?></p></div>
           <div class="sv-field"><label>Correo electrónico</label><p><?php echo e($solicitud['email']); ?></p></div>
           <div class="sv-field"><label>Teléfono</label><p><?php echo e($solicitud['telefono'] ?: 'No proporcionado'); ?></p></div>
           <div class="sv-field"><label>IP de origen</label><p style="font-family:monospace;font-size:.875rem"><?php echo e($solicitud['ip_solicitante'] ?: '—'); ?></p></div>
