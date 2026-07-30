@@ -6,7 +6,7 @@ $id  = (int)($_GET['id'] ?? 0);
 if (!$id) { header('Location: '.APP_URL.'/index.php?page=solicitudes'); exit; }
 
 $solicitud = $db->fetchOne(
-    "SELECT s.*, u.nombre as p_nom, u.apellidos as p_ape, pc.fecha_nacimiento
+    "SELECT s.*, u.nombre as p_nom, u.apellidos as p_ape, pc.fecha_nacimiento, pc.dni_nif, pc.direccion
      FROM solicitudes s 
      LEFT JOIN usuarios_internos u ON s.procesada_por=u.id 
      LEFT JOIN portal_cuentas pc ON s.portal_cuenta_id = pc.id
