@@ -233,10 +233,7 @@ class RoleGuard {
             $items[] = ['titulo'=>'Pagos', 'icono'=>'solar:wallet-money-outline', 'url'=>'pagos'];
         }
 
-        // Abogados — visible para abogado en su propio perfil
-        if ($rol === 'abogado') {
-            $items[] = ['titulo'=>'Abogados', 'icono'=>'solar:user-id-outline', 'url'=>'abogados'];
-        }
+
 
         return $items;
     }
