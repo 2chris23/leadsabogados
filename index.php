@@ -581,14 +581,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
                         </div>
                     </div>
 
-                    <div class="cf-section-title">ELIJA SU TIPO DE CONSULTA LEGAL</div>
 
-                    <div class="cf-group">
-                        <label>Tipo de Consulta <span class="req">*</span></label>
-                        <div class="cf-input-wrap">
-                            <input type="text" name="tipo_problema" placeholder="Ej: Civil, Penal, Laboral, Familiar..." value="<?php echo esc($formData['tipo_problema']); ?>" required>
-                        </div>
-                    </div>
 
                     <div class="cf-section-title">DESCRIBA SU SITUACIÓN LEGAL</div>
 
