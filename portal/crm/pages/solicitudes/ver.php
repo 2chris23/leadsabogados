@@ -380,8 +380,10 @@ $miAsignacion = reset($misAsignaciones);
             <div class="sv-body-premium">
                 <?php 
                 $usr = $auth->getUsuario();
-                $tipoPago = $db->fetchColumn("SELECT tipo_pago_predeterminado FROM usuarios_internos WHERE id = ?", [$usr['id']]);
+                $abogadoParams = $db->fetchOne("SELECT tipo_pago_predeterminado, tarifa_hitos_senal, tarifa_hitos_intermedio, tarifa_hitos_final FROM usuarios_internos WHERE id = ?", [$usr['id']]);
+                $tipoPago = $abogadoParams['tipo_pago_predeterminado'] ?? 'mensual';
                 $esMensual = ($tipoPago === 'mensual');
+                $esHitos = ($tipoPago === 'hitos');
                 $ha = (float)($solicitud['honorarios_abogado'] ?? 0);
                 $bo = (float)($solicitud['bonificacion'] ?? 0);
                 ?>
@@ -389,6 +391,14 @@ $miAsignacion = reset($misAsignaciones);
                     <?php if($esMensual): ?>
                         <div style="font-size:0.75rem;font-weight:700;color:#64748b;text-transform:uppercase;">Esquema de Pago</div>
                         <div style="font-size:0.95rem;font-weight:800;color:#0f172a;margin-bottom:8px;">Plan Mensual</div>
+                    <?php elseif($esHitos): ?>
+                        <div style="font-size:0.75rem;font-weight:800;color:#64748b;text-transform:uppercase;margin-bottom:8px;">Pago por Hitos</div>
+                        <div style="text-align:left;font-size:0.8rem;color:#334155;">
+                            <div style="display:flex;justify-content:space-between;margin-bottom:4px;border-bottom:1px dashed #cbd5e1;padding-bottom:4px;"><span>Señal (Anticipo):</span> <strong style="color:#0f172a;"><?php echo number_format((float)($abogadoParams['tarifa_hitos_senal'] ?? 0), 2); ?> €</strong></div>
+                            <div style="display:flex;justify-content:space-between;margin-bottom:4px;border-bottom:1px dashed #cbd5e1;padding-bottom:4px;"><span>Intermedio:</span> <strong style="color:#0f172a;"><?php echo number_format((float)($abogadoParams['tarifa_hitos_intermedio'] ?? 0), 2); ?> €</strong></div>
+                            <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><span>Final:</span> <strong style="color:#0f172a;"><?php echo number_format((float)($abogadoParams['tarifa_hitos_final'] ?? 0), 2); ?> €</strong></div>
+                        </div>
+                        <div style="font-size:0.7rem;color:#16a34a;font-weight:700;">Total Base: <?php echo number_format($ha, 2); ?> €</div>
                     <?php else: ?>
                         <div style="font-size:0.75rem;font-weight:700;color:#64748b;text-transform:uppercase;">Honorarios Base</div>
                         <div style="font-size:1.2rem;font-weight:800;color:#16a34a;margin-bottom:8px;"><?php echo number_format($ha, 2); ?> €</div>
