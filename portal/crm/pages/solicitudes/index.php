@@ -283,7 +283,7 @@ if ($filtroEstado && in_array($filtroEstado, ['pendiente', 'aceptada', 'denegada
 $joinAsignaciones = "";
 if ($auth->esAbogado()) {
     $abogadoId = $auth->getUsuario()['id'];
-    $joinAsignaciones = "JOIN solicitud_asignaciones sa ON sa.solicitud_id = s.id AND sa.abogado_id = " . (int)$abogadoId;
+    $joinAsignaciones = "JOIN solicitud_asignaciones sa ON sa.solicitud_id = s.id AND sa.abogado_id = " . (int)$abogadoId . " AND sa.estado = 'pendiente'";
 }
 
 $solicitudes = $db->fetchAll(
