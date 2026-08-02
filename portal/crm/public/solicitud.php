@@ -75,6 +75,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             AuditLog::registrar('nueva_solicitud', 'solicitudes', $solicitudId, "Solicitud de: $nombre $apellidos ($email)");
 
+            // Manejo de archivos adjuntos
+            if (!empty($_FILES['documentos']['name'][0])) {
+                $uploadDir = CRM_ROOT . '/uploads/solicitudes/' . $solicitudId . '/';
+                if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
+                
+                $permitidos = ['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx'];
+                $tiposMime = [
+                    'application/pdf', 'image/jpeg', 'image/png',
+                    'application/msword',
+                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                ];
+                
+                $totalFiles = count($_FILES['documentos']['name']);
+                for ($i = 0; $i < $totalFiles; $i++) {
+                    $tmpName = $_FILES['documentos']['tmp_name'][$i];
+                    $name = basename($_FILES['documentos']['name'][$i]);
+                    $size = $_FILES['documentos']['size'][$i];
+                    $error = $_FILES['documentos']['error'][$i];
+                    
+                    if ($error === UPLOAD_ERR_OK && $size > 0 && $size <= 10485760) { // 10MB
+                        $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+                        // Detección MIME real
+                        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+                        $mime = finfo_file($finfo, $tmpName);
+                        finfo_close($finfo);
+                        
+                        if (in_array($ext, $permitidos) && in_array($mime, $tiposMime)) {
+                            // Prevenir ejecución o nombres peligrosos
+                            $safeName = preg_replace('/[^a-zA-Z0-9.\-_]/', '_', $name);
+                            $uniqueName = uniqid() . '_' . $safeName;
+                            $dest = $uploadDir . $uniqueName;
+                            
+                            if (move_uploaded_file($tmpName, $dest)) {
+                                $db->insert('solicitud_archivos', [
+                                    'solicitud_id' => $solicitudId,
+                                    'nombre_original' => $name,
+                                    'nombre_archivo' => $uniqueName,
+                                    'ruta' => 'uploads/solicitudes/' . $solicitudId . '/' . $uniqueName,
+                                    'tipo' => $ext,
+                                    'tamano' => $size,
+                                    'subido_por_cliente' => 1
+                                ]);
+                            }
+                        }
+                    }
+                }
+            }
             // Notificación Telegram al despacho
             try {
                 require_once CRM_ROOT . '/includes/Telegram.php';
@@ -181,7 +228,7 @@ function getConfig($c, $d = '') {
                     <div class="alert alert-danger mb-16"><?php echo htmlspecialchars($error); ?></div>
                     <?php endif; ?>
 
-                    <form method="POST">
+                    <form method="POST" enctype="multipart/form-data">
                         <?php echo CSRF::campo(); ?>
                         <!-- Honeypot -->
                         <div style="display:none"><input type="text" name="website" tabindex="-1" autocomplete="off"></div>
@@ -244,6 +291,11 @@ function getConfig($c, $d = '') {
                             <div class="col-12">
                                 <label class="form-label">Descripción del Problema <span class="text-danger">*</span></label>
                                 <textarea name="descripcion" class="form-control radius-8" rows="5" placeholder="Describa brevemente su situación legal..." required><?php echo htmlspecialchars($_POST['descripcion'] ?? ''); ?></textarea>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Adjuntar Documentos (Opcional)</label>
+                                <input type="file" name="documentos[]" class="form-control radius-8" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" style="padding:10px;">
+                                <small class="text-secondary-light" style="font-size:0.78rem">Formatos permitidos: PDF, JPG, PNG, DOCX (Máx. 10MB por archivo)</small>
                             </div>
                         </div>
 

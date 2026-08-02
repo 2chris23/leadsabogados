@@ -44,6 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['actualizar_tarifas_gl
     $monto_final = (float)($_POST['monto_final'] ?? 0);
 
     $totalHitos = $monto_senal + $monto_intermedio + $monto_final;
+    $tarifa_es_variable = isset($_POST['tarifa_es_variable']) ? 1 : 0;
 
     $db->query("UPDATE usuarios_internos SET 
                 tipo_pago_predeterminado = ?, 
@@ -53,14 +54,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['actualizar_tarifas_gl
                 tarifa_exito_default = ?,
                 tarifa_hitos_senal = ?,
                 tarifa_hitos_intermedio = ?,
-                tarifa_hitos_final = ?
+                tarifa_hitos_final = ?,
+                tarifa_es_variable = ?
                 WHERE id = ?", 
                 [$tipo, ($tipo == 'mensual' ? $monto : 0), $dia, 
                  ($tipo == 'hitos' ? $totalHitos : 0),
                  ($tipo == 'exito' ? $monto : 0),
                  ($tipo == 'hitos' ? $monto_senal : 0),
                  ($tipo == 'hitos' ? $monto_intermedio : 0),
-                 ($tipo == 'hitos' ? $monto_final : 0), $id]);
+                 ($tipo == 'hitos' ? $monto_final : 0), 
+                 $tarifa_es_variable, $id]);
     
     header("Location: index.php?page=abogados/ver&id=" . $id);
     exit;
@@ -163,7 +166,20 @@ include CRM_ROOT . '/templates/layout/header.php';
                                             </div>
                                         </div>
 
-                                        <div id="fieldsArea" class="bg-neutral-50 p-16 radius-12 mb-20 border border-dashed"></div>
+                                        <div class="d-flex align-items-center justify-content-between p-12 radius-12 border bg-white mb-20">
+                                            <div>
+                                                <span class="d-block text-sm fw-bold">Cobro Variable</span>
+                                                <span class="text-xs text-secondary-light">El precio se convendrá en cada solicitud (sin mínimo).</span>
+                                            </div>
+                                            <div class="form-check form-switch" style="margin:0;">
+                                                <input class="form-check-input" type="checkbox" name="tarifa_es_variable" id="tarifaEsVariable" value="1" <?php echo !empty($abogado['tarifa_es_variable']) ? 'checked' : ''; ?> onchange="toggleFieldsArea()">
+                                            </div>
+                                        </div>
+
+                                        <div id="fieldsAreaWrapper">
+                                            <div id="fieldsArea" class="bg-neutral-50 p-16 radius-12 mb-20 border border-dashed"></div>
+                                        </div>
+                                        
                                         <button type="submit" class="btn btn-primary w-100 radius-12 fw-bold py-12">Guardar Cambios</button>
                                     </form>
                                 </div>
@@ -173,7 +189,10 @@ include CRM_ROOT . '/templates/layout/header.php';
                         <div class="bg-neutral-50 p-16 radius-12 border">
                             <?php $t = $abogado['tipo_pago_predeterminado'] ?? 'mensual'; ?>
                             <span class="badge bg-white text-secondary-light border px-12 py-4 radius-pill mb-8" style="font-size: 10px;"><?php echo strtoupper($t); ?></span>
-                            <?php if ($t === 'hitos'): ?>
+                            <?php if (!empty($abogado['tarifa_es_variable'])): ?>
+                                <h6 class="text-lg fw-bold text-primary-600 mb-0">Variable</h6>
+                                <p class="text-xs text-secondary-light mt-4 mb-0">A convenir en cada solicitud</p>
+                            <?php elseif ($t === 'hitos'): ?>
                                 <h6 class="text-lg fw-bold mb-0">€<?php echo number_format($abogado['tarifa_fija_default'], 0, ',', '.'); ?></h6>
                                 <div class="text-xs text-secondary-light mt-8">
                                     <div class="d-flex justify-content-between mb-4 border-bottom pb-4"><span>Señal:</span> <strong class="text-dark">€<?php echo number_format((float)($abogado['tarifa_hitos_senal'] ?? 0), 0, ',', '.'); ?></strong></div>
@@ -338,14 +357,30 @@ function setAcuerdo(tipo, el) {
     document.getElementById('inputTipoAcuerdo').value = tipo;
     document.querySelectorAll('.acuerdo-opt').forEach(o => o.classList.remove('active'));
     el.classList.add('active');
+    renderFieldsArea(tipo);
+}
+
+function toggleFieldsArea() {
+    const isVariable = document.getElementById('tarifaEsVariable').checked;
+    const wrapper = document.getElementById('fieldsAreaWrapper');
+    if (isVariable) {
+        wrapper.style.display = 'none';
+    } else {
+        wrapper.style.display = 'block';
+    }
+}
+
+function renderFieldsArea(tipo) {
     const area = document.getElementById('fieldsArea');
     if(tipo == 'mensual') area.innerHTML = `<div class="row gx-8"><div class="col-6"><label class="text-xs fw-bold mb-4 d-block">DÍA</label><input type="number" name="dia_pago_mensual" class="form-control form-control-sm" value="<?php echo $abogado['dia_pago_mensual'] ?: 20; ?>"></div><div class="col-6"><label class="text-xs fw-bold mb-4 d-block">CUOTA (€)</label><input type="number" name="monto_principal" class="form-control form-control-sm" value="<?php echo $abogado['tarifa_mensual_default'] ?: 200; ?>"></div></div>`;
     else if(tipo == 'hitos') area.innerHTML = `<div class="d-flex flex-column gap-8"><input type="number" name="monto_senal" class="form-control form-control-sm" placeholder="Señal €" value="<?php echo $abogado['tarifa_hitos_senal'] ?? ''; ?>"><input type="number" name="monto_intermedio" class="form-control form-control-sm" placeholder="Intermedio €" value="<?php echo $abogado['tarifa_hitos_intermedio'] ?? ''; ?>"><input type="number" name="monto_final" class="form-control form-control-sm" placeholder="Final €" value="<?php echo $abogado['tarifa_hitos_final'] ?? ''; ?>"></div>`;
     else area.innerHTML = `<label class="text-xs fw-bold mb-4 d-block">ÉXITO (€)</label><input type="number" name="monto_principal" class="form-control form-control-sm" value="<?php echo $abogado['tarifa_exito_default'] ?: 500; ?>">`;
 }
+
 document.addEventListener('DOMContentLoaded', () => {
     const t = "<?php echo $abogado['tipo_pago_predeterminado'] ?: 'mensual'; ?>";
     setAcuerdo(t, document.querySelector(`.acuerdo-opt[onclick*="${t}"]`));
+    toggleFieldsArea();
 });
 </script>
 

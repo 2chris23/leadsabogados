@@ -28,7 +28,7 @@ $estadoLabel = ['pendiente'=>'Pendiente','aceptada'=>'Aceptada','denegada'=>'Den
 
 $extColors = ['PDF'=>['#fef2f2','#dc2626'],'DOC'=>['#e8f0fe','#2e6edd'],'DOCX'=>['#e8f0fe','#2e6edd'],'XLS'=>['#ecfdf5','#059669'],'XLSX'=>['#ecfdf5','#059669'],'JPG'=>['#fff7ed','#ea580c'],'PNG'=>['#fff7ed','#ea580c'],'ZIP'=>['#f5f3ff','#7c3aed'],'RAR'=>['#f5f3ff','#7c3aed']];
 
-$abogados = $auth->esAdmin() ? $db->fetchAll("SELECT id,nombre,apellidos FROM usuarios_internos WHERE rol='abogado' AND activo=1 ORDER BY nombre") : [];
+$abogados = $auth->esAdmin() ? $db->fetchAll("SELECT id, nombre, apellidos, tipo_pago_predeterminado, tarifa_es_variable, tarifa_fija_default, tarifa_exito_default FROM usuarios_internos WHERE rol='abogado' AND activo=1 ORDER BY nombre") : [];
 $asignaciones = $db->fetchAll("
     SELECT sa.*, u.nombre, u.apellidos
     FROM solicitud_asignaciones sa
@@ -218,14 +218,14 @@ $miAsignacion = reset($misAsignaciones);
                           <div style="display:flex;gap:6px;margin-bottom:6px;">
                               <div style="flex:1;">
                                   <label style="font-size:0.6rem;color:#64748b;">%</label>
-                                  <input type="number" step="0.1" name="honorarios_pct" id="honPct" class="sv-input-compact" style="padding:4px;text-align:center;font-size:0.8rem;" value="0" oninput="calcHon()">
+                                  <input type="number" step="0.1" name="honorarios_pct" id="honPct" class="sv-input-compact" style="padding:4px;text-align:center;font-size:0.8rem;" value="0" oninput="calcHon(); checkAbogadoMargins();">
                               </div>
                               <div style="flex:1.5;">
                                   <label style="font-size:0.6rem;color:#64748b;">€</label>
-                                  <input type="number" step="0.01" name="honorarios_abogado" id="honEur" class="sv-input-compact" style="padding:4px;text-align:right;font-size:0.8rem;" value="0" oninput="calcHonEur()" required>
+                                  <input type="number" step="0.01" name="honorarios_abogado" id="honEur" class="sv-input-compact" style="padding:4px;text-align:right;font-size:0.8rem;" value="0" oninput="calcHonEur(); checkAbogadoMargins();" required>
                               </div>
                           </div>
-                          <input type="range" class="sv-slider-compact" id="honSlider" min="0" max="100" step="1" value="0" oninput="syncHonSlider()">
+                          <input type="range" class="sv-slider-compact" id="honSlider" min="0" max="100" step="1" value="0" oninput="syncHonSlider(); checkAbogadoMargins();">
                       </div>
                       
                       <div style="flex:1;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:10px;">
@@ -266,15 +266,28 @@ $miAsignacion = reset($misAsignaciones);
                               <button type="button" onclick="document.querySelectorAll('.abogado-chk').forEach(c => c.checked = false)" style="background:none; border:none; color:#ef4444; font-size:0.7rem; font-weight:700; cursor:pointer; padding:0;">Desmarcar Todos</button>
                           </div>
                       </div>
-                      <div style="max-height:140px;overflow-y:auto;border:1px solid #cbd5e1;border-radius:6px;padding:6px;background:#f8fafc;">
-                        <?php foreach($abogados as $ab): ?>
+                      <div style="max-height:140px;overflow-y:auto;border:1px solid #cbd5e1;border-radius:6px;padding:6px;background:#f8fafc;" id="abogadosListContainer">
+                        <?php foreach($abogados as $ab): 
+                            $esVar = !empty($ab['tarifa_es_variable']);
+                            $tipo = $ab['tipo_pago_predeterminado'] ?: 'mensual';
+                            $precio = 0;
+                            if ($tipo === 'hitos') $precio = $ab['tarifa_fija_default'];
+                            elseif ($tipo === 'exito') $precio = $ab['tarifa_exito_default'];
+                            
+                            $labelInfo = ucfirst($tipo);
+                            if ($esVar) $labelInfo .= ' (Var)';
+                            else if ($tipo !== 'mensual') $labelInfo .= ' (' . $precio . '€)';
+                        ?>
                         <label class="sv-chk" style="padding:4px 8px;margin-bottom:2px;display:flex;align-items:center;gap:8px;cursor:pointer;">
-                          <input type="checkbox" name="abogados[]" value="<?php echo $ab['id']; ?>" class="abogado-chk" style="margin:0;">
+                          <input type="checkbox" name="abogados[]" value="<?php echo $ab['id']; ?>" class="abogado-chk" style="margin:0;" 
+                                 data-tipo="<?php echo $tipo; ?>" data-var="<?php echo $esVar ? '1' : '0'; ?>" data-precio="<?php echo $precio; ?>" onchange="checkAbogadoMargins()">
                           <span class="sv-chk-box"></span>
-                          <span class="sv-chk-text" style="font-size:0.8rem;color:#334155;font-weight:600;"><?php echo e($ab['nombre'] . ' ' . $ab['apellidos']); ?></span>
+                          <span class="sv-chk-text" style="font-size:0.8rem;color:#334155;font-weight:600;flex:1;"><?php echo e($ab['nombre'] . ' ' . $ab['apellidos']); ?></span>
+                          <span style="font-size:0.65rem;background:#e2e8f0;color:#475569;padding:2px 6px;border-radius:4px;font-weight:700;"><?php echo $labelInfo; ?></span>
                         </label>
                         <?php endforeach; ?>
                       </div>
+                      <div id="abogadoWarnings" style="margin-top:8px;"></div>
                   </div>
 
                   <button type="submit" class="sv-btn-save" style="width:100%;padding:10px;border-radius:6px;border:none;font-size:0.85rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;background:#3b82f6;color:#fff;transition:0.2s;" onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">
@@ -303,6 +316,42 @@ $miAsignacion = reset($misAsignaciones);
                         document.getElementById('honSlider').value = Math.min(100, Math.max(0, pctHon));
                         document.getElementById('bonoSlider').value = Math.min(100, Math.max(0, pctBono));
                     }
+                    
+                    function checkAbogadoMargins() {
+                        const honEur = parseFloat(document.getElementById('honEur').value) || 0;
+                        const checkboxes = document.querySelectorAll('.abogado-chk:checked');
+                        const warningsDiv = document.getElementById('abogadoWarnings');
+                        const saveBtn = document.querySelector('.sv-btn-save');
+                        
+                        warningsDiv.innerHTML = '';
+                        let hasBlockingError = false;
+
+                        checkboxes.forEach(chk => {
+                            const esVar = chk.getAttribute('data-var') === '1';
+                            const precio = parseFloat(chk.getAttribute('data-precio')) || 0;
+                            const nombre = chk.nextElementSibling.nextElementSibling.innerText.split('(')[0].trim();
+
+                            if (!esVar && precio > 0) {
+                                if (honEur < precio) {
+                                    hasBlockingError = true;
+                                    warningsDiv.innerHTML += `<div style="padding:8px;background:#fef2f2;border:1px solid #fecaca;border-radius:6px;color:#dc2626;font-size:0.75rem;margin-bottom:4px;"><b>⚠️ Bloqueado:</b> ${nombre} cobra un mínimo de ${precio}€. La oferta actual es inferior.</div>`;
+                                } else if (honEur > precio) {
+                                    const diff = (honEur - precio).toFixed(2);
+                                    warningsDiv.innerHTML += `<div style="padding:8px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;color:#16a34a;font-size:0.75rem;margin-bottom:4px;"><b>✓ Margen positivo:</b> ${nombre} cobra ${precio}€ de forma predeterminada (+${diff}€ de margen para el despacho).</div>`;
+                                }
+                            }
+                        });
+
+                        saveBtn.disabled = hasBlockingError;
+                        if (hasBlockingError) {
+                            saveBtn.style.opacity = '0.5';
+                            saveBtn.style.cursor = 'not-allowed';
+                        } else {
+                            saveBtn.style.opacity = '1';
+                            saveBtn.style.cursor = 'pointer';
+                        }
+                    }
+                    
                     function syncHonSlider() { document.getElementById('honPct').value = document.getElementById('honSlider').value; calcHon(); }
                     function syncBonoSlider() { document.getElementById('bonoPct').value = document.getElementById('bonoSlider').value; calcBono(); }
                     function calcHon() { let pct = parseFloat(document.getElementById('honPct').value) || 0; let val = parseFloat(document.getElementById('valCliente').value) || 0; document.getElementById('honEur').value = (val * (pct / 100)).toFixed(2); updateVaso(); }
