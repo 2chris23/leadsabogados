@@ -172,7 +172,7 @@ include CRM_ROOT . '/templates/layout/header.php';
                         </div>
                     </div>
                     
-                    <div class="mt-24 d-grid"><a href="index.php?page=usuarios/editar&id=<?php echo $id; ?>" class="btn btn-primary radius-12 fw-bold py-12">Editar Perfil</a></div>
+                    <div class="mt-24 d-grid"><a href="index.php?page=abogados/editar&id=<?php echo $id; ?>" class="btn btn-primary radius-12 fw-bold py-12">Editar Perfil</a></div>
                 </div>
             </div>
         </div>

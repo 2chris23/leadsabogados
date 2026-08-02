@@ -1,14 +1,12 @@
 <?php
-$pdo = new PDO('mysql:host=127.0.0.1;dbname=crm;charset=utf8mb4', 'root', '');
-$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
+define('CRM_ROOT', __DIR__ . '/portal/crm');
+require 'portal/crm/includes/config.php';
+require 'portal/crm/includes/Database.php';
 try {
-    $stmt = $pdo->query("SELECT s.*, u.nombre as procesada_nombre, u.apellidos as procesada_apellidos,
-     (SELECT GROUP_CONCAT(CONCAT(ui.nombre, ' ', ui.apellidos) SEPARATOR ', ') FROM solicitud_asignaciones as2 JOIN usuarios_internos ui ON as2.abogado_id = ui.id WHERE as2.solicitud_id = s.id) as abogados_asignados
-     FROM solicitudes s
-     LEFT JOIN usuarios_internos u ON s.procesada_por = u.id
-     ORDER BY s.created_at DESC");
-    echo "OK: " . $stmt->rowCount();
-} catch (Exception $e) {
-    echo "ERROR: " . $e->getMessage();
+    $db = Database::getInstance();
+    $stmt = $db->getConnection()->query("SHOW COLUMNS FROM usuarios_internos");
+    $cols = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    print_r($cols);
+} catch (Throwable $e) {
+    echo $e->getMessage();
 }
