@@ -70,7 +70,7 @@ $beneficioEstimado = $totalHonorariosClientes - $totalHonorariosAbogado;
 
 $casos = $db->fetchAll("SELECT c.*, cl.nombre as cliente_nombre, cl.apellidos as cliente_apellidos, (SELECT SUM(cantidad) FROM pagos WHERE caso_id = c.id AND (tipo_pago IS NULL OR tipo_pago != 'pago_abogado')) as cobrado FROM casos c JOIN clientes cl ON c.cliente_id = cl.id WHERE c.abogado_id = ? ORDER BY c.created_at DESC", [$id]);
 $pagos = $db->fetchAll("SELECT p.*, c.titulo as caso_titulo, cl.nombre as cliente_nombre FROM pagos p JOIN casos c ON p.caso_id = c.id JOIN clientes cl ON c.cliente_id = cl.id WHERE c.abogado_id = ? ORDER BY p.fecha_pago DESC LIMIT 10", [$id]);
-$solicitudes = $db->fetchAll("SELECT * FROM solicitudes WHERE abogado_id = ? AND estado IN ('pendiente', 'aceptada', 'denegada') ORDER BY created_at DESC", [$id]);
+$solicitudes = $db->fetchAll("SELECT s.*, sa.estado as estado FROM solicitudes s JOIN solicitudes_asignaciones sa ON s.id = sa.solicitud_id WHERE sa.abogado_id = ? AND sa.estado IN ('pendiente', 'aceptada', 'denegada') ORDER BY sa.created_at DESC", [$id]);
 
 // Estadísticas por estado
 $estadisticaRows = $db->fetchAll("SELECT estado, COUNT(*) as total FROM casos WHERE abogado_id = ? GROUP BY estado", [$id]);
