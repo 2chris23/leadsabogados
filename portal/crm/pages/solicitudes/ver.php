@@ -210,6 +210,7 @@ $miAsignacion = reset($misAsignaciones);
           <input type="hidden" name="accion" value="asignar_multi">
           
           <span class="sv-label">Valor que pagará el cliente (€)</span>
+          <input type="number" step="0.01" name="valor_cliente" id="valCliente" class="sv-input" style="width:100%;margin-bottom:14px;padding:10px;border-radius:8px;border:1px solid #e2e8f0;" required placeholder="Ej: 1000.00" oninput="calcAll()">
           <div style="display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap">
               <div style="flex:1;min-width:200px;">
                   <span class="sv-label">Honorarios Base del Abogado</span>
