@@ -259,11 +259,18 @@ $miAsignacion = reset($misAsignaciones);
                   </div>
                   
                   <div class="sv-data-group" style="margin-bottom:12px;">
-                      <label>Abogados a Asignar</label>
+                      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                          <label style="margin:0;">Abogados a Asignar</label>
+                          <div style="display:flex; gap:8px;">
+                              <button type="button" onclick="document.querySelectorAll('.abogado-chk').forEach(c => c.checked = true)" style="background:none; border:none; color:#10b981; font-size:0.7rem; font-weight:700; cursor:pointer; padding:0;">Marcar Todos</button>
+                              <button type="button" onclick="document.querySelectorAll('.abogado-chk').forEach(c => c.checked = false)" style="background:none; border:none; color:#ef4444; font-size:0.7rem; font-weight:700; cursor:pointer; padding:0;">Desmarcar Todos</button>
+                          </div>
+                      </div>
                       <div style="max-height:140px;overflow-y:auto;border:1px solid #cbd5e1;border-radius:6px;padding:6px;background:#f8fafc;">
                         <?php foreach($abogados as $ab): ?>
                         <label class="sv-chk" style="padding:4px 8px;margin-bottom:2px;display:flex;align-items:center;gap:8px;cursor:pointer;">
-                          <input type="checkbox" name="abogados[]" value="<?php echo $ab['id']; ?>" style="margin:0;">
+                          <input type="checkbox" name="abogados[]" value="<?php echo $ab['id']; ?>" class="abogado-chk" style="margin:0;">
+                          <span class="sv-chk-box"></span>
                           <span class="sv-chk-text" style="font-size:0.8rem;color:#334155;font-weight:600;"><?php echo e($ab['nombre'] . ' ' . $ab['apellidos']); ?></span>
                         </label>
                         <?php endforeach; ?>
