@@ -362,7 +362,7 @@ $miAsignacion = reset($misAsignaciones);
                     <?php echo CSRF::campo();?>
                     <input type="hidden" name="solicitud_id" value="<?php echo $id;?>">
                     <input type="hidden" name="accion" value="cancelar_asignacion">
-                    <button type="button" class="sv-btn-no" style="width:100%;padding:10px;border-radius:8px;border:none;background:#ef4444;color:#fff;font-size:0.9rem;font-weight:700;cursor:pointer;" onclick="if(confirm('¿Cancelar todas las asignaciones y volver a Pendiente?')) document.getElementById('formCancelarAsig').submit();">
+                    <button type="submit" name="accion_btn" value="cancelar" class="sv-btn-no" style="width:100%;padding:10px;border-radius:8px;border:none;background:#ef4444;color:#fff;font-size:0.9rem;font-weight:700;cursor:pointer;" data-confirm="¿Cancelar todas las asignaciones y volver a Pendiente?">
                         Cancelar Asignaciones
                     </button>
                   </form>
