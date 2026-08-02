@@ -398,7 +398,6 @@ $miAsignacion = reset($misAsignaciones);
                             <div style="display:flex;justify-content:space-between;margin-bottom:4px;border-bottom:1px dashed #cbd5e1;padding-bottom:4px;"><span>Intermedio:</span> <strong style="color:#0f172a;"><?php echo number_format((float)($abogadoParams['tarifa_hitos_intermedio'] ?? 0), 2); ?> €</strong></div>
                             <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><span>Final:</span> <strong style="color:#0f172a;"><?php echo number_format((float)($abogadoParams['tarifa_hitos_final'] ?? 0), 2); ?> €</strong></div>
                         </div>
-                        <div style="font-size:0.7rem;color:#16a34a;font-weight:700;">Total Base: <?php echo number_format($ha, 2); ?> €</div>
                     <?php else: ?>
                         <div style="font-size:0.75rem;font-weight:700;color:#64748b;text-transform:uppercase;">Honorarios Base</div>
                         <div style="font-size:1.2rem;font-weight:800;color:#16a34a;margin-bottom:8px;"><?php echo number_format($ha, 2); ?> €</div>
