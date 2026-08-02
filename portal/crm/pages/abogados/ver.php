@@ -39,22 +39,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['actualizar_tarifas_gl
     $tipo = $_POST['tipo_pago_predeterminado'];
     $monto = (float)($_POST['monto_principal'] ?? 0);
     $dia = (int)($_POST['dia_pago_mensual'] ?? 0);
-    $monto_señal = (float)($_POST['monto_señal'] ?? 0);
+    $monto_senal = (float)($_POST['monto_senal'] ?? 0);
     $monto_intermedio = (float)($_POST['monto_intermedio'] ?? 0);
     $monto_final = (float)($_POST['monto_final'] ?? 0);
 
-    $totalHitos = $monto_señal + $monto_intermedio + $monto_final;
+    $totalHitos = $monto_senal + $monto_intermedio + $monto_final;
 
     $db->query("UPDATE usuarios_internos SET 
                 tipo_pago_predeterminado = ?, 
                 tarifa_mensual_default = ?, 
                 dia_pago_mensual = ?,
                 tarifa_fija_default = ?,
-                tarifa_exito_default = ?
+                tarifa_exito_default = ?,
+                tarifa_hitos_senal = ?,
+                tarifa_hitos_intermedio = ?,
+                tarifa_hitos_final = ?
                 WHERE id = ?", 
                 [$tipo, ($tipo == 'mensual' ? $monto : 0), $dia, 
                  ($tipo == 'hitos' ? $totalHitos : 0),
-                 ($tipo == 'exito' ? $monto : 0), $id]);
+                 ($tipo == 'exito' ? $monto : 0),
+                 ($tipo == 'hitos' ? $monto_senal : 0),
+                 ($tipo == 'hitos' ? $monto_intermedio : 0),
+                 ($tipo == 'hitos' ? $monto_final : 0), $id]);
     
     header("Location: index.php?page=abogados/ver&id=" . $id);
     exit;
@@ -167,8 +173,17 @@ include CRM_ROOT . '/templates/layout/header.php';
                         <div class="bg-neutral-50 p-16 radius-12 border">
                             <?php $t = $abogado['tipo_pago_predeterminado'] ?? 'mensual'; ?>
                             <span class="badge bg-white text-secondary-light border px-12 py-4 radius-pill mb-8" style="font-size: 10px;"><?php echo strtoupper($t); ?></span>
-                            <h6 class="text-lg fw-bold mb-0">€<?php echo number_format($abogado['tarifa_mensual_default'] ?: ($abogado['tarifa_fija_default'] ?: $abogado['tarifa_exito_default']), 0, ',', '.'); ?></h6>
-                            <p class="text-xs text-secondary-light mt-4 mb-0"><?php echo $t == 'mensual' ? "Cobro el día {$abogado['dia_pago_mensual']}" : "Acuerdo activo"; ?></p>
+                            <?php if ($t === 'hitos'): ?>
+                                <h6 class="text-lg fw-bold mb-0">€<?php echo number_format($abogado['tarifa_fija_default'], 0, ',', '.'); ?></h6>
+                                <div class="text-xs text-secondary-light mt-8">
+                                    <div class="d-flex justify-content-between mb-4 border-bottom pb-4"><span>Señal:</span> <strong class="text-dark">€<?php echo number_format((float)($abogado['tarifa_hitos_senal'] ?? 0), 0, ',', '.'); ?></strong></div>
+                                    <div class="d-flex justify-content-between mb-4 border-bottom pb-4"><span>Intermedio:</span> <strong class="text-dark">€<?php echo number_format((float)($abogado['tarifa_hitos_intermedio'] ?? 0), 0, ',', '.'); ?></strong></div>
+                                    <div class="d-flex justify-content-between"><span>Final:</span> <strong class="text-dark">€<?php echo number_format((float)($abogado['tarifa_hitos_final'] ?? 0), 0, ',', '.'); ?></strong></div>
+                                </div>
+                            <?php else: ?>
+                                <h6 class="text-lg fw-bold mb-0">€<?php echo number_format($abogado['tarifa_mensual_default'] ?: ($abogado['tarifa_fija_default'] ?: $abogado['tarifa_exito_default']), 0, ',', '.'); ?></h6>
+                                <p class="text-xs text-secondary-light mt-4 mb-0"><?php echo $t == 'mensual' ? "Cobro el día {$abogado['dia_pago_mensual']}" : "Acuerdo activo"; ?></p>
+                            <?php endif; ?>
                         </div>
                     </div>
                     
