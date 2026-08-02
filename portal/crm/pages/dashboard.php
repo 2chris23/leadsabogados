@@ -22,7 +22,7 @@ if ($esAbogado) {
         "SELECT COUNT(*) FROM casos WHERE abogado_id = ?", [$abogadoId]
     );
     $solicitudesAsignadas = (int)$db->fetchColumn(
-        "SELECT COUNT(*) FROM solicitudes_asignaciones WHERE abogado_id = ? AND estado IN ('pendiente', 'aceptada')", [$abogadoId]
+        "SELECT COUNT(*) FROM solicitud_asignaciones WHERE abogado_id = ? AND estado IN ('pendiente', 'aceptada')", [$abogadoId]
     );
 
     // Últimos casos del abogado
@@ -34,7 +34,7 @@ if ($esAbogado) {
 
     // Solicitudes asignadas para revisar
     $solicitudesParaRevisar = $db->fetchAll(
-        "SELECT s.*, sa.estado as estado_asignacion FROM solicitudes s JOIN solicitudes_asignaciones sa ON s.id = sa.solicitud_id WHERE sa.abogado_id = ? ORDER BY sa.created_at DESC LIMIT 5", [$abogadoId]
+        "SELECT s.*, sa.estado as estado_asignacion FROM solicitudes s JOIN solicitud_asignaciones sa ON s.id = sa.solicitud_id WHERE sa.abogado_id = ? ORDER BY sa.created_at DESC LIMIT 5", [$abogadoId]
     );
 
     $totalSolicitudesMes = 0; $totalCobradoMes = 0; $saldoPendiente = 0; $solicitudesPendientes = 0;
