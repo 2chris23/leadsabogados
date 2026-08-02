@@ -43,60 +43,62 @@ $miAsignacion = reset($misAsignaciones);
 <!-- TOP BAR: Title + Actions -->
 <div class="sv-topbar">
   <div class="sv-topbar-left">
-    <h5 style="font-size:1.4rem;font-weight:800;color:#1a1a2e;margin:0;">Solicitud <span style="color:#2e6edd">#<?php echo $id; ?></span></h5>
-    <p style="font-size:0.85rem;color:#64748b;margin:2px 0 0;">Recibida el <?php echo date('d/m/Y \a\l H:i', strtotime($solicitud['created_at'])); ?></p>
+    <div style="font-size:1.25rem;font-weight:800;color:#1a1a2e;margin:0;">Solicitud <span style="color:#2e6edd">#<?php echo $id; ?></span></div>
+    <p style="font-size:0.8rem;color:#64748b;margin:2px 0 0;">Recibida el <?php echo date('d/m/Y \a\l H:i', strtotime($solicitud['created_at'])); ?></p>
   </div>
-  <div class="sv-topbar-right" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-    <span class="sv-badge <?php echo $badgeCls;?>" style="font-size:0.85rem;padding:6px 14px;box-shadow:0 2px 4px rgba(0,0,0,0.05);">
+  <div class="sv-topbar-right" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+    <span class="sv-badge <?php echo $badgeCls;?>" style="font-size:0.8rem;padding:5px 12px;box-shadow:0 2px 4px rgba(0,0,0,0.05);">
         <svg width="8" height="8" style="margin-right:6px"><circle cx="4" cy="4" r="4" fill="currentColor"/></svg>
         <?php echo $estadoLabel;?>
     </span>
     
     <!-- Admin Actions -->
     <?php if(!$auth->esAbogado()): ?>
-        <form method="POST" action="<?php echo APP_URL;?>/index.php?page=solicitudes" style="display:flex;gap:8px;align-items:center;margin:0;">
+        <form method="POST" action="<?php echo APP_URL;?>/index.php?page=solicitudes" style="display:flex;gap:6px;align-items:center;margin:0;">
           <?php echo CSRF::campo();?>
           <input type="hidden" name="solicitud_id" value="<?php echo $id;?>">
           <?php if($solicitud['estado'] !== 'denegada'): ?>
-          <button type="submit" name="accion" value="denegada" class="sv-btn sv-btn-no" style="width:auto;padding:6px 12px;" data-confirm="¿Denegar esta solicitud?">Denegar</button>
+          <button type="submit" name="accion" value="denegada" class="sv-btn sv-btn-no" style="width:auto;padding:5px 10px;font-size:0.8rem;" data-confirm="¿Denegar esta solicitud?">Denegar</button>
           <?php endif; ?>
           <?php if($solicitud['estado'] !== 'archivada'): ?>
-          <button type="submit" name="accion" value="archivada" class="sv-btn sv-btn-arc" style="width:auto;padding:6px 12px;">Archivar</button>
+          <button type="submit" name="accion" value="archivada" class="sv-btn sv-btn-arc" style="width:auto;padding:5px 10px;font-size:0.8rem;">Archivar</button>
           <?php endif; ?>
           <?php if($solicitud['estado'] !== 'pendiente'): ?>
-          <button type="submit" name="accion" value="pendiente" class="sv-btn sv-btn-arc" style="width:auto;padding:6px 12px;background:#f8fafc;border:1px solid #cbd5e1" data-confirm="¿Volver a Pendiente?">A Pendiente</button>
+          <button type="submit" name="accion" value="pendiente" class="sv-btn sv-btn-arc" style="width:auto;padding:5px 10px;font-size:0.8rem;background:#f8fafc;border:1px solid #cbd5e1" data-confirm="¿Volver a Pendiente?">A Pendiente</button>
           <?php endif; ?>
         </form>
     <?php endif; ?>
     
-    <a href="<?php echo APP_URL; ?>/index.php?page=solicitudes" class="sv-btn sv-btn-arc" style="text-decoration:none;width:auto;padding:6px 16px;">
+    <a href="<?php echo APP_URL; ?>/index.php?page=solicitudes" class="sv-btn sv-btn-arc" style="text-decoration:none;width:auto;padding:5px 14px;font-size:0.8rem;">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg> Volver
     </a>
   </div>
 </div>
 
 <style>
-.sv-topbar { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom:20px; background:#fff; padding:16px 24px; border-radius:12px; border:1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
-.sv-grid-main { display:grid; grid-template-columns: 1fr 1fr; gap:20px; align-items:start; }
+.sv-wrap-container { max-width: 1200px; margin: 0 auto; }
+.sv-topbar { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px; background:#fff; padding:12px 20px; border-radius:10px; border:1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
+.sv-grid-main { display:grid; grid-template-columns: 1fr 1.1fr; gap:16px; align-items:start; }
 @media(max-width:991px) { .sv-grid-main { grid-template-columns: 1fr; } }
-.sv-card-premium { background:#fff; border:1px solid #e2e8f0; border-radius:12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02), 0 2px 4px -1px rgba(0,0,0,0.02); overflow:hidden; margin-bottom:20px; }
-.sv-header-premium { padding:14px 20px; border-bottom:1px solid #f1f5f9; display:flex; align-items:center; gap:10px; background:linear-gradient(to right, #ffffff, #f8fafc); }
-.sv-header-premium h3 { font-size:1rem; font-weight:800; color:#1e293b; margin:0; }
-.sv-body-premium { padding:20px; }
-.sv-info-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:16px; }
-.sv-data-group label { display:block; font-size:0.7rem; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px; }
-.sv-data-group p { font-size:0.95rem; font-weight:600; color:#0f172a; margin:0; display:flex; align-items:center; gap:8px; }
-.sv-input-compact { width:100%; padding:8px 12px; border-radius:8px; border:1px solid #cbd5e1; background:#f8fafc; font-size:0.875rem; font-weight:600; color:#0f172a; transition:all 0.2s; outline:none; }
+.sv-card-premium { background:#fff; border:1px solid #e2e8f0; border-radius:10px; box-shadow: 0 2px 4px -1px rgba(0,0,0,0.02); overflow:hidden; margin-bottom:16px; }
+.sv-header-premium { padding:10px 16px; border-bottom:1px solid #f1f5f9; display:flex; align-items:center; gap:8px; background:linear-gradient(to right, #ffffff, #f8fafc); }
+.sv-header-premium-title { font-size:0.95rem; font-weight:800; color:#1e293b; margin:0; }
+.sv-body-premium { padding:16px; }
+.sv-info-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:12px; }
+.sv-data-group label { display:block; font-size:0.65rem; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:2px; }
+.sv-data-group p { font-size:0.85rem; font-weight:600; color:#0f172a; margin:0; display:flex; align-items:center; gap:6px; }
+.sv-input-compact { width:100%; padding:6px 10px; border-radius:6px; border:1px solid #cbd5e1; background:#f8fafc; font-size:0.85rem; font-weight:600; color:#0f172a; transition:all 0.2s; outline:none; }
 .sv-input-compact:focus { background:#fff; border-color:#3b82f6; box-shadow:0 0 0 3px rgba(59,130,246,0.1); }
-.sv-slider-compact { width:100%; height:6px; -webkit-appearance: none; background:#e2e8f0; border-radius:99px; outline:none; margin-top:12px; }
-.sv-slider-compact::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width:16px; height:16px; border-radius:50%; background:#3b82f6; cursor:pointer; border:2px solid #fff; box-shadow:0 2px 4px rgba(0,0,0,0.2); }
+.sv-slider-compact { width:100%; height:4px; -webkit-appearance: none; background:#e2e8f0; border-radius:99px; outline:none; margin-top:8px; }
+.sv-slider-compact::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width:14px; height:14px; border-radius:50%; background:#3b82f6; cursor:pointer; border:2px solid #fff; box-shadow:0 2px 4px rgba(0,0,0,0.2); }
 </style>
 
+<div class="sv-wrap-container">
 <!-- FULL WIDTH ROW: Datos del Solicitante -->
 <div class="sv-card-premium">
     <div class="sv-header-premium">
-        <div class="sv-hicon" style="background:#e0e7ff;color:#4f46e5;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
-        <h3>Datos del Solicitante</h3>
+        <div class="sv-hicon" style="background:#e0e7ff;color:#4f46e5;width:24px;height:24px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+        <div class="sv-header-premium-title">Datos del Solicitante</div>
     </div>
     <div class="sv-body-premium">
         <div class="sv-info-grid">
@@ -110,7 +112,7 @@ $miAsignacion = reset($misAsignaciones);
                       $waNum = preg_replace('/[^0-9]/', '', $solicitud['telefono']);
                       if (strlen($waNum) == 9) $waNum = '34' . $waNum;
                   ?>
-                  <a href="https://wa.me/<?php echo $waNum; ?>" target="_blank" style="background:#25D366;color:#fff;padding:2px 8px;border-radius:6px;font-size:0.7rem;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:4px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg> WhatsApp</a>
+                  <a href="https://wa.me/<?php echo $waNum; ?>" target="_blank" style="background:#25D366;color:#fff;padding:2px 6px;border-radius:4px;font-size:0.65rem;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:4px;"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg> WhatsApp</a>
                   <?php endif; ?>
                 </p>
             </div>
@@ -126,32 +128,32 @@ $miAsignacion = reset($misAsignaciones);
     <div>
         <div class="sv-card-premium">
             <div class="sv-header-premium">
-                <div class="sv-hicon" style="background:#dcfce7;color:#16a34a;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
-                <h3>Problema Legal</h3>
+                <div class="sv-hicon" style="background:#dcfce7;color:#16a34a;width:24px;height:24px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
+                <div class="sv-header-premium-title">Problema Legal</div>
             </div>
             <div class="sv-body-premium">
-                <div class="sv-data-group" style="margin-bottom:16px;">
+                <div class="sv-data-group" style="margin-bottom:12px;">
                     <label>Área Legal</label>
-                    <p><span style="width:10px;height:10px;border-radius:50%;background:#3b82f6;display:inline-block;margin-right:4px;"></span> <?php echo e($solicitud['tipo_problema']); ?></p>
+                    <p><span style="width:8px;height:8px;border-radius:50%;background:#3b82f6;display:inline-block;margin-right:4px;"></span> <?php echo e($solicitud['tipo_problema']); ?></p>
                 </div>
                 <div class="sv-data-group">
                     <label>Descripción del caso</label>
-                    <div style="background:#f8fafc;border-radius:8px;padding:12px;font-size:0.9rem;color:#334155;line-height:1.5;border:1px solid #f1f5f9;margin-top:6px;">
+                    <div style="background:#f8fafc;border-radius:6px;padding:10px;font-size:0.85rem;color:#334155;line-height:1.4;border:1px solid #f1f5f9;margin-top:4px;">
                         <?php echo nl2br(e($solicitud['descripcion'])); ?>
                     </div>
                 </div>
                 
                 <?php if($solicitud['p_nom']): ?>
-                <div style="margin-top:16px;padding-top:16px;border-top:1px solid #f1f5f9;display:flex;align-items:center;gap:6px;font-size:0.8rem;color:#64748b;">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <div style="margin-top:12px;padding-top:12px;border-top:1px solid #f1f5f9;display:flex;align-items:center;gap:6px;font-size:0.75rem;color:#64748b;">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                   Procesada por <strong style="color:#0f172a;"><?php echo e($solicitud['p_nom'].' '.$solicitud['p_ape']); ?></strong>
                 </div>
                 <?php endif; ?>
                 
                 <?php if($solicitud['motivo_estado']): ?>
-                <div style="margin-top:12px;padding:12px;background:#fff1f2;border-radius:8px;border:1px solid #fecdd3;">
-                  <span style="font-size:0.7rem;font-weight:700;color:#e11d48;text-transform:uppercase;">Motivo (<?php echo $estadoLabel;?>)</span>
-                  <p style="font-size:0.85rem;color:#881337;margin:4px 0 0;"><?php echo e($solicitud['motivo_estado']); ?></p>
+                <div style="margin-top:10px;padding:10px;background:#fff1f2;border-radius:6px;border:1px solid #fecdd3;">
+                  <span style="font-size:0.65rem;font-weight:700;color:#e11d48;text-transform:uppercase;">Motivo (<?php echo $estadoLabel;?>)</span>
+                  <p style="font-size:0.8rem;color:#881337;margin:2px 0 0;"><?php echo e($solicitud['motivo_estado']); ?></p>
                 </div>
                 <?php endif; ?>
             </div>
@@ -160,9 +162,9 @@ $miAsignacion = reset($misAsignaciones);
         <?php if(!empty($archivos)): ?>
         <div class="sv-card-premium">
           <div class="sv-header-premium">
-            <div class="sv-hicon" style="background:#f3e8ff;color:#9333ea;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></div>
-            <h3>Documentos Adjuntos</h3>
-            <span style="margin-left:auto;background:#f3e8ff;color:#9333ea;padding:4px 12px;border-radius:99px;font-size:0.75rem;font-weight:700"><?php echo count($archivos); ?></span>
+            <div class="sv-hicon" style="background:#f3e8ff;color:#9333ea;width:24px;height:24px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></div>
+            <div class="sv-header-premium-title">Documentos Adjuntos</div>
+            <span style="margin-left:auto;background:#f3e8ff;color:#9333ea;padding:2px 8px;border-radius:99px;font-size:0.7rem;font-weight:700"><?php echo count($archivos); ?></span>
           </div>
           <div class="sv-body-premium">
             <?php foreach($archivos as $arch):
@@ -170,14 +172,14 @@ $miAsignacion = reset($misAsignaciones);
               [$bg,$clr]=$extColors[$ext]??['#f1f5f9','#64748b'];
               $kb=round($arch['tamano_bytes']/1024,1);
             ?>
-            <div style="display:flex;align-items:center;gap:12px;padding:10px;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:8px;transition:0.2s;background:#fff;" onmouseover="this.style.borderColor='#3b82f6'" onmouseout="this.style.borderColor='#e2e8f0'">
-              <div style="width:32px;height:32px;border-radius:6px;background:<?php echo $bg;?>;color:<?php echo $clr;?>;display:flex;align-items:center;justify-content:center;font-size:0.6rem;font-weight:800;"><?php echo $ext;?></div>
+            <div style="display:flex;align-items:center;gap:10px;padding:8px;border:1px solid #e2e8f0;border-radius:6px;margin-bottom:6px;transition:0.2s;background:#fff;" onmouseover="this.style.borderColor='#3b82f6'" onmouseout="this.style.borderColor='#e2e8f0'">
+              <div style="width:28px;height:28px;border-radius:4px;background:<?php echo $bg;?>;color:<?php echo $clr;?>;display:flex;align-items:center;justify-content:center;font-size:0.55rem;font-weight:800;"><?php echo $ext;?></div>
               <div style="flex:1;min-width:0;">
-                <div style="font-size:0.875rem;font-weight:600;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><?php echo e($arch['nombre_original']);?></div>
-                <div style="font-size:0.75rem;color:#64748b;margin-top:2px;"><?php echo $kb;?> KB &middot; <?php echo date('d/m/Y H:i',strtotime($arch['created_at']));?></div>
+                <div style="font-size:0.8rem;font-weight:600;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><?php echo e($arch['nombre_original']);?></div>
+                <div style="font-size:0.7rem;color:#64748b;margin-top:0;"><?php echo $kb;?> KB &middot; <?php echo date('d/m/Y H:i',strtotime($arch['created_at']));?></div>
               </div>
-              <button type="button" onclick="downloadArchivo(<?php echo (int)$arch['id'];?>, '<?php echo e(addslashes($arch['nombre_original']));?>')" style="background:none;border:none;color:#3b82f6;cursor:pointer;padding:6px;display:flex;align-items:center;justify-content:center;border-radius:6px;transition:0.2s;" onmouseover="this.style.background='#eff6ff'">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <button type="button" onclick="downloadArchivo(<?php echo (int)$arch['id'];?>, '<?php echo e(addslashes($arch['nombre_original']));?>')" style="background:none;border:none;color:#3b82f6;cursor:pointer;padding:4px;display:flex;align-items:center;justify-content:center;border-radius:4px;transition:0.2s;" onmouseover="this.style.background='#eff6ff'">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               </button>
             </div>
             <?php endforeach;?>
@@ -189,10 +191,10 @@ $miAsignacion = reset($misAsignaciones);
     <!-- RIGHT COLUMN -->
     <div>
         <?php if($auth->esAdmin()): ?>
-        <div class="sv-card-premium" style="border-top:4px solid #f59e0b;">
+        <div class="sv-card-premium" style="border-top:3px solid #f59e0b;">
             <div class="sv-header-premium" style="background:#fff;">
-                <div class="sv-hicon" style="background:#fef3c7;color:#d97706;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
-                <h3>Asignación y Finanzas</h3>
+                <div class="sv-hicon" style="background:#fef3c7;color:#d97706;width:24px;height:24px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+                <div class="sv-header-premium-title">Asignación y Finanzas</div>
             </div>
             <div class="sv-body-premium">
                 <?php if(empty($asignaciones)): ?>
@@ -201,37 +203,37 @@ $miAsignacion = reset($misAsignaciones);
                   <input type="hidden" name="solicitud_id" value="<?php echo $id;?>">
                   <input type="hidden" name="accion" value="asignar_multi">
                   
-                  <div class="sv-data-group" style="margin-bottom:16px;">
+                  <div class="sv-data-group" style="margin-bottom:12px;">
                       <label style="color:#0f172a;">Valor Total del Caso (€)</label>
-                      <input type="number" step="0.01" name="valor_cliente" id="valCliente" class="sv-input-compact" style="font-size:1.1rem;padding:12px;text-align:right;" required placeholder="Ej: 1000.00" oninput="calcAll()">
+                      <input type="number" step="0.01" name="valor_cliente" id="valCliente" class="sv-input-compact" style="font-size:1rem;padding:8px 10px;text-align:right;" required placeholder="Ej: 1000.00" oninput="calcAll()">
                   </div>
 
-                  <div style="display:flex;gap:16px;margin-bottom:20px;">
-                      <div style="flex:1;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px;">
-                          <div style="font-size:0.75rem;font-weight:800;color:#16a34a;margin-bottom:8px;text-transform:uppercase;">Honorarios Base</div>
-                          <div style="display:flex;gap:8px;margin-bottom:8px;">
+                  <div style="display:flex;gap:12px;margin-bottom:16px;">
+                      <div style="flex:1;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:10px;">
+                          <div style="font-size:0.7rem;font-weight:800;color:#16a34a;margin-bottom:6px;text-transform:uppercase;">Honorarios Base</div>
+                          <div style="display:flex;gap:6px;margin-bottom:6px;">
                               <div style="flex:1;">
-                                  <label style="font-size:0.65rem;color:#64748b;">%</label>
-                                  <input type="number" step="0.1" name="honorarios_pct" id="honPct" class="sv-input-compact" style="padding:6px;text-align:center;" value="0" oninput="calcHon()">
+                                  <label style="font-size:0.6rem;color:#64748b;">%</label>
+                                  <input type="number" step="0.1" name="honorarios_pct" id="honPct" class="sv-input-compact" style="padding:4px;text-align:center;font-size:0.8rem;" value="0" oninput="calcHon()">
                               </div>
                               <div style="flex:1.5;">
-                                  <label style="font-size:0.65rem;color:#64748b;">€</label>
-                                  <input type="number" step="0.01" name="honorarios_abogado" id="honEur" class="sv-input-compact" style="padding:6px;text-align:right;" value="0" oninput="calcHonEur()" required>
+                                  <label style="font-size:0.6rem;color:#64748b;">€</label>
+                                  <input type="number" step="0.01" name="honorarios_abogado" id="honEur" class="sv-input-compact" style="padding:4px;text-align:right;font-size:0.8rem;" value="0" oninput="calcHonEur()" required>
                               </div>
                           </div>
                           <input type="range" class="sv-slider-compact" id="honSlider" min="0" max="100" step="1" value="0" oninput="syncHonSlider()">
                       </div>
                       
-                      <div style="flex:1;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px;">
-                          <div style="font-size:0.75rem;font-weight:800;color:#ca8a04;margin-bottom:8px;text-transform:uppercase;">Bono Extra</div>
-                          <div style="display:flex;gap:8px;margin-bottom:8px;">
+                      <div style="flex:1;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:10px;">
+                          <div style="font-size:0.7rem;font-weight:800;color:#ca8a04;margin-bottom:6px;text-transform:uppercase;">Bono Extra</div>
+                          <div style="display:flex;gap:6px;margin-bottom:6px;">
                               <div style="flex:1;">
-                                  <label style="font-size:0.65rem;color:#64748b;">%</label>
-                                  <input type="number" step="0.1" name="bono_pct" id="bonoPct" class="sv-input-compact" style="padding:6px;text-align:center;" value="0" oninput="calcBono()">
+                                  <label style="font-size:0.6rem;color:#64748b;">%</label>
+                                  <input type="number" step="0.1" name="bono_pct" id="bonoPct" class="sv-input-compact" style="padding:4px;text-align:center;font-size:0.8rem;" value="0" oninput="calcBono()">
                               </div>
                               <div style="flex:1.5;">
-                                  <label style="font-size:0.65rem;color:#64748b;">€</label>
-                                  <input type="number" step="0.01" name="bonificacion" id="bonoEur" class="sv-input-compact" style="padding:6px;text-align:right;" value="0" oninput="calcBonoEur()">
+                                  <label style="font-size:0.6rem;color:#64748b;">€</label>
+                                  <input type="number" step="0.01" name="bonificacion" id="bonoEur" class="sv-input-compact" style="padding:4px;text-align:right;font-size:0.8rem;" value="0" oninput="calcBonoEur()">
                               </div>
                           </div>
                           <input type="range" class="sv-slider-compact" id="bonoSlider" min="0" max="100" step="1" value="0" oninput="syncBonoSlider()">
@@ -239,34 +241,33 @@ $miAsignacion = reset($misAsignaciones);
                   </div>
 
                   <!-- Stacked Bar (Vaso de Agua) -->
-                  <div style="margin-bottom:24px;padding:16px;background:#fff;border:1px solid #cbd5e1;border-radius:10px;box-shadow:0 2px 4px rgba(0,0,0,0.02);">
-                      <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:0.75rem;font-weight:800;">
+                  <div style="margin-bottom:20px;padding:12px;background:#fff;border:1px solid #cbd5e1;border-radius:8px;box-shadow:0 1px 2px rgba(0,0,0,0.02);">
+                      <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:0.7rem;font-weight:800;">
                           <span style="color:#2563eb">Despacho: <span id="lblDespacho">100% (0.00€)</span></span>
                           <span style="color:#16a34a">Hon: <span id="lblHon">0% (0.00€)</span></span>
                           <span style="color:#ca8a04">Bono: <span id="lblBono">0% (0.00€)</span></span>
                       </div>
-                      <div style="height:12px;border-radius:99px;background:#e2e8f0;display:flex;overflow:hidden;">
+                      <div style="height:10px;border-radius:99px;background:#e2e8f0;display:flex;overflow:hidden;">
                           <div id="barDespacho" style="height:100%;background:#3b82f6;width:100%;transition:width 0.3s"></div>
                           <div id="barHon" style="height:100%;background:#22c55e;width:0%;transition:width 0.3s"></div>
                           <div id="barBono" style="height:100%;background:#eab308;width:0%;transition:width 0.3s"></div>
                       </div>
                   </div>
                   
-                  <div class="sv-data-group" style="margin-bottom:16px;">
+                  <div class="sv-data-group" style="margin-bottom:12px;">
                       <label>Abogados a Asignar</label>
-                      <div style="max-height:160px;overflow-y:auto;border:1px solid #cbd5e1;border-radius:8px;padding:8px;background:#f8fafc;">
+                      <div style="max-height:140px;overflow-y:auto;border:1px solid #cbd5e1;border-radius:6px;padding:6px;background:#f8fafc;">
                         <?php foreach($abogados as $ab): ?>
-                        <label class="sv-chk" style="padding:6px 10px;margin-bottom:2px;">
-                          <input type="checkbox" name="abogados[]" value="<?php echo $ab['id']; ?>">
-                          <span class="sv-chk-box"></span>
-                          <span class="sv-chk-text" style="font-size:0.85rem;"><?php echo e($ab['nombre'] . ' ' . $ab['apellidos']); ?></span>
+                        <label class="sv-chk" style="padding:4px 8px;margin-bottom:2px;display:flex;align-items:center;gap:8px;cursor:pointer;">
+                          <input type="checkbox" name="abogados[]" value="<?php echo $ab['id']; ?>" style="margin:0;">
+                          <span class="sv-chk-text" style="font-size:0.8rem;color:#334155;font-weight:600;"><?php echo e($ab['nombre'] . ' ' . $ab['apellidos']); ?></span>
                         </label>
                         <?php endforeach; ?>
                       </div>
                   </div>
 
-                  <button type="submit" class="sv-btn-save" style="width:100%;padding:12px;border-radius:8px;border:none;font-size:0.95rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;background:#3b82f6;color:#fff;transition:0.2s;" onmouseover="this.style.background='#2563eb'">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg> Enviar Propuesta
+                  <button type="submit" class="sv-btn-save" style="width:100%;padding:10px;border-radius:6px;border:none;font-size:0.85rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;background:#3b82f6;color:#fff;transition:0.2s;" onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg> Enviar Propuesta
                   </button>
                   
                   <script>
