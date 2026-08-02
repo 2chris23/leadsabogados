@@ -20,10 +20,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
             if(empty($abogados)) throw new Exception("Debe seleccionar al menos un abogado.");
             $valor_cliente = trim($_POST['valor_cliente'] ?? '0');
             $honorarios_abogado = trim($_POST['honorarios_abogado'] ?? '0');
+            $es_bonificacion = isset($_POST['es_bonificacion']) ? 1 : 0;
             $db->beginTransaction();
             $db->update('solicitudes', [
                 'valor_cliente' => $valor_cliente,
                 'honorarios_abogado' => $honorarios_abogado,
+                'es_bonificacion' => $es_bonificacion,
                 'estado' => 'asignada'
             ], 'id = ?', [$solicitudId]);
             foreach ($abogados as $ab_id) {
@@ -190,6 +192,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
                     ], 'id = ?', [$casoId]);
                     $logMsg .= " (Caso reactivado)";
                 } else {
+                    $honorariosAbogadoCaso = $solicitud['honorarios_abogado'] ?? 0;
+                    if ($abogadoActual) {
+                        $tipoPago = $db->fetchColumn("SELECT tipo_pago_predeterminado FROM usuarios_internos WHERE id = ?", [$abogadoActual]);
+                        if ($tipoPago === 'mensual' && empty($solicitud['es_bonificacion'])) {
+                            $honorariosAbogadoCaso = 0;
+                        }
+                    }
+
                     $casoId = $db->insert('casos', [
                         'cliente_id'         => $clienteId,
                         'abogado_id'         => $abogadoActual ?: null,
@@ -200,7 +210,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
                         'estado'             => 'en_estudio',
                         'fecha_apertura'     => date('Y-m-d'),
                         'honorarios_totales' => $solicitud['valor_cliente'] ?? 0,
-                        'honorarios_abogado' => $solicitud['honorarios_abogado'] ?? 0
+                        'honorarios_abogado' => $honorariosAbogadoCaso
                     ]);
     
                     // Copiar archivos del portal (solicitud_archivos) → documentos del caso

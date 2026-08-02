@@ -228,10 +228,15 @@ $miAsignacion = reset($misAsignaciones);
             
             <input type="range" class="form-range" id="honSlider" min="0" max="100" step="1" value="0" oninput="syncSlider()">
             
-            <p style="font-size:0.75rem;color:#64748b;margin:8px 0 0;line-height:1.4">
-               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-3px;margin-right:2px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-               Esto no aplica para abogados con pago mensual, salvo bonificación excepcional.
-            </p>
+            <div style="margin-top:12px;padding-top:12px;border-top:1px solid #e2e8f0;">
+                <label style="display:flex;align-items:start;gap:8px;cursor:pointer;">
+                    <input type="checkbox" name="es_bonificacion" value="1" style="margin-top:2px;accent-color:#2e6edd;">
+                    <span style="font-size:0.75rem;color:#475569;line-height:1.4">
+                        <strong style="color:#1a1a2e">Aplicar como bonificación excepcional</strong><br>
+                        Si seleccionas a un abogado con plan mensual, recibirá este importe como extra. Si no lo marcas, este campo solo aplicará a los abogados por hitos/éxito.
+                    </span>
+                </label>
+            </div>
           </div>
           
           <script>
@@ -331,7 +336,12 @@ $miAsignacion = reset($misAsignaciones);
         <h3>Toma de Decisión</h3>
       </div>
       <div class="sv-card-body">
-        <?php if (!empty($solicitud['honorarios_abogado']) && $solicitud['honorarios_abogado'] > 0): ?>
+        <?php 
+        $tipoPago = $db->fetchColumn("SELECT tipo_pago_predeterminado FROM usuarios_internos WHERE id = ?", [$usuarioAct['id']]);
+        $esMensual = ($tipoPago === 'mensual');
+        $mostrarBono = (!$esMensual || !empty($solicitud['es_bonificacion']));
+        ?>
+        <?php if ($mostrarBono && !empty($solicitud['honorarios_abogado']) && $solicitud['honorarios_abogado'] > 0): ?>
             <p style="font-weight:600;margin-bottom:14px;font-size:1.1rem">Honorarios ofrecidos: <span style="color:#16a34a"><?php echo e($solicitud['honorarios_abogado']); ?> €</span></p>
         <?php else: ?>
             <p style="font-weight:600;margin-bottom:14px;font-size:0.95rem;color:#475569">Retribución: Incluida en tu plan mensual.</p>
