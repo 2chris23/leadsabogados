@@ -337,7 +337,7 @@ $solicitudes = $db->fetchAll(
                             </a>
                         </td>
                         <td class="text-sm"><?php echo e($sol['email']); ?></td>
-                        <td><?php echo e(mb_strimwidth($sol['descripcion'], 0, 40, '...')); ?></td>
+                        <td><?php echo e(mb_strimwidth($sol['descripcion'] ?? '', 0, 40, '...')); ?></td>
                         <td>
                             <?php
                             $badgeClass = match($sol['estado']) {
