@@ -225,6 +225,7 @@ $miAsignacion = reset($misAsignaciones);
                               <input type="number" step="0.01" name="honorarios_abogado" id="honEur" class="sv-input" style="width:100%;padding:8px;border-radius:6px;border:1px solid #cbd5e1;background:#fff;" value="0" oninput="calcHonEur()" required>
                           </div>
                       </div>
+                      <input type="range" class="form-range" id="honSlider" min="0" max="100" step="1" value="0" oninput="syncHonSlider()" style="margin-top:16px;">
                   </div>
               </div>
               <div style="flex:1;min-width:200px;">
@@ -240,6 +241,7 @@ $miAsignacion = reset($misAsignaciones);
                               <input type="number" step="0.01" name="bonificacion" id="bonoEur" class="sv-input" style="width:100%;padding:8px;border-radius:6px;border:1px solid #cbd5e1;background:#fff;" value="0" oninput="calcBonoEur()">
                           </div>
                       </div>
+                      <input type="range" class="form-range" id="bonoSlider" min="0" max="100" step="1" value="0" oninput="syncBonoSlider()" style="margin-top:16px;">
                   </div>
               </div>
           </div>
@@ -277,6 +279,20 @@ $miAsignacion = reset($misAsignaciones);
                 document.getElementById('lblHon').innerText = pctHon.toFixed(1) + '% (' + honEur.toFixed(2) + '€)';
                 document.getElementById('lblBono').innerText = pctBono.toFixed(1) + '% (' + bonoEur.toFixed(2) + '€)';
                 document.getElementById('lblDespacho').innerText = pctDesp.toFixed(1) + '% (' + despEur.toFixed(2) + '€)';
+                
+                // Update sliders visual sync
+                document.getElementById('honSlider').value = Math.min(100, Math.max(0, pctHon));
+                document.getElementById('bonoSlider').value = Math.min(100, Math.max(0, pctBono));
+            }
+
+            function syncHonSlider() {
+                document.getElementById('honPct').value = document.getElementById('honSlider').value;
+                calcHon();
+            }
+
+            function syncBonoSlider() {
+                document.getElementById('bonoPct').value = document.getElementById('bonoSlider').value;
+                calcBono();
             }
 
             function calcHon() {
