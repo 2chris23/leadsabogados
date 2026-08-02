@@ -14,16 +14,83 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
     $motivo      = trim($_POST['motivo'] ?? '');
     $usuarioAct  = $auth->getUsuario();
 
-    if ($accion === 'asignar' && $auth->esAdmin() && $solicitudId > 0) {
+    if ($accion === 'asignar_multi' && $auth->esAdmin() && $solicitudId > 0) {
         try {
-            $abogadoId = (int)($_POST['abogado_id'] ?? 0);
-            $db->update('solicitudes', ['abogado_id' => $abogadoId ?: null], 'id = ?', [$solicitudId]);
-            AuditLog::registrar('asignar_solicitud', 'solicitudes', $solicitudId, "Asignada al abogado #$abogadoId");
-            setFlash('exito', 'Solicitud asignada correctamente al abogado');
+            $abogados = $_POST['abogados'] ?? [];
+            if(empty($abogados)) throw new Exception("Debe seleccionar al menos un abogado.");
+            $honorarios = trim($_POST['honorarios'] ?? '0');
+            $db->beginTransaction();
+            $db->update('solicitudes', ['honorarios' => $honorarios, 'estado' => 'asignada'], 'id = ?', [$solicitudId]);
+            foreach ($abogados as $ab_id) {
+                $db->insert('solicitud_asignaciones', [
+                    'solicitud_id' => $solicitudId,
+                    'abogado_id' => (int)$ab_id,
+                    'estado' => 'pendiente'
+                ]);
+            }
+            $db->commit();
+            AuditLog::registrar('asignar_solicitud', 'solicitudes', $solicitudId, "Propuesta enviada a ".count($abogados)." abogados por $honorarios €");
+            setFlash('exito', 'Propuesta enviada a los abogados seleccionados.');
         } catch (Exception $e) {
+            if($db->getPdo()->inTransaction()) $db->rollBack();
             setFlash('error', 'Error al asignar: ' . $e->getMessage());
         }
         header('Location: ' . APP_URL . '/index.php?page=solicitudes/ver&id=' . $solicitudId);
+        exit;
+    }
+
+    if ($accion === 'cancelar_asignacion' && $auth->esAdmin() && $solicitudId > 0) {
+        try {
+            $db->beginTransaction();
+            $db->update('solicitudes', ['honorarios' => null, 'estado' => 'pendiente'], 'id = ?', [$solicitudId]);
+            $db->query("DELETE FROM solicitud_asignaciones WHERE solicitud_id = ?", [$solicitudId]);
+            $db->commit();
+            AuditLog::registrar('cancelar_asignacion', 'solicitudes', $solicitudId, "Asignaciones canceladas.");
+            setFlash('exito', 'Asignación cancelada. La solicitud vuelve a estar pendiente.');
+        } catch (Exception $e) {
+            $db->rollBack();
+            setFlash('error', 'Error: ' . $e->getMessage());
+        }
+        header('Location: ' . APP_URL . '/index.php?page=solicitudes/ver&id=' . $solicitudId);
+        exit;
+    }
+
+    if ($accion === 'abogado_aceptar' && $auth->esAbogado() && $solicitudId > 0) {
+        $abogadoId = $usuarioAct['id'];
+        $estadoActual = $db->fetchColumn("SELECT estado FROM solicitudes WHERE id = ?", [$solicitudId]);
+        if ($estadoActual !== 'aceptada') {
+            $db->beginTransaction();
+            $db->update('solicitud_asignaciones', ['estado' => 'aceptada'], 'solicitud_id = ? AND abogado_id = ?', [$solicitudId, $abogadoId]);
+            $db->query("DELETE FROM solicitud_asignaciones WHERE solicitud_id = ? AND abogado_id != ?", [$solicitudId, $abogadoId]);
+            $db->update('solicitudes', ['abogado_id' => $abogadoId], 'id = ?', [$solicitudId]);
+            $db->commit();
+            $accion = 'aceptada';
+        } else {
+            setFlash('error', 'Otro abogado ya ha tomado este caso. Ha sido retirado de tu lista.');
+            $db->query("DELETE FROM solicitud_asignaciones WHERE solicitud_id = ? AND abogado_id = ?", [$solicitudId, $abogadoId]);
+            header('Location: ' . APP_URL . '/index.php?page=solicitudes');
+            exit;
+        }
+    }
+
+    if ($accion === 'abogado_rechazar' && $auth->esAbogado() && $solicitudId > 0) {
+        $abogadoId = $usuarioAct['id'];
+        try {
+            $db->beginTransaction();
+            $db->update('solicitud_asignaciones', ['estado' => 'rechazada'], 'solicitud_id = ? AND abogado_id = ?', [$solicitudId, $abogadoId]);
+            
+            $pendientes = $db->fetchColumn("SELECT COUNT(*) FROM solicitud_asignaciones WHERE solicitud_id = ? AND estado = 'pendiente'", [$solicitudId]);
+            if ($pendientes == 0) {
+                $db->update('solicitudes', ['estado' => 'rechazada por todos'], 'id = ?', [$solicitudId]);
+                AuditLog::registrar('solicitud_rechazada', 'solicitudes', $solicitudId, "Todos los abogados rechazaron el caso.");
+            }
+            $db->commit();
+            setFlash('exito', 'Has rechazado el caso.');
+        } catch (Exception $e) {
+            $db->rollBack();
+            setFlash('error', 'Error: ' . $e->getMessage());
+        }
+        header('Location: ' . APP_URL . '/index.php?page=solicitudes');
         exit;
     }
 
@@ -194,10 +261,19 @@ if ($filtroEstado && in_array($filtroEstado, ['pendiente', 'aceptada', 'denegada
 // Si un abogado tiene acceso, ve todas las solicitudes (como admin/gestor).
 // Si se quiere restringir a solo sus solicitudes asignadas, configurar en Permisos.
 
+// Filtro por rol
+$joinAsignaciones = "";
+if ($auth->esAbogado()) {
+    $abogadoId = $auth->getUsuario()['id'];
+    $joinAsignaciones = "JOIN solicitud_asignaciones sa ON sa.solicitud_id = s.id AND sa.abogado_id = " . (int)$abogadoId;
+}
+
 $solicitudes = $db->fetchAll(
-    "SELECT s.*, u.nombre as procesada_nombre, u.apellidos as procesada_apellidos
+    "SELECT s.*, u.nombre as procesada_nombre, u.apellidos as procesada_apellidos,
+     (SELECT GROUP_CONCAT(CONCAT(ui.nombre, ' ', ui.apellidos) SEPARATOR ', ') FROM solicitud_asignaciones as2 JOIN usuarios_internos ui ON as2.abogado_id = ui.id WHERE as2.solicitud_id = s.id) as abogados_asignados
      FROM solicitudes s
      LEFT JOIN usuarios_internos u ON s.procesada_por = u.id
+     $joinAsignaciones
      $whereEstado
      ORDER BY s.created_at DESC",
     $params
@@ -245,7 +321,7 @@ $solicitudes = $db->fetchAll(
                         <th>#</th>
                         <th>Solicitante</th>
                         <th>Email</th>
-                        <th>Tipo de Problema</th>
+                        <th>Descripción</th>
                         <th>Estado</th>
                         <th>Fecha</th>
                         <th class="text-center">Acciones</th>
@@ -261,15 +337,18 @@ $solicitudes = $db->fetchAll(
                             </a>
                         </td>
                         <td class="text-sm"><?php echo e($sol['email']); ?></td>
-                        <td><?php echo e($sol['tipo_problema']); ?></td>
+                        <td><?php echo e(mb_strimwidth($sol['descripcion'], 0, 40, '...')); ?></td>
                         <td>
                             <?php
                             $badgeClass = match($sol['estado']) {
                                 'pendiente' => 'bg-warning-focus text-warning-main',
+                                'asignada'  => 'bg-info-focus text-info-main',
                                 'aceptada'  => 'bg-success-focus text-success-main',
                                 'denegada'  => 'bg-danger-focus text-danger-main',
                                 'archivada' => 'bg-neutral-200 text-neutral-600',
                                 'cancelada' => 'bg-danger-focus text-danger-main',
+                                'no aceptada' => 'bg-danger-focus text-danger-main',
+                                'rechazada por todos' => 'bg-danger-focus text-danger-main',
                                 default     => 'bg-neutral-200'
                             };
                             ?>

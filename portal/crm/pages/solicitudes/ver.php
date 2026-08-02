@@ -29,9 +29,14 @@ $estadoLabel = ['pendiente'=>'Pendiente','aceptada'=>'Aceptada','denegada'=>'Den
 $extColors = ['PDF'=>['#fef2f2','#dc2626'],'DOC'=>['#e8f0fe','#2e6edd'],'DOCX'=>['#e8f0fe','#2e6edd'],'XLS'=>['#ecfdf5','#059669'],'XLSX'=>['#ecfdf5','#059669'],'JPG'=>['#fff7ed','#ea580c'],'PNG'=>['#fff7ed','#ea580c'],'ZIP'=>['#f5f3ff','#7c3aed'],'RAR'=>['#f5f3ff','#7c3aed']];
 
 $abogados = $auth->esAdmin() ? $db->fetchAll("SELECT id,nombre,apellidos FROM usuarios_internos WHERE rol='abogado' AND activo=1 ORDER BY nombre") : [];
-$abogadoSel = $solicitud['abogado_id'] ?? '';
-$abogadoNom = '';
-foreach($abogados as $ab){ if($ab['id']==$abogadoSel){ $abogadoNom=$ab['nombre'].' '.$ab['apellidos']; break; } }
+$asignaciones = $db->fetchAll("
+    SELECT sa.*, u.nombre, u.apellidos
+    FROM solicitud_asignaciones sa
+    JOIN usuarios_internos u ON sa.abogado_id = u.id
+    WHERE sa.solicitud_id = ?
+", [$id]);
+$misAsignaciones = array_filter($asignaciones, fn($a) => $a['abogado_id'] == $auth->getUsuario()['id']);
+$miAsignacion = reset($misAsignaciones);
 ?>
 <link rel="stylesheet" href="<?php echo APP_URL; ?>/assets/css/solicitud-ver.css?v=<?php echo time(); ?>">
 
@@ -80,7 +85,7 @@ foreach($abogados as $ab){ if($ab['id']==$abogadoSel){ $abogadoNom=$ab['nombre']
           <div class="sv-field"><label>Dirección</label><p><?php echo e($solicitud['direccion'] ?? 'No proporcionada'); ?></p></div>
           <div class="sv-field"><label>Correo electrónico</label><p><?php echo e($solicitud['email']); ?></p></div>
           <div class="sv-field"><label>Teléfono</label><p><?php echo e($solicitud['telefono'] ?: 'No proporcionado'); ?></p></div>
-          <div class="sv-field"><label>IP de origen</label><p style="font-family:monospace;font-size:.875rem"><?php echo e($solicitud['ip_solicitante'] ?: '—'); ?></p></div>
+
         </div>
       </div>
     </div>
@@ -176,63 +181,100 @@ foreach($abogados as $ab){ if($ab['id']==$abogadoSel){ $abogadoNom=$ab['nombre']
       </div>
     </div>
 
-    <!-- Asignación (sólo admin) -->
+    <!-- Asignación / Honorarios -->
     <?php if($auth->esAdmin()): ?>
     <div class="sv-card">
       <div class="sv-card-header">
         <div class="sv-hicon" style="background:#fffbeb;color:#d97706">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         </div>
-        <h3>Asignación</h3>
+        <h3>Asignación y Honorarios</h3>
       </div>
       <div class="sv-card-body">
+        <?php if(empty($asignaciones)): ?>
         <form method="POST" action="<?php echo APP_URL;?>/index.php?page=solicitudes">
           <?php echo CSRF::campo();?>
           <input type="hidden" name="solicitud_id" value="<?php echo $id;?>">
-          <input type="hidden" name="accion" value="asignar">
-          <span class="sv-label">Asignar a Abogado</span>
+          <input type="hidden" name="accion" value="asignar_multi">
+          
+          <span class="sv-label">Honorarios propuestos (€)</span>
+          <input type="number" step="0.01" name="honorarios" class="sv-input" style="width:100%;margin-bottom:14px;padding:10px;border-radius:8px;border:1px solid #e2e8f0;" required placeholder="Ej: 500.00">
 
-          <!-- Custom select abogados -->
-          <div class="cs-w" style="margin-bottom:14px">
-            <div class="cs-btn <?php echo $abogadoSel?'hv':'';?>" id="csAbBtn">
-              <?php if($abogadoSel):?>
-              <div class="cs-av"><?php echo strtoupper(substr($abogadoNom,0,1));?></div>
-              <span id="csAbLbl"><?php echo e($abogadoNom);?></span>
-              <?php else:?><span id="csAbLbl" style="color:#94a3b8">Seleccione un abogado...</span><?php endif;?>
-            </div>
-            <svg class="cs-arr" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-            <div class="cs-drop" id="csAbDrop">
-              <div class="cs-item<?php echo !$abogadoSel?' sel':'';?>" data-val="" data-nom="">
-                <span style="color:#94a3b8;font-size:.8125rem">Sin asignar</span>
-              </div>
-              <?php foreach($abogados as $ab):
-                $ini=strtoupper(substr($ab['nombre'],0,1));
-                $nom=e($ab['nombre'].' '.$ab['apellidos']);
-              ?>
-              <div class="cs-item<?php echo $ab['id']==$abogadoSel?' sel':'';?>" data-val="<?php echo $ab['id'];?>" data-nom="<?php echo $nom;?>" data-ini="<?php echo $ini;?>">
-                <div class="cs-av"><?php echo $ini;?></div><?php echo $nom;?>
-              </div>
-              <?php endforeach;?>
-            </div>
-            <input type="hidden" name="abogado_id" id="csAbHid" value="<?php echo $abogadoSel;?>" required>
+          <span class="sv-label">Abogados a asignar</span>
+          <div style="max-height:200px;overflow-y:auto;border:1px solid #e2e8f0;border-radius:8px;padding:10px;margin-bottom:14px;">
+            <?php foreach($abogados as $ab): ?>
+            <label style="display:flex;align-items:center;gap:8px;margin-bottom:6px;cursor:pointer;">
+              <input type="checkbox" name="abogados[]" value="<?php echo $ab['id']; ?>">
+              <?php echo e($ab['nombre'] . ' ' . $ab['apellidos']); ?>
+            </label>
+            <?php endforeach; ?>
           </div>
 
           <button type="submit" class="sv-btn sv-btn-save">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-            Guardar Asignación
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+            Enviar Propuesta
           </button>
         </form>
+        <?php else: ?>
+          <div style="margin-bottom:16px;">
+            <p style="font-weight:600;margin-bottom:8px;">Honorarios propuestos: <span style="color:#16a34a"><?php echo e($solicitud['honorarios'] ?? '0.00'); ?> €</span></p>
+            <p style="font-weight:600;margin-bottom:8px;">Estado de Asignaciones:</p>
+            <ul style="list-style:none;padding:0;margin:0;">
+              <?php foreach($asignaciones as $as): 
+                $col = $as['estado'] === 'aceptada' ? '#16a34a' : ($as['estado'] === 'rechazada' ? '#dc2626' : '#d97706');
+              ?>
+              <li style="margin-bottom:4px;display:flex;justify-content:space-between;">
+                <span><?php echo e($as['nombre'] . ' ' . $as['apellidos']); ?></span>
+                <strong style="color:<?php echo $col; ?>"><?php echo ucfirst($as['estado']); ?></strong>
+              </li>
+              <?php endforeach; ?>
+            </ul>
+          </div>
+          <form method="POST" action="<?php echo APP_URL;?>/index.php?page=solicitudes" onsubmit="return confirm('¿Seguro que desea cancelar esta asignación?');">
+            <?php echo CSRF::campo();?>
+            <input type="hidden" name="solicitud_id" value="<?php echo $id;?>">
+            <input type="hidden" name="accion" value="cancelar_asignacion">
+            <button type="submit" class="sv-btn sv-btn-no" style="width:100%;">Cancelar Asignación</button>
+          </form>
+        <?php endif; ?>
       </div>
     </div>
     <?php endif;?>
 
-    <!-- Acciones -->
+    <?php if ($auth->esAbogado() && $miAsignacion && $miAsignacion['estado'] === 'pendiente' && $solicitud['estado'] !== 'aceptada'): ?>
     <div class="sv-card">
       <div class="sv-card-header">
         <div class="sv-hicon" style="background:#fef2f2;color:#dc2626">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
         </div>
-        <h3>Acciones</h3>
+        <h3>Toma de Decisión</h3>
+      </div>
+      <div class="sv-card-body">
+        <p style="font-weight:600;margin-bottom:14px;font-size:1.1rem">Honorarios: <span style="color:#16a34a"><?php echo e($solicitud['honorarios'] ?? '0.00'); ?> €</span></p>
+        <form method="POST" action="<?php echo APP_URL;?>/index.php?page=solicitudes">
+          <?php echo CSRF::campo();?>
+          <input type="hidden" name="solicitud_id" value="<?php echo $id;?>">
+          <div class="sv-actions-row">
+            <button type="submit" name="accion" value="abogado_aceptar" class="sv-btn sv-btn-ok" data-confirm="¿Aceptar este caso?">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Aceptar Caso
+            </button>
+            <button type="submit" name="accion" value="abogado_rechazar" class="sv-btn sv-btn-no" data-confirm="¿Rechazar este caso?">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Rechazar Caso
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <?php endif; ?>
+
+    <!-- Acciones (sólo Admin o Gestor, no abogados) -->
+    <?php if(!$auth->esAbogado()): ?>
+    <div class="sv-card">
+      <div class="sv-card-header">
+        <div class="sv-hicon" style="background:#fef2f2;color:#dc2626">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <h3>Acciones Manuales</h3>
       </div>
       <div class="sv-card-body">
         <form method="POST" action="<?php echo APP_URL;?>/index.php?page=solicitudes">
@@ -241,11 +283,6 @@ foreach($abogados as $ab){ if($ab['id']==$abogadoSel){ $abogadoNom=$ab['nombre']
           <span class="sv-label">Motivo (opcional)</span>
           <textarea name="motivo" class="sv-textarea" placeholder="Escriba el motivo de la decisión..."></textarea>
           <div class="sv-actions-row" style="margin-top:14px">
-            <?php if($solicitud['estado'] !== 'aceptada'): ?>
-            <button type="submit" name="accion" value="aceptada" class="sv-btn sv-btn-ok" data-confirm="¿Aceptar esta solicitud? Se creará un caso automáticamente.">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Aceptar
-            </button>
-            <?php endif; ?>
             <?php if($solicitud['estado'] !== 'denegada'): ?>
             <button type="submit" name="accion" value="denegada" class="sv-btn sv-btn-no" data-confirm="¿Denegar esta solicitud?">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Denegar
@@ -261,6 +298,7 @@ foreach($abogados as $ab){ if($ab['id']==$abogadoSel){ $abogadoNom=$ab['nombre']
         </form>
       </div>
     </div>
+    <?php endif; ?>
   </div>
 </div>
 
