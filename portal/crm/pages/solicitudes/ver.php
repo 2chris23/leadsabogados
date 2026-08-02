@@ -379,15 +379,16 @@ $miAsignacion = reset($misAsignaciones);
             </div>
             <div class="sv-body-premium">
                 <?php 
-                $tipoPago = $db->fetchColumn("SELECT tipo_pago_predeterminado FROM usuarios_internos WHERE id = ?", [$usuarioAct['id']]);
+                $usr = $auth->getUsuario();
+                $tipoPago = $db->fetchColumn("SELECT tipo_pago_predeterminado FROM usuarios_internos WHERE id = ?", [$usr['id']]);
                 $esMensual = ($tipoPago === 'mensual');
                 $ha = (float)($solicitud['honorarios_abogado'] ?? 0);
                 $bo = (float)($solicitud['bonificacion'] ?? 0);
                 ?>
                 <div style="background:#f8fafc;padding:20px;border-radius:12px;border:1px solid #e2e8f0;margin-bottom:20px;text-align:center;">
                     <?php if($esMensual): ?>
-                        <div style="font-size:0.85rem;font-weight:700;color:#64748b;text-transform:uppercase;">Retribución Base</div>
-                        <div style="font-size:1.1rem;font-weight:800;color:#0f172a;margin-bottom:12px;">Incluida en nómina</div>
+                        <div style="font-size:0.85rem;font-weight:700;color:#64748b;text-transform:uppercase;">Esquema de Pago</div>
+                        <div style="font-size:1.1rem;font-weight:800;color:#0f172a;margin-bottom:12px;">Plan Mensual</div>
                     <?php else: ?>
                         <div style="font-size:0.85rem;font-weight:700;color:#64748b;text-transform:uppercase;">Honorarios Base</div>
                         <div style="font-size:1.6rem;font-weight:800;color:#16a34a;margin-bottom:12px;"><?php echo number_format($ha, 2); ?> €</div>
