@@ -210,57 +210,108 @@ $miAsignacion = reset($misAsignaciones);
           <input type="hidden" name="accion" value="asignar_multi">
           
           <span class="sv-label">Valor que pagará el cliente (€)</span>
-          <input type="number" step="0.01" name="valor_cliente" id="valCliente" class="sv-input" style="width:100%;margin-bottom:14px;padding:10px;border-radius:8px;border:1px solid #e2e8f0;" required placeholder="Ej: 1000.00" oninput="calcHon()">
+          <div style="display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap">
+              <div style="flex:1;min-width:200px;">
+                  <span class="sv-label">Honorarios Base del Abogado</span>
+                  <div style="background:#f8fafc;padding:12px;border-radius:8px;border:1px solid #e2e8f0;">
+                      <div style="display:flex;gap:12px;">
+                          <div style="flex:1">
+                              <label style="font-size:0.7rem;font-weight:700;color:#64748b;margin-bottom:4px;display:block">Porcentaje (%)</label>
+                              <input type="number" step="0.1" name="honorarios_pct" id="honPct" class="sv-input" style="width:100%;padding:8px;border-radius:6px;border:1px solid #cbd5e1;background:#fff;" value="0" oninput="calcHon()">
+                          </div>
+                          <div style="flex:1">
+                              <label style="font-size:0.7rem;font-weight:700;color:#64748b;margin-bottom:4px;display:block">Euros (€)</label>
+                              <input type="number" step="0.01" name="honorarios_abogado" id="honEur" class="sv-input" style="width:100%;padding:8px;border-radius:6px;border:1px solid #cbd5e1;background:#fff;" value="0" oninput="calcHonEur()" required>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+              <div style="flex:1;min-width:200px;">
+                  <span class="sv-label">Bonificación Extra</span>
+                  <div style="background:#f8fafc;padding:12px;border-radius:8px;border:1px solid #e2e8f0;">
+                      <div style="display:flex;gap:12px;">
+                          <div style="flex:1">
+                              <label style="font-size:0.7rem;font-weight:700;color:#64748b;margin-bottom:4px;display:block">Porcentaje (%)</label>
+                              <input type="number" step="0.1" name="bono_pct" id="bonoPct" class="sv-input" style="width:100%;padding:8px;border-radius:6px;border:1px solid #cbd5e1;background:#fff;" value="0" oninput="calcBono()">
+                          </div>
+                          <div style="flex:1">
+                              <label style="font-size:0.7rem;font-weight:700;color:#64748b;margin-bottom:4px;display:block">Euros (€)</label>
+                              <input type="number" step="0.01" name="bonificacion" id="bonoEur" class="sv-input" style="width:100%;padding:8px;border-radius:6px;border:1px solid #cbd5e1;background:#fff;" value="0" oninput="calcBonoEur()">
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
 
-          <span class="sv-label">Honorarios del Abogado</span>
-          <div style="background:#f8fafc;padding:12px;border-radius:8px;border:1px solid #e2e8f0;margin-bottom:14px;">
-            
-            <div style="display:flex;gap:12px;margin-bottom:12px">
-                <div style="flex:1">
-                    <label style="font-size:0.7rem;font-weight:700;color:#64748b;margin-bottom:4px;display:block">Porcentaje (%)</label>
-                    <input type="number" step="0.1" name="honorarios_pct" id="honPct" class="sv-input" style="width:100%;padding:8px;border-radius:6px;border:1px solid #cbd5e1;background:#fff;" value="0" oninput="calcFromPct()">
-                </div>
-                <div style="flex:1">
-                    <label style="font-size:0.7rem;font-weight:700;color:#64748b;margin-bottom:4px;display:block">Euros (€)</label>
-                    <input type="number" step="0.01" name="honorarios_abogado" id="honEur" class="sv-input" style="width:100%;padding:8px;border-radius:6px;border:1px solid #cbd5e1;background:#fff;" value="0" oninput="calcFromEur()" required>
-                </div>
-            </div>
-            
-            <input type="range" class="form-range" id="honSlider" min="0" max="100" step="1" value="0" oninput="syncSlider()">
-            
-            <div style="margin-top:12px;padding-top:12px;border-top:1px solid #e2e8f0;">
-                <label style="display:flex;align-items:start;gap:8px;cursor:pointer;">
-                    <input type="checkbox" name="es_bonificacion" value="1" style="margin-top:2px;accent-color:#2e6edd;">
-                    <span style="font-size:0.75rem;color:#475569;line-height:1.4">
-                        <strong style="color:#1a1a2e">Aplicar como bonificación excepcional</strong><br>
-                        Si seleccionas a un abogado con plan mensual, recibirá este importe como extra. Si no lo marcas, este campo solo aplicará a los abogados por hitos/éxito.
-                    </span>
-                </label>
-            </div>
+          <!-- Barra de Progreso (Vaso de Agua) -->
+          <div style="margin-bottom:20px;padding:12px;background:#fff;border:1px solid #e2e8f0;border-radius:8px;">
+              <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:0.75rem;font-weight:800;color:#475569;">
+                  <span style="color:#2563eb">Despacho: <span id="lblDespacho">100% (0.00€)</span></span>
+                  <span style="color:#16a34a">Honorarios: <span id="lblHon">0% (0.00€)</span></span>
+                  <span style="color:#ca8a04">Bono: <span id="lblBono">0% (0.00€)</span></span>
+              </div>
+              <div style="height:14px;border-radius:99px;background:#e2e8f0;display:flex;overflow:hidden;box-shadow:inset 0 1px 3px rgba(0,0,0,0.1)">
+                  <div id="barDespacho" style="height:100%;background:#3b82f6;width:100%;transition:width 0.3s"></div>
+                  <div id="barHon" style="height:100%;background:#22c55e;width:0%;transition:width 0.3s"></div>
+                  <div id="barBono" style="height:100%;background:#eab308;width:0%;transition:width 0.3s"></div>
+              </div>
           </div>
           
           <script>
-            function syncSlider() {
-                document.getElementById('honPct').value = document.getElementById('honSlider').value;
-                calcFromPct();
+            function updateVaso() {
+                let val = parseFloat(document.getElementById('valCliente').value) || 0;
+                let honEur = parseFloat(document.getElementById('honEur').value) || 0;
+                let bonoEur = parseFloat(document.getElementById('bonoEur').value) || 0;
+
+                let despEur = Math.max(0, val - honEur - bonoEur);
+                
+                let pctHon = val > 0 ? (honEur / val) * 100 : 0;
+                let pctBono = val > 0 ? (bonoEur / val) * 100 : 0;
+                let pctDesp = val > 0 ? (despEur / val) * 100 : (val === 0 ? 100 : 0);
+
+                document.getElementById('barHon').style.width = pctHon + '%';
+                document.getElementById('barBono').style.width = pctBono + '%';
+                document.getElementById('barDespacho').style.width = pctDesp + '%';
+
+                document.getElementById('lblHon').innerText = pctHon.toFixed(1) + '% (' + honEur.toFixed(2) + '€)';
+                document.getElementById('lblBono').innerText = pctBono.toFixed(1) + '% (' + bonoEur.toFixed(2) + '€)';
+                document.getElementById('lblDespacho').innerText = pctDesp.toFixed(1) + '% (' + despEur.toFixed(2) + '€)';
             }
-            function calcFromPct() {
+
+            function calcHon() {
                 let pct = parseFloat(document.getElementById('honPct').value) || 0;
                 let val = parseFloat(document.getElementById('valCliente').value) || 0;
-                let eur = val * (pct / 100);
-                document.getElementById('honEur').value = eur.toFixed(2);
-                document.getElementById('honSlider').value = Math.min(100, Math.max(0, pct));
+                document.getElementById('honEur').value = (val * (pct / 100)).toFixed(2);
+                updateVaso();
             }
-            function calcFromEur() {
+            function calcHonEur() {
                 let eur = parseFloat(document.getElementById('honEur').value) || 0;
                 let val = parseFloat(document.getElementById('valCliente').value) || 0;
-                let pct = val > 0 ? (eur / val) * 100 : 0;
-                document.getElementById('honPct').value = pct.toFixed(1);
-                document.getElementById('honSlider').value = Math.min(100, Math.max(0, pct));
+                document.getElementById('honPct').value = (val > 0 ? (eur / val) * 100 : 0).toFixed(1);
+                updateVaso();
             }
-            function calcHon() {
-                calcFromPct();
+
+            function calcBono() {
+                let pct = parseFloat(document.getElementById('bonoPct').value) || 0;
+                let val = parseFloat(document.getElementById('valCliente').value) || 0;
+                document.getElementById('bonoEur').value = (val * (pct / 100)).toFixed(2);
+                updateVaso();
             }
+            function calcBonoEur() {
+                let eur = parseFloat(document.getElementById('bonoEur').value) || 0;
+                let val = parseFloat(document.getElementById('valCliente').value) || 0;
+                document.getElementById('bonoPct').value = (val > 0 ? (eur / val) * 100 : 0).toFixed(1);
+                updateVaso();
+            }
+
+            function calcAll() {
+                calcHonEur(); 
+                calcBonoEur(); 
+                updateVaso();
+            }
+
+            document.getElementById('valCliente').addEventListener('input', calcAll);
+            setTimeout(updateVaso, 100); // init
           </script>
 
           <span class="sv-label">Abogados a asignar</span>
@@ -281,8 +332,20 @@ $miAsignacion = reset($misAsignaciones);
         </form>
         <?php else: ?>
           <div style="margin-bottom:16px;">
-            <p style="font-weight:600;margin-bottom:4px;font-size:0.8125rem;color:#64748b">Valor del Caso: <strong style="color:#1a1a2e"><?php echo e($solicitud['valor_cliente'] ?? '0.00'); ?> €</strong></p>
-            <p style="font-weight:600;margin-bottom:12px;font-size:0.8125rem;color:#64748b">Honorarios Abogado: <strong style="color:#16a34a"><?php echo e($solicitud['honorarios_abogado'] ?? '0.00'); ?> €</strong></p>
+            <div style="background:#f8fafc;padding:12px;border-radius:8px;border:1px solid #e2e8f0;margin-bottom:14px;font-size:0.8125rem;">
+                <p style="font-weight:600;margin-bottom:4px;color:#64748b">Valor del Caso: <strong style="color:#1a1a2e"><?php echo e($solicitud['valor_cliente'] ?? '0.00'); ?> €</strong></p>
+                <?php
+                $vc = (float)($solicitud['valor_cliente'] ?? 0);
+                $ha = (float)($solicitud['honorarios_abogado'] ?? 0);
+                $bo = (float)($solicitud['bonificacion'] ?? 0);
+                $de = max(0, $vc - $ha - $bo);
+                ?>
+                <p style="font-weight:600;margin-bottom:4px;color:#2563eb">Despacho: <strong><?php echo number_format($de, 2); ?> €</strong></p>
+                <p style="font-weight:600;margin-bottom:4px;color:#16a34a">Honorarios Abogado: <strong><?php echo number_format($ha, 2); ?> €</strong></p>
+                <?php if($bo > 0): ?>
+                <p style="font-weight:600;margin-bottom:0;color:#ca8a04">Bonificación Extra: <strong><?php echo number_format($bo, 2); ?> €</strong></p>
+                <?php endif; ?>
+            </div>
             <p style="font-weight:600;margin-bottom:8px;">Estado de Asignaciones:</p>
             <ul style="list-style:none;padding:0;margin:0;">
               <?php foreach($asignaciones as $as): 
@@ -339,13 +402,25 @@ $miAsignacion = reset($misAsignaciones);
         <?php 
         $tipoPago = $db->fetchColumn("SELECT tipo_pago_predeterminado FROM usuarios_internos WHERE id = ?", [$usuarioAct['id']]);
         $esMensual = ($tipoPago === 'mensual');
-        $mostrarBono = (!$esMensual || !empty($solicitud['es_bonificacion']));
+        $ha = (float)($solicitud['honorarios_abogado'] ?? 0);
+        $bo = (float)($solicitud['bonificacion'] ?? 0);
         ?>
-        <?php if ($mostrarBono && !empty($solicitud['honorarios_abogado']) && $solicitud['honorarios_abogado'] > 0): ?>
-            <p style="font-weight:600;margin-bottom:14px;font-size:1.1rem">Honorarios ofrecidos: <span style="color:#16a34a"><?php echo e($solicitud['honorarios_abogado']); ?> €</span></p>
-        <?php else: ?>
-            <p style="font-weight:600;margin-bottom:14px;font-size:0.95rem;color:#475569">Retribución: Incluida en tu plan mensual.</p>
-        <?php endif; ?>
+        <div style="background:#f8fafc;padding:12px;border-radius:8px;border:1px solid #e2e8f0;margin-bottom:16px;">
+            <?php if($esMensual): ?>
+                <p style="font-weight:600;margin-bottom:4px;font-size:0.95rem;color:#475569">Retribución Base: <span>Incluida en nómina mensual</span></p>
+            <?php else: ?>
+                <p style="font-weight:600;margin-bottom:4px;font-size:1.05rem;color:#1a1a2e">Honorarios Base: <span style="color:#16a34a"><?php echo number_format($ha, 2); ?> €</span></p>
+            <?php endif; ?>
+            
+            <?php if($bo > 0): ?>
+                <p style="font-weight:600;margin-bottom:0;font-size:1.05rem;color:#1a1a2e">Bonificación Extra: <span style="color:#ca8a04">+<?php echo number_format($bo, 2); ?> €</span></p>
+            <?php endif; ?>
+            
+            <?php if(!$esMensual && $bo > 0): ?>
+                <div style="height:1px;background:#e2e8f0;margin:8px 0;"></div>
+                <p style="font-weight:800;margin-bottom:0;font-size:1.15rem;color:#1a1a2e">Total a Cobrar: <span style="color:#16a34a"><?php echo number_format($ha + $bo, 2); ?> €</span></p>
+            <?php endif; ?>
+        </div>
         <form method="POST" action="<?php echo APP_URL;?>/index.php?page=solicitudes">
           <?php echo CSRF::campo();?>
           <input type="hidden" name="solicitud_id" value="<?php echo $id;?>">
