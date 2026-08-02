@@ -372,10 +372,10 @@ $miAsignacion = reset($misAsignaciones);
         <?php endif; ?>
 
         <?php if ($auth->esAbogado() && $miAsignacion && $miAsignacion['estado'] === 'pendiente' && $solicitud['estado'] !== 'aceptada'): ?>
-        <div class="sv-card-premium" style="border-top:4px solid #10b981;">
+        <div class="sv-card-premium" style="border-top:3px solid #10b981;">
             <div class="sv-header-premium" style="background:#fff;">
-                <div class="sv-hicon" style="background:#dcfce7;color:#059669;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
-                <h3>Oferta de Caso</h3>
+                <div class="sv-hicon" style="background:#dcfce7;color:#059669;width:24px;height:24px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+                <div class="sv-header-premium-title">Oferta de Caso</div>
             </div>
             <div class="sv-body-premium">
                 <?php 
@@ -385,37 +385,37 @@ $miAsignacion = reset($misAsignaciones);
                 $ha = (float)($solicitud['honorarios_abogado'] ?? 0);
                 $bo = (float)($solicitud['bonificacion'] ?? 0);
                 ?>
-                <div style="background:#f8fafc;padding:20px;border-radius:12px;border:1px solid #e2e8f0;margin-bottom:20px;text-align:center;">
+                <div style="background:#f8fafc;padding:12px;border-radius:8px;border:1px solid #e2e8f0;margin-bottom:12px;text-align:center;">
                     <?php if($esMensual): ?>
-                        <div style="font-size:0.85rem;font-weight:700;color:#64748b;text-transform:uppercase;">Esquema de Pago</div>
-                        <div style="font-size:1.1rem;font-weight:800;color:#0f172a;margin-bottom:12px;">Plan Mensual</div>
+                        <div style="font-size:0.75rem;font-weight:700;color:#64748b;text-transform:uppercase;">Esquema de Pago</div>
+                        <div style="font-size:0.95rem;font-weight:800;color:#0f172a;margin-bottom:8px;">Plan Mensual</div>
                     <?php else: ?>
-                        <div style="font-size:0.85rem;font-weight:700;color:#64748b;text-transform:uppercase;">Honorarios Base</div>
-                        <div style="font-size:1.6rem;font-weight:800;color:#16a34a;margin-bottom:12px;"><?php echo number_format($ha, 2); ?> €</div>
+                        <div style="font-size:0.75rem;font-weight:700;color:#64748b;text-transform:uppercase;">Honorarios Base</div>
+                        <div style="font-size:1.2rem;font-weight:800;color:#16a34a;margin-bottom:8px;"><?php echo number_format($ha, 2); ?> €</div>
                     <?php endif; ?>
                     
                     <?php if($bo > 0): ?>
-                        <div style="display:inline-block;background:#fef3c7;border:1px solid #fde68a;padding:6px 16px;border-radius:99px;">
-                            <span style="font-size:0.8rem;font-weight:800;color:#d97706;text-transform:uppercase;">Bono Extra: +<?php echo number_format($bo, 2); ?> €</span>
+                        <div style="display:inline-block;background:#fef3c7;border:1px solid #fde68a;padding:4px 12px;border-radius:99px;">
+                            <span style="font-size:0.7rem;font-weight:800;color:#d97706;text-transform:uppercase;">Bono Extra: +<?php echo number_format($bo, 2); ?> €</span>
                         </div>
                     <?php endif; ?>
                     
                     <?php if(!$esMensual && $bo > 0): ?>
-                        <div style="height:1px;background:#cbd5e1;margin:16px 0;"></div>
-                        <div style="font-size:0.9rem;font-weight:700;color:#64748b;text-transform:uppercase;">Total a Cobrar</div>
-                        <div style="font-size:1.8rem;font-weight:800;color:#059669;"><?php echo number_format($ha + $bo, 2); ?> €</div>
+                        <div style="height:1px;background:#cbd5e1;margin:10px 0;"></div>
+                        <div style="font-size:0.8rem;font-weight:700;color:#64748b;text-transform:uppercase;">Total a Cobrar</div>
+                        <div style="font-size:1.4rem;font-weight:800;color:#059669;"><?php echo number_format($ha + $bo, 2); ?> €</div>
                     <?php endif; ?>
                 </div>
 
                 <form method="POST" action="<?php echo APP_URL;?>/index.php?page=solicitudes">
                   <?php echo CSRF::campo();?>
                   <input type="hidden" name="solicitud_id" value="<?php echo $id;?>">
-                  <div style="display:flex;gap:12px;">
-                    <button type="submit" name="accion" value="abogado_aceptar" class="sv-btn-ok" style="flex:1;background:#10b981;color:#fff;padding:12px;border-radius:8px;border:none;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;" data-confirm="¿Aceptar este caso?">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Aceptar
+                  <div style="display:flex;gap:8px;">
+                    <button type="submit" name="accion" value="abogado_aceptar" class="sv-btn-ok" style="flex:1;background:#10b981;color:#fff;padding:8px;border-radius:6px;border:none;font-weight:700;font-size:0.85rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;" data-confirm="¿Aceptar este caso?">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Aceptar
                     </button>
-                    <button type="submit" name="accion" value="abogado_rechazar" class="sv-btn-no" style="flex:1;background:#ef4444;color:#fff;padding:12px;border-radius:8px;border:none;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;" data-confirm="¿Rechazar este caso?">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Rechazar
+                    <button type="submit" name="accion" value="abogado_rechazar" class="sv-btn-no" style="flex:1;background:#ef4444;color:#fff;padding:8px;border-radius:6px;border:none;font-weight:700;font-size:0.85rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;" data-confirm="¿Rechazar este caso?">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Rechazar
                     </button>
                   </div>
                 </form>
