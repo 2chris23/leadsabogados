@@ -203,7 +203,7 @@ if (isset($rutas[$page])) {
     } elseif ($auth->esGestor()) {
         header('Location: ' . APP_URL . '/index.php?page=solicitudes');
     } else {
-        header('Location: ' . APP_URL . '/index.php?page=casos');
+        header('Location: ' . APP_URL . '/index.php?page=dashboard');
     }
     exit;
 }

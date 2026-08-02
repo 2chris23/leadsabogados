@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 } elseif ($rolUsuario === 'gestor') {
                     header('Location: ' . APP_URL . '/index.php?page=solicitudes');
                 } else {
-                    header('Location: ' . APP_URL . '/index.php?page=casos');
+                    header('Location: ' . APP_URL . '/index.php?page=dashboard');
                 }
                 exit;
             } else {
