@@ -1,11 +1,15 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 define('CRM_ROOT', __DIR__);
 require CRM_ROOT . '/includes/config.php';
 require CRM_ROOT . '/includes/Database.php';
 
 try {
     $db = Database::getInstance();
-    $pdo = $db->getPdo();
+    $pdo = $db->getConnection();
 
     // Add honorarios column if not exists
     $columns = [];
@@ -41,6 +45,6 @@ try {
     echo "Table solicitud_asignaciones created. <br>";
     echo "Migration completed successfully.";
 
-} catch (Exception $e) {
-    echo "Error: " . $e->getMessage();
+} catch (Throwable $e) {
+    echo "Error: " . $e->getMessage() . " in " . $e->getFile() . " on line " . $e->getLine();
 }
