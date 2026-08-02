@@ -18,9 +18,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
         try {
             $abogados = $_POST['abogados'] ?? [];
             if(empty($abogados)) throw new Exception("Debe seleccionar al menos un abogado.");
-            $honorarios = trim($_POST['honorarios'] ?? '0');
+            $valor_cliente = trim($_POST['valor_cliente'] ?? '0');
+            $honorarios_abogado = trim($_POST['honorarios_abogado'] ?? '0');
             $db->beginTransaction();
-            $db->update('solicitudes', ['honorarios' => $honorarios, 'estado' => 'asignada'], 'id = ?', [$solicitudId]);
+            $db->update('solicitudes', [
+                'valor_cliente' => $valor_cliente,
+                'honorarios_abogado' => $honorarios_abogado,
+                'estado' => 'asignada'
+            ], 'id = ?', [$solicitudId]);
             foreach ($abogados as $ab_id) {
                 $db->insert('solicitud_asignaciones', [
                     'solicitud_id' => $solicitudId,
@@ -29,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
                 ]);
             }
             $db->commit();
-            AuditLog::registrar('asignar_solicitud', 'solicitudes', $solicitudId, "Propuesta enviada a ".count($abogados)." abogados por $honorarios €");
+            AuditLog::registrar('asignar_solicitud', 'solicitudes', $solicitudId, "Propuesta enviada a ".count($abogados)." abogados (Valor: $valor_cliente €, Honorarios: $honorarios_abogado €)");
             setFlash('exito', 'Propuesta enviada a los abogados seleccionados.');
         } catch (Exception $e) {
             if($db->getPdo()->inTransaction()) $db->rollBack();
@@ -42,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
     if ($accion === 'cancelar_asignacion' && $auth->esAdmin() && $solicitudId > 0) {
         try {
             $db->beginTransaction();
-            $db->update('solicitudes', ['honorarios' => null, 'estado' => 'pendiente'], 'id = ?', [$solicitudId]);
+            $db->update('solicitudes', ['valor_cliente' => null, 'honorarios_abogado' => null, 'estado' => 'pendiente'], 'id = ?', [$solicitudId]);
             $db->query("DELETE FROM solicitud_asignaciones WHERE solicitud_id = ?", [$solicitudId]);
             $db->commit();
             AuditLog::registrar('cancelar_asignacion', 'solicitudes', $solicitudId, "Asignaciones canceladas.");
@@ -186,14 +191,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
                     $logMsg .= " (Caso reactivado)";
                 } else {
                     $casoId = $db->insert('casos', [
-                        'cliente_id'     => $clienteId,
-                        'abogado_id'     => $abogadoActual ?: null,
-                        'titulo'         => $solicitud['tipo_problema'] . ' - ' . $solicitud['nombre'] . ' ' . $solicitud['apellidos'],
-                        'tipo_caso'      => $solicitud['tipo_problema'],
-                        'descripcion'    => $solicitud['descripcion'],
-                        'referencia'     => $referencia,
-                        'estado'         => 'en_estudio',
-                        'fecha_apertura' => date('Y-m-d')
+                        'cliente_id'         => $clienteId,
+                        'abogado_id'         => $abogadoActual ?: null,
+                        'titulo'             => $solicitud['tipo_problema'] . ' - ' . $solicitud['nombre'] . ' ' . $solicitud['apellidos'],
+                        'tipo_caso'          => $solicitud['tipo_problema'],
+                        'descripcion'        => $solicitud['descripcion'],
+                        'referencia'         => $referencia,
+                        'estado'             => 'en_estudio',
+                        'fecha_apertura'     => date('Y-m-d'),
+                        'honorarios_totales' => $solicitud['valor_cliente'] ?? 0,
+                        'honorarios_abogado' => $solicitud['honorarios_abogado'] ?? 0
                     ]);
     
                     // Copiar archivos del portal (solicitud_archivos) → documentos del caso
