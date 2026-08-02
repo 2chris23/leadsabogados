@@ -76,7 +76,7 @@ $miAsignacion = reset($misAsignaciones);
 </div>
 
 <style>
-.sv-wrap-container { max-width: 1200px; margin: 0 auto; }
+.sv-wrap-container { width: 100%; }
 .sv-topbar { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px; background:#fff; padding:12px 20px; border-radius:10px; border:1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
 .sv-grid-main { display:grid; grid-template-columns: 1fr 1.1fr; gap:16px; align-items:start; }
 @media(max-width:991px) { .sv-grid-main { grid-template-columns: 1fr; } }
