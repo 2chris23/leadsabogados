@@ -231,12 +231,33 @@ $miAsignacion = reset($misAsignaciones);
               <?php endforeach; ?>
             </ul>
           </div>
-          <form method="POST" action="<?php echo APP_URL;?>/index.php?page=solicitudes" onsubmit="return confirm('¿Seguro que desea cancelar esta asignación?');">
+          <form id="formCancelarAsig" method="POST" action="<?php echo APP_URL;?>/index.php?page=solicitudes">
             <?php echo CSRF::campo();?>
             <input type="hidden" name="solicitud_id" value="<?php echo $id;?>">
             <input type="hidden" name="accion" value="cancelar_asignacion">
-            <button type="submit" class="sv-btn sv-btn-no" style="width:100%;">Cancelar Asignación</button>
+            <button type="button" class="sv-btn sv-btn-no" style="width:100%;" data-bs-toggle="modal" data-bs-target="#modalCancelarAsig">Cancelar Asignación</button>
           </form>
+
+          <!-- Modal Cancelar Asignación -->
+          <div class="modal fade" id="modalCancelarAsig" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-sm">
+              <div class="modal-content" style="border-radius:12px; border:none; box-shadow:0 10px 40px rgba(0,0,0,0.1);">
+                <div class="modal-header" style="border-bottom:none; padding:24px 24px 0;">
+                  <div style="width:56px;height:56px;border-radius:50%;background:#fef2f2;color:#dc2626;display:flex;align-items:center;justify-content:center;margin:0 auto;">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                  </div>
+                </div>
+                <div class="modal-body text-center" style="padding:16px 24px 24px;">
+                  <h4 style="font-weight:800;color:#1a1a2e;margin-bottom:8px;font-size:1.15rem;">¿Cancelar Asignación?</h4>
+                  <p style="color:#64748b;font-size:0.875rem;margin-bottom:24px;line-height:1.5;">La propuesta se revocará para todos los abogados y la solicitud volverá a estar "Pendiente".</p>
+                  <div style="display:flex;gap:12px;justify-content:center;">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius:8px;font-weight:700;padding:8px 20px;flex:1;background:#f1f5f9;border:none;color:#475569;">Atrás</button>
+                    <button type="button" class="btn btn-danger" onclick="document.getElementById('formCancelarAsig').submit();" style="border-radius:8px;font-weight:700;padding:8px 20px;flex:1;background:#ef4444;border:none;">Cancelar</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         <?php endif; ?>
       </div>
     </div>
