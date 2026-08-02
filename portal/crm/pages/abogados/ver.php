@@ -237,9 +237,7 @@ include CRM_ROOT . '/templates/layout/header.php';
                             <div class="w-24-px h-24-px bg-primary-600 text-white rounded-circle d-flex align-items-center justify-content-center text-xs fw-bold"><?php echo strtoupper(substr($sol['nombre'],0,1)); ?></div>
                             <span class="text-sm fw-semibold"><?php echo e($sol['nombre'] . ' ' . $sol['apellidos']); ?></span>
                         </div>
-                        <div class="mb-16 text-sm text-secondary-light text-truncate">
-                            <strong>Problema:</strong> <?php echo e($sol['tipo_problema']); ?>
-                        </div>
+
                         <div class="d-flex pt-12 border-top" onclick="event.stopPropagation()">
                             <a href="<?php echo $solUrl; ?>" class="btn btn-sm btn-outline-primary flex-grow-1 radius-12 fw-bold">Ver Solicitud</a>
                         </div>
