@@ -203,12 +203,11 @@ $miAsignacion = reset($misAsignaciones);
           <span class="sv-label">Abogados a asignar</span>
           <div style="max-height:200px;overflow-y:auto;border:1px solid #e2e8f0;border-radius:8px;padding:10px;margin-bottom:14px;">
             <?php foreach($abogados as $ab): ?>
-            <div class="form-check" style="margin-bottom:8px">
-              <input class="form-check-input" type="checkbox" name="abogados[]" value="<?php echo $ab['id']; ?>" id="abogado_<?php echo $ab['id']; ?>">
-              <label class="form-check-label" for="abogado_<?php echo $ab['id']; ?>" style="cursor:pointer; font-size:14px; font-weight:500;">
-                <?php echo e($ab['nombre'] . ' ' . $ab['apellidos']); ?>
-              </label>
-            </div>
+            <label class="sv-chk">
+              <input type="checkbox" name="abogados[]" value="<?php echo $ab['id']; ?>">
+              <span class="sv-chk-box"></span>
+              <span class="sv-chk-text"><?php echo e($ab['nombre'] . ' ' . $ab['apellidos']); ?></span>
+            </label>
             <?php endforeach; ?>
           </div>
 

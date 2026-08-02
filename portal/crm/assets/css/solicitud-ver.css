@@ -55,3 +55,14 @@
 .sv-label{font-size:.75rem;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;display:block}
 .sv-divider{border:none;border-top:1px solid #f1f5f9;margin:16px 0}
 .sv-info-row{display:flex;align-items:center;gap:6px;font-size:.8125rem;color:#64748b;margin-top:4px}
+
+/* Custom Checkbox */
+.sv-chk { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 8px; cursor: pointer; transition: 0.2s; border: 1px solid transparent; margin-bottom: 4px; }
+.sv-chk:hover { background: #f8fafc; border-color: #e2e8f0; }
+.sv-chk input { display: none; }
+.sv-chk-box { width: 22px; height: 22px; border: 2px solid #cbd5e1; border-radius: 6px; display: flex; align-items: center; justify-content: center; transition: 0.2s; background: #fff; flex-shrink: 0; }
+.sv-chk input:checked ~ .sv-chk-box { background: #2e6edd; border-color: #2e6edd; }
+.sv-chk-box::after { content: ''; width: 5px; height: 10px; border: solid white; border-width: 0 2px 2px 0; transform: rotate(45deg) translateY(-1px); opacity: 0; transition: 0.2s; }
+.sv-chk input:checked ~ .sv-chk-box::after { opacity: 1; }
+.sv-chk-text { font-size: 0.875rem; color: #475569; user-select: none; transition: 0.2s; }
+.sv-chk input:checked ~ .sv-chk-text { font-weight: 700; color: #1a1a2e; }
