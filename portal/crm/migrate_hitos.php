@@ -1,4 +1,5 @@
 <?php
+define('CRM_ROOT', __DIR__);
 require 'includes/config.php';
 require 'includes/Database.php';
 
