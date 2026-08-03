@@ -1306,11 +1306,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         <input type="number" name="honorarios_totales" class="form-control"
                                step="0.01" min="0" value="<?php echo $caso['honorarios_totales']; ?>" required>
                     </div>
-                    <div class="col-sm-6">
-                        <label class="form-label">Pago Abogado (&euro;)</label>
-                        <input type="number" name="honorarios_abogado" class="form-control"
-                               step="0.01" min="0" value="<?php echo $caso['honorarios_abogado'] ?? 0; ?>" title="Opcional. Lo que se le paga al abogado por este caso (0 = usar su tarifa por defecto)">
-                    </div>
 
                     <?php $tpc = $caso['tipo_pago_cliente'] ?? 'pago_unico'; ?>
                     <div class="col-sm-6">

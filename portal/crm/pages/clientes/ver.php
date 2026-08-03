@@ -746,10 +746,6 @@ include CRM_ROOT . '/templates/layout/header.php';
                         <input type="number" step="0.01" name="honorarios_totales" class="form-control" value="0.00" title="Lo que se le cobra al cliente">
                     </div>
                     <div class="col-sm-6">
-                        <label class="form-label fw-semibold">Pago Abogado (€)</label>
-                        <input type="number" step="0.01" name="honorarios_abogado" class="form-control" value="0.00" title="Opcional. Lo que se le paga al abogado por este caso específico (0 para usar su tarifa por defecto)">
-                    </div>
-                    <div class="col-sm-6">
                         <label class="form-label fw-semibold">Fecha de Apertura</label>
                         <input type="date" name="fecha_apertura" class="form-control" value="<?php echo date('Y-m-d'); ?>">
                     </div>
@@ -815,10 +811,6 @@ include CRM_ROOT . '/templates/layout/header.php';
                     <div class="col-sm-6">
                         <label class="form-label fw-semibold">Cobro Cliente (€)</label>
                         <input type="number" step="0.01" name="honorarios_totales" id="editCasoHonorarios" class="form-control" title="Lo que se le cobra al cliente">
-                    </div>
-                    <div class="col-sm-6">
-                        <label class="form-label fw-semibold">Pago Abogado (€)</label>
-                        <input type="number" step="0.01" name="honorarios_abogado" id="editCasoHonorariosAbogado" class="form-control" title="Opcional. Lo que se le paga al abogado por este caso (0 para usar tarifa por defecto)">
                     </div>
                     <?php /* DESCRIPCION - oculto temporalmente
                     <div class="col-12">
