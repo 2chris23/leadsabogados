@@ -655,9 +655,9 @@ document.addEventListener('DOMContentLoaded', () => {
                                 </div>
                                 <div>
                                     <div style="display:flex; align-items:center; gap: 8px;">
-                                        <h4 style="margin:0; font-weight: 700; font-size: 1rem; color: #0f172a; letter-spacing: -0.01em;">
+                                        <div style="margin:0; font-weight: 700; font-size: 0.9375rem; color: #0f172a; letter-spacing: -0.01em;">
                                             <?php echo e($nota['titulo'] ?? 'Nota sin título'); ?>
-                                        </h4>
+                                        </div>
                                         <span class="feed-nota-tag <?php echo $tagClass; ?>">
                                             <span class="tag-dot <?php echo $dotClass; ?>"></span>
                                             <?php echo $isInterna ? 'INTERNA' : 'PÚBLICA'; ?>
@@ -686,7 +686,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             </div>
                         </div>
                         
-                        <div style="font-size: 0.9375rem; color: #334155; line-height: 1.6; white-space: pre-wrap; padding-left: 50px;"><?php echo e($nota['contenido']); ?></div>
+                        <div style="font-size: 0.875rem; color: #334155; line-height: 1.6; white-space: pre-wrap; padding-left: 50px;"><?php echo e($nota['contenido']); ?></div>
                         
                         <?php if(!empty($nota['doc_id'])): ?>
                         <div class="doc-attachment" style="margin-top: 16px; margin-left: 50px; padding: 12px 16px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; display:flex; align-items:center; justify-content: space-between; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
