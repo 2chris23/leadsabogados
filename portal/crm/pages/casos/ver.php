@@ -300,7 +300,7 @@ unset($pp);
 $tituloPagina = $caso['referencia'];
 include CRM_ROOT . '/templates/layout/header.php';
 ?>
-<link rel="stylesheet" href="<?php echo APP_URL; ?>/assets/css/caso-ver.css">
+<link rel="stylesheet" href="<?php echo APP_URL; ?>/assets/css/caso-ver.css?v=<?php echo time(); ?>">
 <?php
 $estadoMap = [
     'en_estudio'       => ['cls'=>'cv-state-study', 'label'=>'En Estudio',       'dot'=>'#2563eb'],
