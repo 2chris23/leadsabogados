@@ -169,18 +169,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_caso'])) {
         $saldoPendiente = max(0, $honorariosTotales - $totalPagado);
 
         // Desactivar temporalmente restricciones de clave foránea para permitir limpiar cuotas no pagadas
-        try { $db->execute("SET FOREIGN_KEY_CHECKS = 0"); } catch (Throwable $eFk) {}
+        try { $db->query("SET FOREIGN_KEY_CHECKS = 0"); } catch (Throwable $eFk) {}
 
         // Borrar cuotas pendientes o vencidas existentes (o todas si no hay pagos)
         try {
             if ($totalPagado <= 0) {
-                $db->execute("DELETE FROM pagos_programados WHERE caso_id = ?", [$id]);
+                $db->query("DELETE FROM pagos_programados WHERE caso_id = ?", [$id]);
             } else {
-                $db->execute("DELETE FROM pagos_programados WHERE caso_id = ? AND estado IN ('pendiente', 'vencido')", [$id]);
+                $db->query("DELETE FROM pagos_programados WHERE caso_id = ? AND estado IN ('pendiente', 'vencido')", [$id]);
             }
         } catch (Throwable $eDel) {
             // Si la tabla no existe aún, la creamos al vuelo
-            $db->execute("CREATE TABLE IF NOT EXISTS pagos_programados (
+            $db->query("CREATE TABLE IF NOT EXISTS pagos_programados (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 caso_id INT NOT NULL,
                 numero_cuota INT DEFAULT 1,
@@ -193,7 +193,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_caso'])) {
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 INDEX idx_caso (caso_id)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-            $db->execute("DELETE FROM pagos_programados WHERE caso_id = ?", [$id]);
+            $db->query("DELETE FROM pagos_programados WHERE caso_id = ?", [$id]);
         }
 
         if ($saldoPendiente > 0) {
@@ -254,9 +254,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_caso'])) {
                 }
             }
         }
-        try { $db->execute("SET FOREIGN_KEY_CHECKS = 1"); } catch (Throwable $eFk) {}
+        try { $db->query("SET FOREIGN_KEY_CHECKS = 1"); } catch (Throwable $eFk) {}
     } catch (Throwable $eP) {
-        try { $db->execute("SET FOREIGN_KEY_CHECKS = 1"); } catch (Throwable $eFk) {}
+        try { $db->query("SET FOREIGN_KEY_CHECKS = 1"); } catch (Throwable $eFk) {}
         $errorRegen = $eP->getMessage();
         error_log('[CRM] error en regeneracion de pagos: ' . $errorRegen);
     }

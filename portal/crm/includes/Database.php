@@ -69,6 +69,13 @@ class Database {
     }
     
     /**
+     * Alias para query()
+     */
+    public function execute($sql, $params = []) {
+        return $this->query($sql, $params);
+    }
+    
+    /**
      * Obtener un solo registro
      */
     public function fetchOne($sql, $params = []) {
