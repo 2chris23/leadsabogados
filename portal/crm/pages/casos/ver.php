@@ -147,6 +147,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_caso'])) {
     }
 
     // Lógica para regenerar pagos_programados (con fallback a la tabla 'pagos' tradicional)
+    $errorRegen = null;
     try {
         $tipoPago = $_POST['tipo_pago_cliente'] ?? 'pago_unico';
         $honorariosTotales = (float)($_POST['honorarios_totales'] ?? 0);
@@ -167,14 +168,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_caso'])) {
         
         $saldoPendiente = max(0, $honorariosTotales - $totalPagado);
 
-        // Borrar cuotas pendientes o vencidas existentes
+        // Desactivar temporalmente restricciones de clave foránea para permitir limpiar cuotas no pagadas
+        try { $db->execute("SET FOREIGN_KEY_CHECKS = 0"); } catch (Throwable $eFk) {}
+
+        // Borrar cuotas pendientes o vencidas existentes (o todas si no hay pagos)
         try {
-            $db->execute("DELETE FROM pagos_programados WHERE caso_id = ? AND estado IN ('pendiente', 'vencido')", [$id]);
+            if ($totalPagado <= 0) {
+                $db->execute("DELETE FROM pagos_programados WHERE caso_id = ?", [$id]);
+            } else {
+                $db->execute("DELETE FROM pagos_programados WHERE caso_id = ? AND estado IN ('pendiente', 'vencido')", [$id]);
+            }
         } catch (Throwable $eDel) {
             // Si la tabla no existe aún, la creamos al vuelo
             $db->execute("CREATE TABLE IF NOT EXISTS pagos_programados (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 caso_id INT NOT NULL,
+                numero_cuota INT DEFAULT 1,
+                concepto VARCHAR(255) DEFAULT NULL,
                 monto DECIMAL(10,2) NOT NULL,
                 fecha_vencimiento DATE NOT NULL,
                 estado ENUM('pendiente','pagado','vencido') NOT NULL DEFAULT 'pendiente',
@@ -183,7 +193,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_caso'])) {
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 INDEX idx_caso (caso_id)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-            $db->execute("DELETE FROM pagos_programados WHERE caso_id = ? AND estado IN ('pendiente', 'vencido')", [$id]);
+            $db->execute("DELETE FROM pagos_programados WHERE caso_id = ?", [$id]);
         }
 
         if ($saldoPendiente > 0) {
@@ -197,15 +207,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_caso'])) {
                     'numero_cuota'      => 1,
                     'concepto'          => 'Pago único'
                 ];
-                try {
-                    $db->insert('pagos_programados', $data);
-                } catch (Throwable $e1) {
-                    unset($data['numero_cuota'], $data['concepto']);
-                    try { $db->insert('pagos_programados', $data); } catch (Throwable $e2) {
-                        unset($data['estado']);
-                        $db->insert('pagos_programados', $data);
-                    }
-                }
+                $db->insert('pagos_programados', $data);
             } elseif ($tipoPago === 'cuotas') {
                 $numCuotas = (int)($_POST['num_cuotas'] ?? 1);
                 if ($numCuotas > 0) {
@@ -222,15 +224,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_caso'])) {
                             'numero_cuota'      => $i,
                             'concepto'          => "Cuota $i de $numCuotas"
                         ];
-                        try {
-                            $db->insert('pagos_programados', $data);
-                        } catch (Throwable $e1) {
-                            unset($data['numero_cuota'], $data['concepto']);
-                            try { $db->insert('pagos_programados', $data); } catch (Throwable $e2) {
-                                unset($data['estado']);
-                                $db->insert('pagos_programados', $data);
-                            }
-                        }
+                        $db->insert('pagos_programados', $data);
 
                         $dateObj = new DateTime($fecha);
                         if ($freq === 'semanal')        $dateObj->modify('+1 week');
@@ -255,25 +249,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_caso'])) {
                             'numero_cuota'      => $i + 1,
                             'concepto'          => "Pago programado #" . ($i + 1)
                         ];
-                        try {
-                            $db->insert('pagos_programados', $data);
-                        } catch (Throwable $e1) {
-                            unset($data['numero_cuota'], $data['concepto']);
-                            try { $db->insert('pagos_programados', $data); } catch (Throwable $e2) {
-                                unset($data['estado']);
-                                $db->insert('pagos_programados', $data);
-                            }
-                        }
+                        $db->insert('pagos_programados', $data);
                     }
                 }
             }
         }
+        try { $db->execute("SET FOREIGN_KEY_CHECKS = 1"); } catch (Throwable $eFk) {}
     } catch (Throwable $eP) {
-        error_log('[CRM] error en regeneracion de pagos: ' . $eP->getMessage());
+        try { $db->execute("SET FOREIGN_KEY_CHECKS = 1"); } catch (Throwable $eFk) {}
+        $errorRegen = $eP->getMessage();
+        error_log('[CRM] error en regeneracion de pagos: ' . $errorRegen);
     }
 
     AuditLog::registrar('editar', 'casos', $id, 'Datos del caso y plan de pagos actualizados');
-    setFlash('exito', 'Caso y plan de pagos actualizado');
+    if ($errorRegen) {
+        setFlash('error', '⚠️ Caso actualizado, pero hubo un detalle con las cuotas: ' . $errorRegen);
+    } else {
+        setFlash('exito', 'Caso y plan de pagos actualizado correctamente');
+    }
     header('Location: ' . APP_URL . '/index.php?page=casos/ver&id=' . $id); exit;
 }
 
