@@ -721,6 +721,73 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </div>
 
+    <!-- Estilos notas (siempre cargados) -->
+    <style>
+        .feed-nota-card {
+            border-radius: 16px;
+            padding: 20px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .feed-nota-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.08);
+        }
+        .feed-nota-interna {
+            background: linear-gradient(145deg, #fffafa, #fff1f2);
+            border: 1px solid #ffe4e6;
+        }
+        .feed-nota-publica {
+            background: #ffffff;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .feed-nota-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1rem;
+            color: #fff;
+            box-shadow: 0 4px 10px -2px rgba(0,0,0,0.1);
+        }
+        .avatar-interna { background: linear-gradient(135deg, #f43f5e, #e11d48); }
+        .avatar-publica { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+        .feed-nota-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.6875rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+        }
+        .tag-interna { background: #ffe4e6; color: #e11d48; }
+        .tag-publica { background: #dbeafe; color: #2563eb; }
+        .tag-dot { width: 6px; height: 6px; border-radius: 50%; }
+        .dot-interna { background: #e11d48; }
+        .dot-publica { background: #2563eb; }
+        .feed-nota-actions {
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .feed-nota-card:hover .feed-nota-actions {
+            opacity: 1;
+        }
+        .doc-attachment {
+            transition: all 0.2s;
+        }
+        .doc-attachment:hover {
+            background: #f1f5f9 !important;
+            border-color: #cbd5e1 !important;
+        }
+    </style>
+
     <?php if(RoleGuard::esAdmin()): ?>
     <!-- Notas del Caso (admin: columna izquierda) -->
     <div class="cv-card" style="margin-bottom: 24px;">
@@ -782,73 +849,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         <!-- Feed de Notas -->
         <div>
-            <style>
-                .feed-nota-card {
-                    border-radius: 16px;
-                    padding: 20px;
-                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                    position: relative;
-                    overflow: hidden;
-                }
-                .feed-nota-card:hover {
-                    transform: translateY(-2px);
-                    box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.08);
-                }
-                .feed-nota-interna {
-                    background: linear-gradient(145deg, #fffafa, #fff1f2);
-                    border: 1px solid #ffe4e6;
-                }
-                .feed-nota-publica {
-                    background: #ffffff;
-                    border: 1px solid #f1f5f9;
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-                }
-                .feed-nota-avatar {
-                    width: 38px;
-                    height: 38px;
-                    border-radius: 12px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-weight: 800;
-                    font-size: 1rem;
-                    color: #fff;
-                    box-shadow: 0 4px 10px -2px rgba(0,0,0,0.1);
-                }
-                .avatar-interna { background: linear-gradient(135deg, #f43f5e, #e11d48); }
-                .avatar-publica { background: linear-gradient(135deg, #3b82f6, #2563eb); }
-                
-                .feed-nota-tag {
-                    display: inline-flex;
-                    align-items: center;
-                    gap: 4px;
-                    padding: 4px 10px;
-                    border-radius: 20px;
-                    font-size: 0.6875rem;
-                    font-weight: 700;
-                    letter-spacing: 0.05em;
-                }
-                .tag-interna { background: #ffe4e6; color: #e11d48; }
-                .tag-publica { background: #dbeafe; color: #2563eb; }
-                .tag-dot { width: 6px; height: 6px; border-radius: 50%; }
-                .dot-interna { background: #e11d48; }
-                .dot-publica { background: #2563eb; }
-                
-                .feed-nota-actions {
-                    opacity: 0;
-                    transition: opacity 0.2s;
-                }
-                .feed-nota-card:hover .feed-nota-actions {
-                    opacity: 1;
-                }
-                .doc-attachment {
-                    transition: all 0.2s;
-                }
-                .doc-attachment:hover {
-                    background: #f1f5f9 !important;
-                    border-color: #cbd5e1 !important;
-                }
-            </style>
 
             <?php if(empty($notasCaso)): ?>
             <?php if(isset($notasCasoError)): ?>
