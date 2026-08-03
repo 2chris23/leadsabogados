@@ -1,9 +1,16 @@
 <?php
-// Show where ver.php actually is on the server
-$path = realpath(__DIR__ . '/portal/crm/pages/casos/ver.php');
+// The web root on this server is portal/crm/
+// So ver.php is at: __DIR__ . '/pages/casos/ver.php'
+$path = realpath(__DIR__ . '/pages/casos/ver.php');
 echo "Ruta del archivo: " . $path . "<br>";
-echo "Fecha modificación: " . date('Y-m-d H:i:s', filemtime($path)) . "<br>";
-// Read last 200 chars to see if it has the new code
-$content = file_get_contents($path);
-echo "Contiene 'Divisor': " . (strpos($content, 'Divisor') !== false ? "SI (codigo nuevo)" : "NO (codigo viejo)") . "<br>";
-echo "Contiene 'Estado de Pagos' como card separada: " . (substr_count($content, 'cv-card mb-24') > 0 ? "SI (hay card vieja)" : "NO (bien unificado)");
+if ($path && file_exists($path)) {
+    echo "Fecha modificación: " . date('Y-m-d H:i:s', filemtime($path)) . "<br>";
+    $content = file_get_contents($path);
+    echo "Contiene 'Divisor' (codigo nuevo): " . (strpos($content, '<!-- Divisor -->') !== false ? "<b style='color:green'>SI - NUEVO</b>" : "<b style='color:red'>NO - VIEJO</b>") . "<br>";
+    echo "Cards separadas ('cv-card mb-24'): " . (strpos($content, 'cv-card mb-24') !== false ? "<b style='color:red'>SI - hay card vieja</b>" : "<b style='color:green'>NO - bien unificado</b>");
+} else {
+    echo "<b>ARCHIVO NO ENCONTRADO</b><br>";
+    echo "Directorio actual: " . __DIR__ . "<br>";
+    echo "Archivos en directorio: ";
+    print_r(scandir(__DIR__));
+}
