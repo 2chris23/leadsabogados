@@ -167,10 +167,10 @@ class RoleGuard {
                 'icono'     => 'solar:settings-outline',
                 'submenu'   => [
                     ['titulo'=>'Usuarios',      'url'=>'usuarios',              'icono_color'=>'text-primary-600'],
-                    ['titulo'=>'Permisos',       'url'=>'permisos',              'icono_color'=>'text-purple-600'],
+                    // ['titulo'=>'Permisos',       'url'=>'permisos',              'icono_color'=>'text-purple-600'],
                     ['titulo'=>'Configuración', 'url'=>'configuracion/tema',   'icono_color'=>'text-warning-main'],
-                    ['titulo'=>'Correo',         'url'=>'configuracion/correo', 'icono_color'=>'text-success-main'],
-                    ['titulo'=>'Auditoría',      'url'=>'auditoria',            'icono_color'=>'text-info-main'],
+                    // ['titulo'=>'Correo',         'url'=>'configuracion/correo', 'icono_color'=>'text-success-main'],
+                    // ['titulo'=>'Auditoría',      'url'=>'auditoria',            'icono_color'=>'text-info-main'],
                 ],
             ],
         ];
