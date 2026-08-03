@@ -13,8 +13,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['actualizar_finanzas_c
     $sumarCoste = (float)($_POST['sumar_coste'] ?? 0);
     
     if ($sumarCoste > 0) {
-        $db->query("UPDATE casos SET honorarios_abogado = honorarios_abogado + ? WHERE id = ?", [$sumarCoste, $casoId]);
-        
         // Registrar el egreso en la tabla pagos
         $db->insert('pagos', [
             'caso_id' => $casoId,
