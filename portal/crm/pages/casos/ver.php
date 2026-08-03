@@ -259,10 +259,7 @@ try {
         WHERE n.caso_id = ?
         ORDER BY n.created_at DESC
     ", [$id]);
-} catch (Exception $e) {
-    // Si la tabla no existe aún, ignorar o mostrar mensaje vacío
-    $notasCaso = [];
-}
+} catch (Exception $e) { $notasCasoError = $e->getMessage(); $notasCaso = []; }
 
 // Documentos: tabla propia + archivos del portal vinculados al caso
 $documentos = $db->fetchAll("SELECT * FROM documentos WHERE caso_id = ? AND nota_id IS NULL ORDER BY created_at DESC", [$id]);
@@ -629,6 +626,11 @@ document.addEventListener('DOMContentLoaded', () => {
             </style>
 
             <?php if(empty($notasCaso)): ?>
+            <?php if(isset($notasCasoError)): ?>
+            <div style="color:red; padding:20px; background:#fee2e2; border-radius:8px; margin-bottom:20px;">
+                <strong>Error al cargar las notas:</strong> <?php echo e($notasCasoError); ?>
+            </div>
+            <?php endif; ?>
             <div style="text-align:center; padding: 40px 20px; background: #f8fafc; border-radius: 16px; border: 1px dashed #cbd5e1;">
                 <div style="width: 48px; height: 48px; background: #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px;">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
@@ -1127,3 +1129,5 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 <?php include CRM_ROOT . '/templates/layout/footer.php'; ?>
+
+
