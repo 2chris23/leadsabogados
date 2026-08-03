@@ -398,16 +398,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['eliminar_nota'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['registrar_pago_abogado'])) {
     CSRF::verificarOAbortar();
     if (RoleGuard::esAdmin()) {
-        $db->insert('pagos', [
-            'caso_id' => $id,
-            'cantidad' => (float)$_POST['cantidad'],
-            'fecha_pago' => $_POST['fecha_pago'],
-            'metodo_pago' => $_POST['metodo_pago'],
-            'concepto' => trim($_POST['concepto']),
-            'tipo_pago' => 'pago_abogado',
-            'created_by' => $_SESSION['usuario_id']
-        ]);
-        setFlash('exito', 'Pago al abogado registrado correctamente');
+        try {
+            $db->insert('pagos', [
+                'caso_id' => $id,
+                'cantidad' => (float)$_POST['cantidad'],
+                'fecha_pago' => $_POST['fecha_pago'],
+                'metodo_pago' => $_POST['metodo_pago'],
+                'concepto' => trim($_POST['concepto']),
+                'tipo_pago' => 'pago_abogado',
+                'registrado_por' => $_SESSION['usuario_id'] ?? 1
+            ]);
+            setFlash('exito', 'Pago al abogado registrado correctamente');
+        } catch (Throwable $e) {
+            try {
+                // Fallback sin registrado_por si la columna no existe
+                $db->insert('pagos', [
+                    'caso_id' => $id,
+                    'cantidad' => (float)$_POST['cantidad'],
+                    'fecha_pago' => $_POST['fecha_pago'],
+                    'metodo_pago' => $_POST['metodo_pago'],
+                    'concepto' => trim($_POST['concepto']),
+                    'tipo_pago' => 'pago_abogado'
+                ]);
+                setFlash('exito', 'Pago al abogado registrado correctamente (fallback)');
+            } catch (Throwable $e2) {
+                setFlash('error', 'Error al registrar pago al abogado: ' . $e2->getMessage());
+            }
+        }
     } else {
         setFlash('error', 'No tienes permisos');
     }
@@ -506,7 +523,11 @@ $extColors = ['PDF'=>['#fef2f2','#dc2626'],'DOC'=>['#e8f0fe','#2e6edd'],'DOCX'=>
 <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:24px">
   <div>
     <h5 style="font-size:1.125rem;font-weight:800;color:#1a1a2e;margin:0"><?php echo e($caso['referencia']); ?></h5>
-    <p style="font-size:.8125rem;color:#94a3b8;margin:2px 0 0"><?php echo e($caso['titulo']); ?></p>
+    <p style="font-size:.8125rem;color:#94a3b8;margin:2px 0 0">
+      <span style="font-weight:700;color:#475569"><?php echo ucfirst(e($caso['tipo'] ?? '')); ?></span> 
+      &middot; <?php echo e($caso['titulo']); ?> 
+      &middot; <?php echo e($caso['cliente_nombre'] ?? '') . ' ' . e($caso['cliente_apellidos'] ?? ''); ?>
+    </p>
   </div>
   <div style="display:flex;gap:8px;align-items:center">
     <?php if (RoleGuard::esAdmin()): ?>
