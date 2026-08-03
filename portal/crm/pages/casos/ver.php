@@ -200,7 +200,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_nota_accion'])
             'contenido' => trim($_POST['contenido_nota']),
             'tipo' => $_POST['tipo_nota'] === 'interna' ? 'interna' : 'publica'
         ], 'id = ?', [$notaId]);
-        setFlash('exito', 'Nota actualizada correctamente');
+        
+        // Subir archivo adjunto si lo hay
+        if (isset($_FILES['documento_nota']) && $_FILES['documento_nota']['error'] !== UPLOAD_ERR_NO_FILE) {
+            require_once CRM_ROOT . '/includes/FileUpload.php';
+            $resultado = FileUpload::subir($_FILES['documento_nota'], $id);
+            
+            if ($resultado['exito']) {
+                try {
+                    $db->insert('documentos', [
+                        'caso_id' => $id,
+                        'nota_id' => $notaId,
+                        'nombre_original' => $resultado['datos']['nombre_original'],
+                        'nombre_archivo' => $resultado['datos']['nombre_archivo'] ?? $resultado['datos']['nombre_original'],
+                        'ruta' => $resultado['datos']['ruta'],
+                        'tipo_mime' => $resultado['datos']['tipo_mime'] ?? null,
+                        'tamano_bytes' => $resultado['datos']['tamano_bytes'] ?? null,
+                        'descripcion' => 'Adjunto a nota',
+                        'subido_por' => $usuarioAct['id'] ?? null
+                    ]);
+                } catch (Exception $e) {
+                    setFlash('error', 'La nota se actualizó pero hubo un error al registrar el documento en la base de datos: ' . $e->getMessage());
+                }
+            } else {
+                setFlash('error', 'La nota se actualizó pero hubo un error con el archivo: ' . $resultado['mensaje']);
+            }
+        }
+        
+        if (!isset($_SESSION['flash']['error'])) {
+            setFlash('exito', 'Nota actualizada correctamente');
+        }
     } else {
         setFlash('error', 'No tienes permiso para editar esta nota');
     }
@@ -872,7 +901,7 @@ document.addEventListener('DOMContentLoaded', () => {
 <!-- Modal Editar Nota -->
 <div class="modal fade" id="modalEditarNota" tabindex="-1">
     <div class="modal-dialog">
-        <form method="POST" class="modal-content radius-8">
+        <form method="POST" enctype="multipart/form-data" class="modal-content radius-8">
             <?php echo CSRF::campo(); ?>
             <input type="hidden" name="editar_nota_accion" value="1">
             <input type="hidden" name="nota_id" id="editar_nota_id">
@@ -884,18 +913,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Tipo</label>
-                    <div style="display:flex; gap:16px;">
-                        <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size: 0.875rem; font-weight: 600; color: #1e293b;">
-                            <input type="radio" name="tipo_nota" id="editar_tipo_publica" value="publica" style="accent-color: #2563eb;"> Pública
-                        </label>
-                        <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size: 0.875rem; font-weight: 600; color: #dc2626;">
-                            <input type="radio" name="tipo_nota" id="editar_tipo_interna" value="interna" style="accent-color: #dc2626;"> Interna
-                        </label>
-                    </div>
+                    <select name="tipo_nota" id="editar_tipo_nota" class="form-select">
+                        <option value="publica">Pública (Visible al cliente)</option>
+                        <option value="interna">Interna (Privada)</option>
+                    </select>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Descripción</label>
                     <textarea name="contenido_nota" id="editar_nota_contenido" class="form-control" rows="4" required></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Adjuntar Archivo (opcional)</label>
+                    <input type="file" name="documento_nota" class="form-control">
+                    <small class="text-muted">Si subes un archivo, se añadirá a la nota.</small>
                 </div>
             </div>
             <div class="modal-footer">
@@ -1128,8 +1158,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('editar_nota_id').value = id;
             document.getElementById('editar_nota_titulo').value = titulo;
             document.getElementById('editar_nota_contenido').value = contenido;
-            if (tipo === 'publica') document.getElementById('editar_tipo_publica').checked = true;
-            else document.getElementById('editar_tipo_interna').checked = true;
+            document.getElementById('editar_tipo_nota').value = tipo;
             
             new bootstrap.Modal(document.getElementById('modalEditarNota')).show();
         });
