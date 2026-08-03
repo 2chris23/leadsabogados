@@ -721,7 +721,8 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </div>
 
-    <!-- Notas del Caso -->
+    <?php if(RoleGuard::esAdmin()): ?>
+    <!-- Notas del Caso (admin: columna izquierda) -->
     <div class="cv-card" style="margin-bottom: 24px;">
       <div class="cv-card-header">
         <div class="cv-icon" style="background:#f3e8ff;color:#9333ea">
@@ -935,11 +936,148 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       </div>
     </div>
+    <?php endif; /* esAdmin notes left */ ?>
 
   </div> <!-- Close Left Column -->
 
   <!-- ══ COL DERECHA ══ -->
   <div style="min-width: 0;">
+
+    <?php if (!RoleGuard::esAdmin()): ?>
+    <!-- Notas del Caso (abogado: columna derecha) -->
+    <div class="cv-card" style="margin-bottom: 24px;">
+      <div class="cv-card-header">
+        <div class="cv-icon" style="background:#f3e8ff;color:#9333ea">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <h3>Notas del Caso</h3>
+      </div>
+      <div class="cv-card-body">
+        <!-- Feed de Notas -->
+        <form method="POST" enctype="multipart/form-data" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
+            <?php echo CSRF::campo(); ?>
+            <input type="hidden" name="crear_nota_feed" value="1">
+            
+            <div style="display:flex; gap:16px; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #e2e8f0;">
+                <label style="flex:1; cursor:pointer;">
+                    <input type="radio" name="tipo_nota" value="publica" checked style="display:none;" onchange="
+                        this.nextElementSibling.style.border='2px solid #2563eb'; 
+                        this.nextElementSibling.style.background='#eff6ff';
+                        const otherLbl = document.getElementById('lblInternaUI');
+                        otherLbl.style.border='1px solid #e2e8f0';
+                        otherLbl.style.background='#ffffff';
+                    ">
+                    <div id="lblPublicaUI" style="border: 2px solid #2563eb; background: #eff6ff; padding: 10px; border-radius: 8px; text-align: center; font-weight: 600; color: #1e293b; transition: all 0.2s;">
+                        <span style="color:#2563eb; font-size:1.2rem; vertical-align:middle; margin-right:4px;">●</span> Nota Pública
+                    </div>
+                </label>
+                <label style="flex:1; cursor:pointer;">
+                    <input type="radio" name="tipo_nota" value="interna" style="display:none;" onchange="
+                        this.nextElementSibling.style.border='2px solid #dc2626'; 
+                        this.nextElementSibling.style.background='#fef2f2';
+                        const otherLbl = document.getElementById('lblPublicaUI');
+                        otherLbl.style.border='1px solid #e2e8f0';
+                        otherLbl.style.background='#ffffff';
+                    ">
+                    <div id="lblInternaUI" style="border: 1px solid #e2e8f0; background: #ffffff; padding: 10px; border-radius: 8px; text-align: center; font-weight: 600; color: #1e293b; transition: all 0.2s;">
+                        <span style="color:#dc2626; font-size:1.2rem; vertical-align:middle; margin-right:4px;">●</span> Nota Interna
+                    </div>
+                </label>
+            </div>
+            
+            <input type="text" name="titulo_nota" class="cv-input" placeholder="Título de la nota..." style="width: 100%; margin-bottom: 12px;" required>
+            <textarea name="contenido_nota" class="cv-input" rows="3" placeholder="Escribe la descripción aquí..." style="width: 100%; margin-bottom: 12px; resize: vertical;" required></textarea>
+            
+            <div style="display:flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                <div>
+                    <label class="cv-btn cv-btn-ghost" style="padding: 6px 12px; font-size: 0.8125rem; cursor: pointer; display: inline-flex; width: auto; background: #ffffff; border: 1px solid #e2e8f0;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                        <span id="file-name-display" style="margin-left:6px; font-weight: 500;">Adjuntar Archivo</span>
+                        <input type="file" name="documento_nota" style="display:none" onchange="document.getElementById('file-name-display').textContent = this.files[0] ? this.files[0].name : 'Adjuntar Archivo'">
+                    </label>
+                </div>
+                <button type="submit" class="cv-btn cv-btn-primary" style="width: auto; padding: 6px 16px;">
+                    Publicar Nota
+                </button>
+            </div>
+        </form>
+
+        <?php if(empty($notasCaso)): ?>
+        <div style="text-align:center; padding: 40px 20px; background: #f8fafc; border-radius: 16px; border: 1px dashed #cbd5e1;">
+            <div style="width: 48px; height: 48px; background: #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            </div>
+            <h4 style="margin: 0 0 4px; color: #334155; font-size: 1rem;">No hay notas aún</h4>
+            <p style="margin: 0; color: #64748b; font-size: 0.875rem;">Las notas que agregues aparecerán aquí.</p>
+        </div>
+        <?php else: ?>
+            <div style="display:flex; flex-direction:column; gap: 20px;">
+            <?php foreach($notasCaso as $nota): 
+                $isInterna = $nota['tipo'] === 'interna';
+                $cardClass = $isInterna ? 'feed-nota-interna' : 'feed-nota-publica';
+                $avatarClass = $isInterna ? 'avatar-interna' : 'avatar-publica';
+                $tagClass = $isInterna ? 'tag-interna' : 'tag-publica';
+                $dotClass = $isInterna ? 'dot-interna' : 'dot-publica';
+            ?>
+                <div class="feed-nota-card <?php echo $cardClass; ?>">
+                    <div style="display:flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                        <div style="display:flex; align-items:center; gap: 12px;">
+                            <div class="feed-nota-avatar <?php echo $avatarClass; ?>">
+                                <?php echo strtoupper(substr($nota['autor_nombre'] ?? 'S', 0, 1)); ?>
+                            </div>
+                            <div>
+                                <div style="display:flex; align-items:center; gap: 8px;">
+                                    <div style="margin:0; font-weight: 700; font-size: 0.9375rem; color: #0f172a; letter-spacing: -0.01em;">
+                                        <?php echo e($nota['titulo'] ?? 'Nota sin título'); ?>
+                                    </div>
+                                    <span class="feed-nota-tag <?php echo $tagClass; ?>">
+                                        <span class="tag-dot <?php echo $dotClass; ?>"></span>
+                                        <?php echo $isInterna ? 'INTERNA' : 'PÚBLICA'; ?>
+                                    </span>
+                                </div>
+                                <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">
+                                    Por <strong style="color: #475569;"><?php echo e(($nota['autor_nombre'] ?? 'Sistema') . ' ' . ($nota['autor_apellidos'] ?? '')); ?></strong> 
+                                    &bull; <?php echo date('d M, Y \a \l\a\s H:i', strtotime($nota['created_at'])); ?>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="feed-nota-actions" style="display:flex; align-items:center; gap: 8px;">
+                            <?php if($nota['created_by'] === ($_SESSION['usuario_id']??0) || RoleGuard::esAdmin()): ?>
+                            <button type="button" class="btn btn-sm btn-editar-nota" style="background:#f1f5f9; color:#475569; border:none; border-radius:6px; padding: 6px; cursor:pointer;" data-id="<?php echo $nota['id']; ?>" data-titulo="<?php echo e($nota['titulo']); ?>" data-contenido="<?php echo e($nota['contenido']); ?>" data-tipo="<?php echo $nota['tipo']; ?>">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                            </button>
+                            <form method="POST" style="margin:0; display:inline;" onsubmit="event.preventDefault(); crmConfirm('Eliminar nota', '¿Eliminar esta nota de forma permanente?', () => this.submit(), true);">
+                                <?php echo CSRF::campo(); ?>
+                                <input type="hidden" name="eliminar_nota" value="<?php echo $nota['id']; ?>">
+                                <button type="submit" style="background:#fef2f2; color:#ef4444; border:none; border-radius:6px; padding: 6px; cursor:pointer;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                </button>
+                            </form>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <div style="font-size: 0.875rem; color: #334155; line-height: 1.6; white-space: pre-wrap; padding-left: 50px;"><?php echo e($nota['contenido']); ?></div>
+                    <?php if(!empty($nota['doc_id'])): ?>
+                    <div class="doc-attachment" style="margin-top: 16px; margin-left: 50px; padding: 12px 16px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; display:flex; align-items:center; justify-content: space-between;">
+                        <div style="display:flex; align-items:center; gap: 12px;">
+                            <div style="background: linear-gradient(135deg, #eff6ff, #dbeafe); color: #2563eb; padding: 8px; border-radius: 8px;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.875rem; font-weight: 600; color: #1e293b;"><?php echo e($nota['doc_nombre']); ?></div>
+                                <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;"><?php echo round($nota['doc_tamano']/1024, 1); ?> KB &bull; Adjunto</div>
+                            </div>
+                        </div>
+                        <a href="<?php echo APP_URL; ?>/index.php?page=casos/descargar&id=<?php echo $nota['doc_id']; ?>" target="_blank" style="padding: 6px 12px; font-size: 0.8125rem; font-weight: 600; color: #2563eb; background: #eff6ff; border-radius: 8px; text-decoration: none;">Descargar</a>
+                    </div>
+                    <?php endif; ?>
+                </div>
+            <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+      </div>
+    </div>
+    <?php endif; /* !esAdmin notes right */ ?>
 
     <?php if (RoleGuard::esAdmin()): ?>
     <!-- Financiero -->
