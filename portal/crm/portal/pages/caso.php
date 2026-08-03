@@ -196,11 +196,10 @@ $stepsOrden = array_keys($estadoCaso);
         <span>Portal del Cliente</span>
     </a>
     <div class="topbar-right">
-        <a href="<?php echo portalUrl(); ?>/index.php?page=dashboard" class="btn-back" style="margin-right: 12px;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        <a href="index.php?page=dashboard" class="btn-back">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
             Volver
         </a>
-        <a href="index.php?page=perfil" class="btn-back" style="color:#2e6edd; background:#e8f0fe; border-color:#bfdbfe; margin-right: 12px;">Mi Perfil</a>
         <a href="index.php?page=logout" class="btn-back" style="color:#ef4444; border-color:#fecaca; background:#fef2f2; margin-right: 12px;">Salir</a>
         <div class="topbar-avatar"><?php echo strtoupper(substr($nombre,0,1)); ?></div>
     </div>

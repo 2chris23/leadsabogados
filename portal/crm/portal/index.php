@@ -98,7 +98,6 @@ $rutas = [
     'nueva-solicitud' => 'pages/nueva-solicitud.php',
     'caso'            => 'pages/caso.php',
     'descargar-doc'   => 'pages/descargar-doc.php',
-    'perfil'          => 'pages/profile.php',
 ];
 
 if (isset($rutas[$page]) && file_exists(PORTAL_ROOT . '/' . $rutas[$page])) {

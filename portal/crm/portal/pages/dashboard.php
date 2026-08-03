@@ -180,7 +180,6 @@ $tiposConsulta = ['Civil','Penal','Laboral','Mercantil','Inmobiliario','Familia'
             <div class="topbar-name"><?php echo e($nombre . ' ' . $apellidos); ?></div>
             <div class="topbar-role"><?php echo $esCliente ? 'Cliente' : 'Visitante'; ?></div>
         </div>
-        <a href="index.php?page=perfil" class="btn-logout" style="color:#2e6edd; background:#e8f0fe;">Mi Perfil</a>
         <a href="index.php?page=logout" class="btn-logout">Salir</a>
     </div>
 </div>
