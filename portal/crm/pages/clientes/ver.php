@@ -655,6 +655,7 @@ include CRM_ROOT . '/templates/layout/header.php';
                             <input type="text" name="direccion" class="form-control border-start-0 ps-0" value="<?php echo e($cliente['direccion']); ?>">
                         </div>
                     </div>
+                    <?php /* NOTAS INTERNAS - oculto temporalmente
                     <div class="col-12">
                         <label class="form-label fw-semibold text-neutral-800 d-flex justify-content-between">
                             <span>Notas Internas</span>
@@ -662,6 +663,7 @@ include CRM_ROOT . '/templates/layout/header.php';
                         </label>
                         <textarea name="notas" class="form-control" rows="4" placeholder="Observaciones sobre el cliente..."><?php echo e($cliente['notas']); ?></textarea>
                     </div>
+                    */ ?>
                 </div>
             </div>
             <div class="modal-footer border-top border-neutral-100 p-24 d-flex justify-content-between bg-neutral-50 radius-bottom-12">
