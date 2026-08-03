@@ -487,7 +487,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="cv-field"><label>Referencia</label><p style="font-family:monospace;font-size:.875rem"><?php echo e($caso['referencia']); ?></p></div>
         </div>
         
-        <h4 style="font-size: 0.875rem; color: #1a1a2e; font-weight: 700; margin: 24px 0 12px; padding-top: 16px; border-top: 1px solid #e2e8f0;">Datos del Cliente</h4>
+        <div style="font-size: 0.875rem; color: #1a1a2e; font-weight: 700; margin: 24px 0 12px; padding-top: 16px; border-top: 1px solid #e2e8f0; text-transform: uppercase;">Datos del Cliente</div>
         <div class="cv-grid">
           <div class="cv-field"><label>Cliente</label><p><a href="<?php echo APP_URL; ?>/index.php?page=clientes/ver&id=<?php echo $caso['cliente_id']; ?>" style="color:#2e6edd;font-weight:600;text-decoration:none"><?php echo e($caso['cliente_nombre'].' '.$caso['cliente_apellidos']); ?></a></p></div>
           <div class="cv-field"><label>Teléfono</label><p><?php echo $caso['cliente_telefono'] ? e($caso['cliente_telefono']) : '—'; ?></p></div>
@@ -524,7 +524,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         otherLbl.style.background='#ffffff';
                     ">
                     <div id="lblPublicaUI" style="border: 2px solid #2563eb; background: #eff6ff; padding: 10px; border-radius: 8px; text-align: center; font-weight: 600; color: #1e293b; transition: all 0.2s;">
-                        <span style="color:#2563eb; font-size:1.2rem; vertical-align:middle; margin-right:4px;">●</span> Nota Pública (Visible al cliente)
+                        <span style="color:#2563eb; font-size:1.2rem; vertical-align:middle; margin-right:4px;">●</span> Nota Pública
                     </div>
                 </label>
                 <label style="flex:1; cursor:pointer;">
@@ -536,7 +536,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         otherLbl.style.background='#ffffff';
                     ">
                     <div id="lblInternaUI" style="border: 1px solid #e2e8f0; background: #ffffff; padding: 10px; border-radius: 8px; text-align: center; font-weight: 600; color: #1e293b; transition: all 0.2s;">
-                        <span style="color:#dc2626; font-size:1.2rem; vertical-align:middle; margin-right:4px;">●</span> Nota Interna (Privada)
+                        <span style="color:#dc2626; font-size:1.2rem; vertical-align:middle; margin-right:4px;">●</span> Nota Interna
                     </div>
                 </label>
             </div>
@@ -658,12 +658,12 @@ document.addEventListener('DOMContentLoaded', () => {
     <!-- Progreso de Pagos del Cliente -->
     <?php if(!empty($pagosProgramados)): ?>
     <div class="cv-card mb-24" style="margin-bottom: 24px;">
-      <div class="cv-card-body" style="padding: 24px 32px; overflow-x: auto;">
-        <h4 style="margin: 0 0 24px 0; font-size: 1rem; color: #1e293b; display:flex; align-items:center; gap:8px;">
+      <div class="cv-card-body" style="padding: 24px 32px;">
+        <div style="margin: 0 0 24px 0; font-size: 1.125rem; font-weight:700; color: #1e293b; display:flex; align-items:center; gap:8px;">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
           Estado de Pagos del Cliente
-        </h4>
-        <div style="display:flex; justify-content:space-between; position:relative; min-width: <?php echo max(100, count($pagosProgramados)*110); ?>px; padding-top:10px;">
+        </div>
+        <div style="display:flex; justify-content:space-between; position:relative; width: 100%; padding-top:10px;">
           <!-- Línea conectora base -->
           <div style="position:absolute; top:22px; left:0; right:0; height:3px; background:#e2e8f0; z-index:1;"></div>
           
@@ -686,14 +686,14 @@ document.addEventListener('DOMContentLoaded', () => {
                   $textColor = '#f59e0b';
               }
           ?>
-          <div style="position:relative; z-index:3; display:flex; flex-direction:column; align-items:center; width: 110px;">
-            <div style="width:28px; height:28px; border-radius:50%; background:<?php echo $bgColor; ?>; border:3px solid <?php echo $borderColor; ?>; display:flex; align-items:center; justify-content:center; box-shadow:0 0 0 4px #ffffff; z-index:2;">
+          <div style="position:relative; z-index:3; display:flex; flex-direction:column; align-items:center; flex: 1; min-width: 0;">
+            <div style="width:24px; height:24px; border-radius:50%; background:<?php echo $bgColor; ?>; border:3px solid <?php echo $borderColor; ?>; display:flex; align-items:center; justify-content:center; box-shadow:0 0 0 4px #ffffff; z-index:2;">
                 <?php if($isPagado): ?>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
                 <?php endif; ?>
             </div>
-            <span style="margin-top:12px; font-size:0.75rem; font-weight:700; color:<?php echo $textColor; ?>; text-transform:uppercase; text-align:center; line-height:1.2;"><?php echo e($pp['concepto']); ?></span>
-            <span style="margin-top:4px; font-size:0.75rem; color:#64748b; font-weight:600;">€<?php echo number_format($pp['monto'], 2, ',', '.'); ?></span>
+            <span style="margin-top:10px; font-size:0.65rem; font-weight:700; color:<?php echo $textColor; ?>; text-transform:uppercase; text-align:center; line-height:1.2; width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="<?php echo e($pp['concepto']); ?>"><?php echo e($pp['concepto']); ?></span>
+            <span style="margin-top:2px; font-size:0.65rem; color:#64748b; font-weight:600;">€<?php echo number_format($pp['monto'], 2, ',', '.'); ?></span>
           </div>
           <?php endforeach; ?>
         </div>
