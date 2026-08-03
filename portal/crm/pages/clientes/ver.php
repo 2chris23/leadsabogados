@@ -255,20 +255,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['eliminar_caso'])) {
 }
 
 
+$whereCasos = "c.cliente_id = ?";
+$paramsCasos = [$id];
 if ($auth->esAbogado()) {
-    $casos = $db->fetchAll(
-        "SELECT c.*, u.nombre as abogado_nombre, u.apellidos as abogado_apellidos
-         FROM casos c LEFT JOIN usuarios_internos u ON c.abogado_id = u.id 
-         WHERE c.cliente_id = ? AND c.abogado_id = ? ORDER BY c.created_at DESC", 
-        [$id, $_SESSION['usuario_id'] ?? 0]
-    );
-} else {
-    $casos = $db->fetchAll(
-        "SELECT c.*, u.nombre as abogado_nombre, u.apellidos as abogado_apellidos,
-            COALESCE((SELECT SUM(p.cantidad) FROM pagos p WHERE p.caso_id = c.id), 0) as total_pagado
-         FROM casos c LEFT JOIN usuarios_internos u ON c.abogado_id = u.id WHERE c.cliente_id = ? ORDER BY c.created_at DESC", [$id]
-    );
+    $whereCasos .= " AND c.abogado_id = ?";
+    $paramsCasos[] = $_SESSION['usuario_id'] ?? 0;
 }
+$casos = $db->fetchAll(
+    "SELECT c.*, u.nombre as abogado_nombre, u.apellidos as abogado_apellidos,
+        u.tipo_pago_predeterminado, u.tarifa_mensual_default, u.tarifa_fija_default, u.tarifa_exito_default,
+        (SELECT SUM(p.cantidad) FROM pagos p WHERE p.caso_id = c.id AND (p.tipo_pago IS NULL OR p.tipo_pago != 'pago_abogado')) as total_pagado_cliente,
+        (SELECT SUM(p.cantidad) FROM pagos p WHERE p.caso_id = c.id AND p.tipo_pago = 'pago_abogado') as total_pagado_abogado
+     FROM casos c LEFT JOIN usuarios_internos u ON c.abogado_id = u.id 
+     WHERE $whereCasos ORDER BY c.created_at DESC", $paramsCasos
+);
+
+foreach ($casos as &$cTemp) {
+    // Honorarios cliente
+    $cTemp['_honorarios_cliente'] = (float)$cTemp['honorarios_totales'];
+    $cTemp['_pagado_cliente'] = (float)$cTemp['total_pagado_cliente'];
+    $cTemp['_pendiente_cliente'] = max(0, $cTemp['_honorarios_cliente'] - $cTemp['_pagado_cliente']);
+    
+    // Honorarios abogado
+    $ha_real = (float)($cTemp['honorarios_abogado'] ?? 0);
+    if ($ha_real == 0 && !empty($cTemp['abogado_id'])) {
+        $uTipo = $cTemp['tipo_pago_predeterminado'] ?? 'fijo';
+        if ($uTipo === 'hitos' || $uTipo === 'fijo') $ha_real = (float)($cTemp['tarifa_fija_default'] ?? 0);
+        elseif ($uTipo === 'mensual') $ha_real = (float)($cTemp['tarifa_mensual_default'] ?? 0);
+        elseif ($uTipo === 'exito') $ha_real = (float)($cTemp['tarifa_exito_default'] ?? 0);
+    }
+    $bono = (float)($cTemp['bono_abogado'] ?? 0);
+    
+    $cTemp['_honorarios_abogado'] = $ha_real + $bono;
+    $cTemp['_pagado_abogado'] = (float)$cTemp['total_pagado_abogado'];
+    $cTemp['_pendiente_abogado'] = max(0, $cTemp['_honorarios_abogado'] - $cTemp['_pagado_abogado']);
+}
+unset($cTemp);
 
 $abogadosList = $db->fetchAll("SELECT id, nombre, apellidos FROM usuarios_internos WHERE rol = 'abogado' AND activo = 1 ORDER BY nombre");
 
@@ -524,24 +546,30 @@ include CRM_ROOT . '/templates/layout/header.php';
                                     </span>
                                 </td>
                                 <?php if($auth->esAdmin()): ?>
-                                <td class="py-16 border-bottom border-neutral-100">
-                                    <div class="d-flex flex-column gap-1">
-                                        <div class="d-flex align-items-center gap-2">
-                                            <span class="text-xs text-secondary-light">Pagado:</span>
-                                            <span class="text-sm fw-bold <?php echo $caso['total_pagado'] >= $caso['honorarios_totales'] ? 'text-success-600' : 'text-neutral-800'; ?>">€<?php echo number_format($caso['total_pagado'],2,',','.'); ?></span>
-                                        </div>
-                                        <div class="w-100 bg-neutral-100 rounded-pill overflow-hidden my-4" style="height: 6px;">
-                                            <?php 
-                                            $porcentaje = $caso['honorarios_totales'] > 0 ? min(100, ($caso['total_pagado'] / $caso['honorarios_totales']) * 100) : 0;
-                                            $bgProgress = $porcentaje == 100 ? 'bg-success-500' : 'bg-primary-500';
-                                            $badgeClass = $porcentaje == 100 ? 'bg-success-50 text-success-600 border border-success-200' : 'bg-primary-50 text-primary-600 border border-primary-200';
-                                            ?>
-                                            <div class="<?php echo $bgProgress; ?> h-100 rounded-pill" style="width: <?php echo $porcentaje; ?>%"></div>
-                                        </div>
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <span class="text-xs text-secondary-light fw-medium">de €<?php echo number_format($caso['honorarios_totales'],2,',','.'); ?></span>
-                                            <span class="badge <?php echo $badgeClass; ?> radius-4 px-8 py-2"><?php echo round($porcentaje); ?>%</span>
-                                        </div>
+                                <td class="py-16 border-bottom border-neutral-100" style="min-width: 220px;">
+                                    <div class="d-flex flex-column gap-2" style="font-size:0.8rem;">
+                                         <!-- Cliente -->
+                                         <div>
+                                             <div class="d-flex justify-content-between mb-2">
+                                                 <span class="fw-bold text-neutral-800" style="font-size: 11px; text-transform: uppercase; color: #10b981;">Cliente</span>
+                                                 <span class="text-xs text-secondary-light">de €<?php echo number_format($caso['_honorarios_cliente'], 0, ',', '.'); ?></span>
+                                             </div>
+                                             <div class="d-flex align-items-center justify-content-between">
+                                                 <span class="text-success-main fw-bold">Cobrado: €<?php echo number_format($caso['_pagado_cliente'], 2, ',', '.'); ?></span>
+                                                 <span class="text-danger-main text-xs fw-semibold">Falta: €<?php echo number_format($caso['_pendiente_cliente'], 2, ',', '.'); ?></span>
+                                             </div>
+                                         </div>
+                                         <!-- Abogado -->
+                                         <div style="border-top:1px dashed #e2e8f0; padding-top:6px; margin-top:4px;">
+                                             <div class="d-flex justify-content-between mb-2">
+                                                 <span class="fw-bold text-neutral-800" style="font-size: 11px; text-transform: uppercase; color: #3b82f6;">Abogado</span>
+                                                 <span class="text-xs text-secondary-light">de €<?php echo number_format($caso['_honorarios_abogado'], 0, ',', '.'); ?></span>
+                                             </div>
+                                             <div class="d-flex align-items-center justify-content-between">
+                                                 <span class="text-info-main fw-bold">Pagado: €<?php echo number_format($caso['_pagado_abogado'], 2, ',', '.'); ?></span>
+                                                 <span class="text-danger-main text-xs fw-semibold">Falta: €<?php echo number_format($caso['_pendiente_abogado'], 2, ',', '.'); ?></span>
+                                             </div>
+                                         </div>
                                     </div>
                                 </td>
                                 <?php endif; ?>
