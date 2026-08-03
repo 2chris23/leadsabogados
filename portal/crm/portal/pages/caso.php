@@ -406,7 +406,6 @@ $stepsOrden = array_keys($estadoCaso);
             <h2>Novedades y Documentos</h2>
             <span class="cnt" style="background:#f3e8ff;color:#9333ea"><?php echo count($feedItems); ?></span>
         </div>
-        </div>
         <div class="card-body">
             <?php foreach($feedItems as $item): 
                 if ($item['type'] === 'nota'):
