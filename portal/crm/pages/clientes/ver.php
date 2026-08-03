@@ -741,10 +741,12 @@ include CRM_ROOT . '/templates/layout/header.php';
                             <option value="en_tramitacion">En tramitación</option>
                         </select>
                     </div>
+                    <?php if($auth->esAdmin()): ?>
                     <div class="col-sm-6">
                         <label class="form-label fw-semibold">Cobro Cliente (€)</label>
                         <input type="number" step="0.01" name="honorarios_totales" class="form-control" value="0.00" title="Lo que se le cobra al cliente">
                     </div>
+                    <?php endif; ?>
                     <div class="col-sm-6">
                         <label class="form-label fw-semibold">Fecha de Apertura</label>
                         <input type="date" name="fecha_apertura" class="form-control" value="<?php echo date('Y-m-d'); ?>">
@@ -808,10 +810,14 @@ include CRM_ROOT . '/templates/layout/header.php';
                             <option value="archivado">Archivado</option>
                         </select>
                     </div>
+                    <?php if($auth->esAdmin()): ?>
                     <div class="col-sm-6">
                         <label class="form-label fw-semibold">Cobro Cliente (€)</label>
                         <input type="number" step="0.01" name="honorarios_totales" id="editCasoHonorarios" class="form-control" title="Lo que se le cobra al cliente">
                     </div>
+                    <?php else: ?>
+                    <input type="hidden" name="honorarios_totales" id="editCasoHonorarios">
+                    <?php endif; ?>
                     <?php /* DESCRIPCION - oculto temporalmente
                     <div class="col-12">
                         <label class="form-label fw-semibold">Descripción</label>

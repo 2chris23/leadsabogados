@@ -1301,12 +1301,17 @@ document.addEventListener('DOMContentLoaded', () => {
                           <input type="hidden" name="abogado_id" id="csModalHid" value="<?php echo $abSel; ?>">
                         </div>
                     </div>
+                    <?php if(RoleGuard::esAdmin()): ?>
                     <div class="col-sm-6">
                         <label class="form-label">Cobro Cliente (&euro;)</label>
                         <input type="number" name="honorarios_totales" class="form-control"
                                step="0.01" min="0" value="<?php echo $caso['honorarios_totales']; ?>" required>
                     </div>
+                    <?php else: ?>
+                    <input type="hidden" name="honorarios_totales" value="<?php echo $caso['honorarios_totales']; ?>">
+                    <?php endif; ?>
 
+                    <?php if(RoleGuard::esAdmin()): ?>
                     <?php $tpc = $caso['tipo_pago_cliente'] ?? 'pago_unico'; ?>
                     <div class="col-sm-6">
                         <label class="form-label">Tipo de Pago del Cliente</label>
@@ -1320,6 +1325,24 @@ document.addEventListener('DOMContentLoaded', () => {
                             <option value="fechas_custom" <?php echo $tpc==='fechas_custom'?'selected':''; ?>>Fechas Personalizadas</option>
                         </select>
                     </div>
+
+                    <?php $frec = $caso['frecuencia_pago'] ?? 'mensual'; ?>
+                    <div class="col-sm-6" id="wrapCuotas" style="display:<?php echo $tpc==='cuotas'?'block':'none'; ?>;">
+                        <label class="form-label">Frecuencia de Pago (Cuotas)</label>
+                        <select name="frecuencia_pago" class="form-select">
+                            <option value="semanal" <?php echo $frec==='semanal'?'selected':''; ?>>Semanal</option>
+                            <option value="quincenal" <?php echo $frec==='quincenal'?'selected':''; ?>>Quincenal</option>
+                            <option value="mensual" <?php echo $frec==='mensual'?'selected':''; ?>>Mensual</option>
+                            <option value="bimestral" <?php echo $frec==='bimestral'?'selected':''; ?>>Bimestral (cada 2 meses)</option>
+                            <option value="trimestral" <?php echo $frec==='trimestral'?'selected':''; ?>>Trimestral (cada 3 meses)</option>
+                            <option value="semestral" <?php echo $frec==='semestral'?'selected':''; ?>>Semestral (cada 6 meses)</option>
+                            <option value="anual" <?php echo $frec==='anual'?'selected':''; ?>>Anual</option>
+                        </select>
+                    </div>
+                    <?php else: ?>
+                    <input type="hidden" name="tipo_pago_cliente" value="<?php echo $caso['tipo_pago_cliente'] ?? 'pago_unico'; ?>">
+                    <input type="hidden" name="frecuencia_pago" value="<?php echo $caso['frecuencia_pago'] ?? 'mensual'; ?>">
+                    <?php endif; ?>
                     
                     <!-- PAGO ÚNICO -->
                     <div class="col-12" id="wrapPagoUnico" style="<?php echo $tpc !== 'pago_unico' ? 'display:none' : ''; ?>">

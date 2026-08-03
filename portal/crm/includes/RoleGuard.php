@@ -228,8 +228,12 @@ class RoleGuard {
             $items[] = ['titulo'=>'Casos', 'icono'=>'solar:case-minimalistic-outline', 'url'=>'casos'];
         }
 
-        // Pagos — solo si tiene permiso explícito
-        if ($tiene(['pagos.ver', 'pagos.registrar'])) {
+        // Pagos — solo administradores o si tiene permiso explícito en BD (no fallback por defecto)
+        $puedeVerPagos = false;
+        if (!empty($permisos)) {
+            $puedeVerPagos = !empty($permisos['pagos.ver']) || !empty($permisos['pagos.registrar']);
+        }
+        if ($puedeVerPagos) {
             $items[] = ['titulo'=>'Pagos', 'icono'=>'solar:wallet-money-outline', 'url'=>'pagos'];
         }
 
