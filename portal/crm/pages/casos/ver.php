@@ -189,9 +189,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_caso'])) {
         if ($saldoPendiente > 0) {
             if ($tipoPago === 'pago_unico') {
                 $fecha = $_POST['fecha_pago_unico'] ?? date('Y-m-d');
-                $db->insert('pagos_programados', [
-                    'caso_id' => $id, 'monto' => $saldoPendiente, 'fecha_vencimiento' => $fecha, 'estado' => 'pendiente'
-                ]);
+                $data = [
+                    'caso_id'           => $id,
+                    'fecha_vencimiento' => $fecha,
+                    'monto'             => $saldoPendiente,
+                    'estado'            => 'pendiente',
+                    'numero_cuota'      => 1,
+                    'concepto'          => 'Pago único'
+                ];
+                try {
+                    $db->insert('pagos_programados', $data);
+                } catch (Throwable $e1) {
+                    unset($data['numero_cuota'], $data['concepto']);
+                    try { $db->insert('pagos_programados', $data); } catch (Throwable $e2) {
+                        unset($data['estado']);
+                        $db->insert('pagos_programados', $data);
+                    }
+                }
             } elseif ($tipoPago === 'cuotas') {
                 $numCuotas = (int)($_POST['num_cuotas'] ?? 1);
                 if ($numCuotas > 0) {
@@ -199,9 +213,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_caso'])) {
                     $freq = $_POST['frecuencia_pago'] ?? 'mensual';
                     $fecha = $_POST['fecha_inicio_cuotas'] ?? date('Y-m-d');
                     for ($i = 1; $i <= $numCuotas; $i++) {
-                        $db->insert('pagos_programados', [
-                            'caso_id' => $id, 'monto' => $montoCuota, 'fecha_vencimiento' => $fecha, 'estado' => 'pendiente'
-                        ]);
+                        $montoActual = ($i === $numCuotas) ? round($saldoPendiente - ($montoCuota * ($numCuotas - 1)), 2) : $montoCuota;
+                        $data = [
+                            'caso_id'           => $id,
+                            'fecha_vencimiento' => $fecha,
+                            'monto'             => $montoActual,
+                            'estado'            => 'pendiente',
+                            'numero_cuota'      => $i,
+                            'concepto'          => "Cuota $i de $numCuotas"
+                        ];
+                        try {
+                            $db->insert('pagos_programados', $data);
+                        } catch (Throwable $e1) {
+                            unset($data['numero_cuota'], $data['concepto']);
+                            try { $db->insert('pagos_programados', $data); } catch (Throwable $e2) {
+                                unset($data['estado']);
+                                $db->insert('pagos_programados', $data);
+                            }
+                        }
+
                         $dateObj = new DateTime($fecha);
                         if ($freq === 'semanal')        $dateObj->modify('+1 week');
                         elseif ($freq === 'quincenal')  $dateObj->modify('+15 days');
@@ -217,9 +247,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_caso'])) {
                 foreach ($montos as $i => $m) {
                     $montoCustom = (float)$m;
                     if ($montoCustom > 0) {
-                        $db->insert('pagos_programados', [
-                            'caso_id' => $id, 'monto' => $montoCustom, 'fecha_vencimiento' => $fechas[$i] ?? date('Y-m-d'), 'estado' => 'pendiente'
-                        ]);
+                        $data = [
+                            'caso_id'           => $id,
+                            'fecha_vencimiento' => $fechas[$i] ?? date('Y-m-d'),
+                            'monto'             => $montoCustom,
+                            'estado'            => 'pendiente',
+                            'numero_cuota'      => $i + 1,
+                            'concepto'          => "Pago programado #" . ($i + 1)
+                        ];
+                        try {
+                            $db->insert('pagos_programados', $data);
+                        } catch (Throwable $e1) {
+                            unset($data['numero_cuota'], $data['concepto']);
+                            try { $db->insert('pagos_programados', $data); } catch (Throwable $e2) {
+                                unset($data['estado']);
+                                $db->insert('pagos_programados', $data);
+                            }
+                        }
                     }
                 }
             }
