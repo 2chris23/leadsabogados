@@ -880,7 +880,6 @@ function openEditCaso(caso) {
     document.getElementById('editCasoAbogado').value = caso.abogado_id || '';
     document.getElementById('editCasoEstado').value = caso.estado;
     document.getElementById('editCasoHonorarios').value = caso.honorarios_totales;
-    document.getElementById('editCasoHonorariosAbogado').value = caso.honorarios_abogado || 0;
     // document.getElementById('editCasoDescripcion').value = caso.descripcion || '';
     bootstrap.Modal.getOrCreateInstance(document.getElementById('editarCasoModal')).show();
 }
