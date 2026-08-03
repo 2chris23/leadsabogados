@@ -954,40 +954,114 @@ document.addEventListener('DOMContentLoaded', () => {
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
           Estado de Pagos del Cliente
         </div>
-        <div style="display:flex; justify-content:space-between; position:relative; width: 100%; padding-top:10px;">
+
+        <?php
+        // ── Calcular progreso real cruzando pagos reales vs cuotas programadas ──
+        $totalPagadoReal   = array_sum(array_column($pagos, 'cantidad'));
+        $acumulado         = 0.0;
+        $cuotaActualIdx    = -1; // índice de la cuota "en progreso" (parcialmente cubierta)
+
+        foreach ($pagosProgramados as $idx => $pp) {
+            $acumulado += (float)$pp['monto'];
+            if ($totalPagadoReal >= $acumulado) {
+                // Esta cuota está completamente cubierta por los pagos reales
+                $pagosProgramados[$idx]['_estadoReal'] = 'pagado';
+            } elseif ($totalPagadoReal > ($acumulado - (float)$pp['monto'])) {
+                // Parcialmente cubierta → es la cuota "en progreso"
+                $pagosProgramados[$idx]['_estadoReal'] = 'progreso';
+                $cuotaActualIdx = $idx;
+            } else {
+                $pagosProgramados[$idx]['_estadoReal'] = $pp['estado']; // pendiente o vencido
+            }
+        }
+
+        // Calcular % de progreso de la cuota actual
+        $progressPct = 0;
+        if ($cuotaActualIdx >= 0) {
+            $ppActual        = $pagosProgramados[$cuotaActualIdx];
+            $pagadoAnterior  = $acumulado - (float)$ppActual['monto'];
+            $pagadoEnCuota   = max(0, $totalPagadoReal - ($pagadoAnterior - (float)$ppActual['monto']));
+            $progressPct     = min(100, round(($pagadoEnCuota / max(1, (float)$ppActual['monto'])) * 100));
+        }
+
+        $totalCuotas = count($pagosProgramados);
+        ?>
+
+        <?php if ($totalCuotas === 0): ?>
+        <p style="color:#94a3b8;font-size:.875rem;text-align:center;padding:16px 0">Sin cuotas programadas</p>
+        <?php else: ?>
+        <!-- Barra de progreso global -->
+        <?php
+        $pctGlobal = $caso['honorarios_totales'] > 0 ? min(100, round(($totalPagadoReal / $caso['honorarios_totales']) * 100)) : 0;
+        ?>
+        <div style="margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+            <span style="font-size:.75rem;font-weight:600;color:#64748b">Progreso total</span>
+            <span style="font-size:.75rem;font-weight:700;color:<?php echo $pctGlobal>=100?'#10b981':'#2563eb'; ?>"><?php echo $pctGlobal; ?>%</span>
+          </div>
+          <div style="height:6px;background:#e2e8f0;border-radius:999px;overflow:hidden">
+            <div style="height:100%;width:<?php echo $pctGlobal; ?>%;background:<?php echo $pctGlobal>=100?'#10b981':'linear-gradient(90deg,#2563eb,#6ba3ff)'; ?>;border-radius:999px;transition:width .5s"></div>
+          </div>
+        </div>
+
+        <!-- Cuotas individuales -->
+        <div style="display:flex; justify-content:space-between; position:relative; width:100%; padding-top:10px; overflow-x:auto; gap:4px;">
           <!-- Línea conectora base -->
           <div style="position:absolute; top:22px; left:0; right:0; height:3px; background:#e2e8f0; z-index:1;"></div>
-          
-          <?php foreach ($pagosProgramados as $index => $pp): 
-              $isPagado = $pp['estado'] === 'pagado';
-              $isPendiente = $pp['estado'] === 'pendiente';
-              $isVencido = $isPendiente && strtotime($pp['fecha_vencimiento']) < time();
-              
-              if ($isPagado) {
-                  $bgColor = '#10b981'; // green
-                  $borderColor = '#10b981';
-                  $textColor = '#10b981';
-              } elseif ($isVencido) {
-                  $bgColor = '#fef2f2';
-                  $borderColor = '#ef4444'; // red
-                  $textColor = '#ef4444';
-              } else {
-                  $bgColor = '#fffbeb';
-                  $borderColor = '#f59e0b'; // yellow
-                  $textColor = '#f59e0b';
-              }
+          <!-- Línea de progreso coloreada -->
+          <?php
+          $cuotasPagadas = count(array_filter($pagosProgramados, fn($p) => ($p['_estadoReal'] ?? '') === 'pagado'));
+          $lineaPct = $totalCuotas > 1 ? ($cuotasPagadas / ($totalCuotas - 1)) * 100 : ($cuotasPagadas > 0 ? 100 : 0);
           ?>
-          <div style="position:relative; z-index:3; display:flex; flex-direction:column; align-items:center; flex: 1; min-width: 0;">
-            <div style="width:24px; height:24px; border-radius:50%; background:<?php echo $bgColor; ?>; border:3px solid <?php echo $borderColor; ?>; display:flex; align-items:center; justify-content:center; box-shadow:0 0 0 4px #ffffff; z-index:2;">
-                <?php if($isPagado): ?>
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-                <?php endif; ?>
+          <div style="position:absolute; top:22px; left:0; height:3px; width:<?php echo $lineaPct; ?>%; background:linear-gradient(90deg,#10b981,#34d399); z-index:2; transition:width .5s"></div>
+
+          <?php foreach ($pagosProgramados as $index => $pp):
+              $estadoReal = $pp['_estadoReal'] ?? 'pendiente';
+              $esPagado   = $estadoReal === 'pagado';
+              $esProgreso = $estadoReal === 'progreso';
+              $esVencido  = $estadoReal === 'vencido' || (!$esPagado && !$esProgreso && strtotime($pp['fecha_vencimiento']) < time());
+              $esActivo   = $index === $cuotaActualIdx;
+
+              if ($esPagado)       { $bg='#10b981'; $bord='#10b981'; $tc='#059669'; }
+              elseif ($esProgreso) { $bg='#dbeafe'; $bord='#2563eb'; $tc='#1d4ed8'; }
+              elseif ($esVencido)  { $bg='#fef2f2'; $bord='#ef4444'; $tc='#dc2626'; }
+              else                 { $bg='#fffbeb'; $bord='#f59e0b'; $tc='#d97706'; }
+
+              $numCuota = $pp['numero_cuota'] ?? ($index + 1);
+              $totalNum = $pp['concepto'] ? (preg_match('/de (\d+)/', $pp['concepto'], $m) ? $m[1] : $totalCuotas) : $totalCuotas;
+          ?>
+          <div style="position:relative; z-index:3; display:flex; flex-direction:column; align-items:center; flex:1; min-width:52px;">
+
+            <?php if ($esActivo): ?>
+            <!-- Flechita indicadora de cuota actual -->
+            <div style="position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:.65rem;color:#2563eb;font-weight:800;white-space:nowrap">▼ Aquí</div>
+            <?php endif; ?>
+
+            <!-- Círculo -->
+            <div style="width:24px;height:24px;border-radius:50%;background:<?php echo $bg; ?>;border:3px solid <?php echo $bord; ?>;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 4px #fff;z-index:2;position:relative;<?php echo $esActivo?'box-shadow:0 0 0 4px #dbeafe, 0 0 0 2px #2563eb;':'' ?>">
+              <?php if ($esPagado): ?>
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              <?php elseif ($esProgreso): ?>
+              <div style="width:8px;height:8px;border-radius:50%;background:#2563eb"></div>
+              <?php endif; ?>
             </div>
-            <span style="margin-top:10px; font-size:0.65rem; font-weight:700; color:<?php echo $textColor; ?>; text-transform:uppercase; text-align:center; line-height:1.2; width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="<?php echo e($pp['concepto']); ?>"><?php echo e($pp['concepto']); ?></span>
-            <span style="margin-top:2px; font-size:0.65rem; color:#64748b; font-weight:600;">€<?php echo number_format($pp['monto'], 2, ',', '.'); ?></span>
+
+            <!-- Etiqueta -->
+            <span style="margin-top:10px;font-size:.6rem;font-weight:700;color:<?php echo $tc; ?>;text-transform:uppercase;text-align:center;line-height:1.2;width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="Cuota <?php echo $numCuota; ?> de <?php echo $totalNum; ?>">
+              CUOTA <?php echo $numCuota; ?> DE <?php echo $totalNum; ?>
+            </span>
+            <span style="margin-top:2px;font-size:.65rem;color:#64748b;font-weight:600;">€<?php echo number_format($pp['monto'], 2, ',', '.'); ?></span>
+            <?php if ($esPagado): ?>
+            <span style="font-size:.55rem;color:#10b981;font-weight:700;margin-top:1px">✓ Pagada</span>
+            <?php elseif ($esProgreso): ?>
+            <span style="font-size:.55rem;color:#2563eb;font-weight:700;margin-top:1px">En curso</span>
+            <?php elseif ($esVencido): ?>
+            <span style="font-size:.55rem;color:#dc2626;font-weight:700;margin-top:1px">Vencida</span>
+            <?php endif; ?>
           </div>
           <?php endforeach; ?>
         </div>
+        <?php endif; ?>
       </div>
     </div>
     <?php endif; ?>
