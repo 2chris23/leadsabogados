@@ -132,7 +132,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_caso'])) {
         'abogado_id'        => $_POST['abogado_id'] ?: null,
         'honorarios_totales'=> (float)($_POST['honorarios_totales'] ?? 0),
         'tipo_pago_cliente' => $_POST['tipo_pago_cliente'] ?? 'pago_unico',
-        'cuotas_cliente'    => (int)($_POST['num_cuotas'] ?? 1),
         'frecuencia_pago'   => $_POST['frecuencia_pago'] ?? 'mensual',
     ], 'id = ?', [$id]);
 
