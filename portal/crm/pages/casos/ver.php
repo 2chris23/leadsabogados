@@ -125,15 +125,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_caso'])) {
         $tipoCasoStr = $decodedTipo[0]['value'];
     }
 
-    $db->update('casos', [
+    // Columnas base — siempre existen
+    $datosBase = [
         'titulo'            => trim($_POST['titulo']),
         'tipo_caso'         => $tipoCasoStr,
         'descripcion'       => trim($_POST['descripcion']),
         'abogado_id'        => $_POST['abogado_id'] ?: null,
         'honorarios_totales'=> (float)($_POST['honorarios_totales'] ?? 0),
-        'tipo_pago_cliente' => $_POST['tipo_pago_cliente'] ?? 'pago_unico',
-        'frecuencia_pago'   => $_POST['frecuencia_pago'] ?? 'mensual',
-    ], 'id = ?', [$id]);
+    ];
+    $db->update('casos', $datosBase, 'id = ?', [$id]);
+
+    // Columnas financieras opcionales (añadidas por migración)
+    try {
+        $db->update('casos', [
+            'tipo_pago_cliente' => $_POST['tipo_pago_cliente'] ?? 'pago_unico',
+            'frecuencia_pago'   => $_POST['frecuencia_pago'] ?? 'mensual',
+        ], 'id = ?', [$id]);
+    } catch (Throwable $e) {
+        // Si las columnas no existen, ignorar silenciosamente
+        error_log('[CRM] financiero cols missing: ' . $e->getMessage());
+    }
 
     // Lógica para regenerar pagos_programados
     $tipoPago = $_POST['tipo_pago_cliente'] ?? 'pago_unico';
