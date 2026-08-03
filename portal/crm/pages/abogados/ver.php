@@ -7,6 +7,13 @@ require_once CRM_ROOT . '/includes/Database.php';
 $db = Database::getInstance();
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
+// --- TEMPORARY DB FIX TRIGGER ---
+if (isset($_GET['fix_db'])) {
+    $db->query("UPDATE casos SET honorarios_abogado = 0");
+    echo "<h1>¡Base de datos arreglada correctamente!</h1><p>Ya puedes volver al perfil del abogado quitando '&fix_db=1' de la URL.</p>";
+    exit;
+}
+
 // --- PROCESAR ACTUALIZACIÓN DE FINANZAS POR CASO ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['actualizar_finanzas_caso'])) {
     $casoId = (int)$_POST['caso_id'];
