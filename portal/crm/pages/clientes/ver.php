@@ -485,7 +485,7 @@ include CRM_ROOT . '/templates/layout/header.php';
             
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0 text-nowrap border-0">
+                    <table class="table table-hover align-middle mb-0 border-0">
                         <thead class="bg-neutral-50 text-uppercase text-xs tracking-wider fw-semibold text-secondary-light">
                             <tr>
                                 <th class="ps-24 py-16 border-bottom border-neutral-100">Referencia</th>
