@@ -496,7 +496,7 @@ include CRM_ROOT . '/templates/layout/header.php';
                                     <th class="py-16 border-bottom border-neutral-100">Cobro Cliente</th>
                                     <th class="py-16 border-bottom border-neutral-100">Pago Abogado</th>
                                 <?php endif; ?>
-                                <th class="pe-24 py-16 border-bottom border-neutral-100 text-end">Acción</th>
+                                <th class="pe-24 py-16 border-bottom border-neutral-100 text-start">Acción</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -572,8 +572,8 @@ include CRM_ROOT . '/templates/layout/header.php';
                                      </div>
                                 </td>
                                 <?php endif; ?>
-                                <td class="pe-24 py-16 border-bottom border-neutral-100 text-end">
-                                    <div class="d-flex align-items-center justify-content-end gap-2">
+                                <td class="pe-24 py-16 border-bottom border-neutral-100 text-start">
+                                    <div class="d-flex align-items-center justify-content-start gap-2">
                                         <a href="<?php echo APP_URL; ?>/index.php?page=casos/ver&id=<?php echo $caso['id']; ?>" class="btn btn-sm bg-info-50 text-info-600 hover-bg-info-100 border border-info-200 transition-2 d-inline-flex align-items-center justify-content-center radius-8" style="width:32px; height:32px;" title="Ver Expediente">
                                             <iconify-icon icon="solar:eye-outline" class="text-lg"></iconify-icon>
                                         </a>
