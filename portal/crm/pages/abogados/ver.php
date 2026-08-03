@@ -73,11 +73,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['actualizar_tarifas_gl
 $abogado = $db->fetchOne("SELECT * FROM usuarios_internos WHERE id = ? AND rol = 'abogado'", [$id]);
 if (!$abogado) { header('Location: index.php?page=abogados'); exit; }
 
-$totalHonorariosClientes = (float)$db->fetchColumn("SELECT SUM(honorarios_totales) FROM casos WHERE abogado_id = ?", [$id]);
-$totalHonorariosAbogado  = (float)$db->fetchColumn("SELECT SUM(honorarios_abogado) FROM casos WHERE abogado_id = ?", [$id]);
-$beneficioEstimado = $totalHonorariosClientes - $totalHonorariosAbogado;
+$casos = $db->fetchAll("SELECT c.*, cl.nombre as cliente_nombre, cl.apellidos as cliente_apellidos, 
+    (SELECT SUM(cantidad) FROM pagos WHERE caso_id = c.id AND (tipo_pago IS NULL OR tipo_pago != 'pago_abogado')) as cobrado,
+    (SELECT SUM(cantidad) FROM pagos WHERE caso_id = c.id AND tipo_pago = 'pago_abogado') as pagado_abogado
+    FROM casos c JOIN clientes cl ON c.cliente_id = cl.id WHERE c.abogado_id = ? ORDER BY c.created_at DESC", [$id]);
 
-$casos = $db->fetchAll("SELECT c.*, cl.nombre as cliente_nombre, cl.apellidos as cliente_apellidos, (SELECT SUM(cantidad) FROM pagos WHERE caso_id = c.id AND (tipo_pago IS NULL OR tipo_pago != 'pago_abogado')) as cobrado FROM casos c JOIN clientes cl ON c.cliente_id = cl.id WHERE c.abogado_id = ? ORDER BY c.created_at DESC", [$id]);
+$totalHonorariosClientes = 0.0;
+$totalHonorariosAbogado = 0.0;
+$totalPagadoAbogado = 0.0;
+
+foreach ($casos as &$c) {
+    $totalHonorariosClientes += (float)$c['honorarios_totales'];
+    
+    $ha_real = (float)($c['honorarios_abogado'] ?? 0);
+    if ($ha_real == 0) {
+        $uTipo = $abogado['tipo_pago_predeterminado'] ?? 'fijo';
+        if ($uTipo === 'hitos' || $uTipo === 'fijo') $ha_real = (float)$abogado['tarifa_fija_default'];
+        elseif ($uTipo === 'mensual') $ha_real = (float)$abogado['tarifa_mensual_default'];
+        elseif ($uTipo === 'exito') $ha_real = (float)$abogado['tarifa_exito_default'];
+    }
+    $bono = (float)($c['bono_abogado'] ?? 0);
+    $c['_coste_abogado'] = $ha_real + $bono;
+    $c['_pagado_abogado'] = (float)$c['pagado_abogado'];
+    
+    $totalHonorariosAbogado += $c['_coste_abogado'];
+    $totalPagadoAbogado += $c['_pagado_abogado'];
+}
+unset($c);
+
+$beneficioEstimado = $totalHonorariosClientes - $totalHonorariosAbogado;
+$pendienteAbogado = max(0, $totalHonorariosAbogado - $totalPagadoAbogado);
+
 $pagos = $db->fetchAll("SELECT p.*, c.titulo as caso_titulo, cl.nombre as cliente_nombre FROM pagos p JOIN casos c ON p.caso_id = c.id JOIN clientes cl ON c.cliente_id = cl.id WHERE c.abogado_id = ? ORDER BY p.fecha_pago DESC LIMIT 10", [$id]);
 $solicitudes = $db->fetchAll("SELECT s.*, sa.estado as estado FROM solicitudes s JOIN solicitud_asignaciones sa ON s.id = sa.solicitud_id WHERE sa.abogado_id = ? AND sa.estado IN ('pendiente', 'aceptada', 'denegada') ORDER BY sa.created_at DESC", [$id]);
 
@@ -214,9 +240,10 @@ include CRM_ROOT . '/templates/layout/header.php';
         <!-- Main Content -->
         <div class="col-lg-8 col-xxl-9">
             <div class="row gy-24 mb-24">
-                <div class="col-sm-4"><div class="card p-20 radius-12 border bg-white shadow-sm h-100 d-flex align-items-center gap-12"><div class="w-44-px h-44-px bg-primary-50 text-primary-600 rounded-circle d-flex align-items-center justify-content-center text-xl"><iconify-icon icon="solar:folder-with-files-outline"></iconify-icon></div><div><h5 class="mb-0 fw-bold">€<?php echo number_format($totalHonorariosClientes, 0, ',', '.'); ?></h5><span class="text-xs text-secondary-light">Cartera Clientes</span></div></div></div>
-                <div class="col-sm-4"><div class="card p-20 radius-12 border bg-white shadow-sm h-100 d-flex align-items-center gap-12"><div class="w-44-px h-44-px bg-success-50 text-success-600 rounded-circle d-flex align-items-center justify-content-center text-xl"><iconify-icon icon="solar:chart-square-outline"></iconify-icon></div><div><h5 class="mb-0 fw-bold text-success-main">€<?php echo number_format($beneficioEstimado, 0, ',', '.'); ?></h5><span class="text-xs text-secondary-light">Beneficio Despacho</span></div></div></div>
-                <div class="col-sm-4"><div class="card p-20 radius-12 border bg-white shadow-sm h-100 d-flex align-items-center gap-12"><div class="w-44-px h-44-px bg-info-50 text-info-600 rounded-circle d-flex align-items-center justify-content-center text-xl"><iconify-icon icon="solar:users-group-two-rounded-outline"></iconify-icon></div><div><h5 class="mb-0 fw-bold text-info-main">€<?php echo number_format($totalHonorariosAbogado, 0, ',', '.'); ?></h5><span class="text-xs text-secondary-light">Coste Abogado</span></div></div></div>
+                <div class="col-sm-3"><div class="card p-16 radius-12 border bg-white shadow-sm h-100"><div class="d-flex align-items-center gap-12 mb-8"><div class="w-32-px h-32-px bg-primary-50 text-primary-600 rounded-circle d-flex align-items-center justify-content-center text-lg"><iconify-icon icon="solar:folder-with-files-outline"></iconify-icon></div><span class="text-xs text-secondary-light fw-bold uppercase">Cartera Clientes</span></div><h5 class="mb-0 fw-bold">€<?php echo number_format($totalHonorariosClientes, 0, ',', '.'); ?></h5></div></div>
+                <div class="col-sm-3"><div class="card p-16 radius-12 border bg-white shadow-sm h-100"><div class="d-flex align-items-center gap-12 mb-8"><div class="w-32-px h-32-px bg-info-50 text-info-600 rounded-circle d-flex align-items-center justify-content-center text-lg"><iconify-icon icon="solar:users-group-two-rounded-outline"></iconify-icon></div><span class="text-xs text-secondary-light fw-bold uppercase">Coste Abogado</span></div><h5 class="mb-0 fw-bold text-info-main">€<?php echo number_format($totalHonorariosAbogado, 0, ',', '.'); ?></h5></div></div>
+                <div class="col-sm-3"><div class="card p-16 radius-12 border bg-white shadow-sm h-100"><div class="d-flex align-items-center gap-12 mb-8"><div class="w-32-px h-32-px bg-success-50 text-success-600 rounded-circle d-flex align-items-center justify-content-center text-lg"><iconify-icon icon="solar:chart-square-outline"></iconify-icon></div><span class="text-xs text-secondary-light fw-bold uppercase">Ben. Despacho</span></div><h5 class="mb-0 fw-bold text-success-main">€<?php echo number_format($beneficioEstimado, 0, ',', '.'); ?></h5></div></div>
+                <div class="col-sm-3"><div class="card p-16 radius-12 border bg-white shadow-sm h-100"><div class="d-flex align-items-center gap-12 mb-8"><div class="w-32-px h-32-px bg-warning-50 text-warning-600 rounded-circle d-flex align-items-center justify-content-center text-lg"><iconify-icon icon="solar:wallet-money-outline"></iconify-icon></div><span class="text-xs text-secondary-light fw-bold uppercase">Pagado Abog.</span></div><h5 class="mb-0 fw-bold text-warning-main">€<?php echo number_format($totalPagadoAbogado, 0, ',', '.'); ?></h5></div></div>
             </div>
 
             <!-- Estadísticas por estado -->
@@ -285,7 +312,9 @@ include CRM_ROOT . '/templates/layout/header.php';
             <div class="row gy-24 mb-24">
                 <?php foreach ($casos as $caso): 
                     $t = (float)$caso['honorarios_totales']; $c = (float)$caso['cobrado']; $p = ($t > 0) ? ($c / $t) * 100 : 0;
-                    $ha = (float)($caso['honorarios_abogado'] ?? 0);
+                    $ha = $caso['_coste_abogado'];
+                    $pa = $caso['_pagado_abogado'];
+                    $p_ab = ($ha > 0) ? ($pa / $ha) * 100 : 0;
                 ?>
                 <div class="col-md-6 col-xxl-4">
                     <?php
@@ -310,11 +339,16 @@ include CRM_ROOT . '/templates/layout/header.php';
                         </a>
                         <div class="bg-neutral-50 p-12 radius-16 mb-20 d-flex align-items-center gap-2"><div class="w-24-px h-24-px bg-primary-600 text-white rounded-circle d-flex align-items-center justify-content-center text-xs fw-bold"><?php echo substr($caso['cliente_nombre'],0,1); ?></div><span class="text-sm fw-semibold"><?php echo e($caso['cliente_nombre']); ?></span></div>
                         <div class="mb-16">
-                            <div class="d-flex justify-content-between mb-4"><span class="text-xs text-secondary-light fw-bold uppercase">Cobro</span><span class="text-xs fw-bold"><?php echo (int)$p; ?>%</span></div>
-                            <div class="progress w-100 radius-pill mb-16" style="height: 6px;"><div class="progress-bar bg-primary-600" style="width: <?php echo $p; ?>%"></div></div>
-                            <div class="d-flex justify-content-between pt-12 border-top">
-                                <div><span class="text-xs text-secondary-light d-block mb-2 fw-bold uppercase" style="font-size: 9px;">Coste</span><span class="text-sm fw-bold text-info-main">€<?php echo number_format($ha, 0, ',', '.'); ?></span></div>
-                                <div class="text-end"><span class="text-xs text-secondary-light d-block mb-2 fw-bold uppercase" style="font-size: 9px;">Margen</span><span class="text-sm fw-bold text-success-main">€<?php echo number_format($t - $ha, 0, ',', '.'); ?></span></div>
+                            <div class="d-flex justify-content-between mb-4"><span class="text-xs text-secondary-light fw-bold uppercase">Cobro Cliente</span><span class="text-xs fw-bold"><?php echo (int)$p; ?>%</span></div>
+                            <div class="progress w-100 radius-pill mb-12" style="height: 6px;"><div class="progress-bar bg-primary-600" style="width: <?php echo $p; ?>%"></div></div>
+                            
+                            <div class="d-flex justify-content-between mb-4 mt-8"><span class="text-xs text-secondary-light fw-bold uppercase">Pago Abogado</span><span class="text-xs fw-bold"><?php echo (int)$p_ab; ?>%</span></div>
+                            <div class="progress w-100 radius-pill mb-16" style="height: 6px;"><div class="progress-bar bg-success-600" style="width: <?php echo $p_ab; ?>%"></div></div>
+
+                            <div class="d-flex pt-12 border-top justify-content-between">
+                                <div class="text-center"><span class="text-xs text-secondary-light d-block mb-2 fw-bold uppercase" style="font-size: 9px;">Honorarios</span><span class="text-sm fw-bold text-info-main">€<?php echo number_format($ha, 0, ',', '.'); ?></span></div>
+                                <div class="text-center"><span class="text-xs text-secondary-light d-block mb-2 fw-bold uppercase" style="font-size: 9px;">Pagado</span><span class="text-sm fw-bold text-success-main">€<?php echo number_format($pa, 0, ',', '.'); ?></span></div>
+                                <div class="text-center"><span class="text-xs text-secondary-light d-block mb-2 fw-bold uppercase" style="font-size: 9px;">Pendiente</span><span class="text-sm fw-bold text-danger-main">€<?php echo number_format(max(0, $ha - $pa), 0, ',', '.'); ?></span></div>
                             </div>
                         </div>
                         <div class="d-flex gap-8 pt-12 border-top" onclick="event.stopPropagation()">
@@ -330,7 +364,7 @@ include CRM_ROOT . '/templates/layout/header.php';
                             <input type="hidden" name="actualizar_finanzas_caso" value="1">
                             <input type="hidden" name="caso_id" value="<?php echo $caso['id']; ?>">
                             <h6 class="mb-4 fw-bold">Registrar Pago al Abogado</h6>
-                            <p class="text-sm text-secondary-light mb-20">Coste actual en este caso: <strong class="text-info-main">€<?php echo number_format($ha, 2, ',', '.'); ?></strong></p>
+                            <p class="text-sm text-secondary-light mb-20">Coste actual en este caso: <strong class="text-info-main">€<?php echo number_format($ha, 2, ',', '.'); ?></strong> | Pagado: <strong class="text-success-main">€<?php echo number_format($pa, 2, ',', '.'); ?></strong></p>
                             
                             <div class="mb-20">
                                 <label class="form-label text-sm fw-bold text-dark">Monto a sumar (€)</label>
