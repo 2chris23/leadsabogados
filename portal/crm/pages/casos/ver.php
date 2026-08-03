@@ -152,18 +152,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_caso'])) {
         $tipoPago = $_POST['tipo_pago_cliente'] ?? 'pago_unico';
         $honorariosTotales = (float)($_POST['honorarios_totales'] ?? 0);
         
-        // Obtener total pagado con fallback de tablas
+        // Obtener total pagado de la tabla pagos (fuente de verdad)
         $totalPagado = 0.0;
         try {
-            $r = $db->fetchOne("SELECT COALESCE(SUM(monto),0) as total FROM pagos_cliente WHERE caso_id = ?", [$id]);
+            $r = $db->fetchOne("SELECT COALESCE(SUM(cantidad),0) as total FROM pagos WHERE caso_id = ? AND (tipo_pago IS NULL OR tipo_pago != 'pago_abogado')", [$id]);
             $totalPagado = (float)($r['total'] ?? 0);
-        } catch (Throwable $e1) {
-            try {
-                $r = $db->fetchOne("SELECT COALESCE(SUM(cantidad),0) as total FROM pagos WHERE caso_id = ? AND (tipo_pago IS NULL OR tipo_pago != 'pago_abogado')", [$id]);
-                $totalPagado = (float)($r['total'] ?? 0);
-            } catch (Throwable $e2) {
-                $totalPagado = 0.0;
-            }
+        } catch (Throwable $ePagado) {
+            $totalPagado = 0.0;
         }
         
         $saldoPendiente = max(0, $honorariosTotales - $totalPagado);
@@ -419,18 +414,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['registrar_pago_abogad
     header('Location: ' . APP_URL . '/index.php?page=casos/ver&id=' . $id); exit;
 }
 
-// Datos complementarios
-// pagos del cliente (tabla pagos, o pagos_cliente si existe)
+// pagos del cliente — siempre leemos de la tabla 'pagos' original (donde registrar.php guarda)
+$pagos = [];
 try {
-    // Intentar tabla pagos_cliente primero
-    $pagos = $db->fetchAll("SELECT id, caso_id, monto as cantidad, fecha as fecha_pago, metodo as metodo_pago, notas, created_at FROM pagos_cliente WHERE caso_id = ? ORDER BY fecha DESC", [$id]);
+    $pagos = $db->fetchAll("SELECT id, caso_id, cantidad, fecha_pago, metodo_pago, concepto, notas, created_at FROM pagos WHERE caso_id = ? AND (tipo_pago IS NULL OR tipo_pago = 'pago_cliente' OR tipo_pago NOT IN ('pago_abogado')) ORDER BY fecha_pago DESC, created_at DESC", [$id]);
 } catch (Throwable $e1) {
-    // Fallback: tabla pagos original
-    try {
-        $pagos = $db->fetchAll("SELECT * FROM pagos WHERE caso_id = ? AND (tipo_pago IS NULL OR tipo_pago != 'pago_abogado') ORDER BY fecha_pago DESC, created_at DESC", [$id]);
-    } catch (Throwable $e2) {
-        $pagos = [];
-    }
+    $pagos = [];
 }
 $totalPagado = array_sum(array_column($pagos, 'cantidad'));
 $saldoPendiente = $caso['honorarios_totales'] - $totalPagado;
