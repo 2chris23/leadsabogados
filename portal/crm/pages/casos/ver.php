@@ -623,7 +623,7 @@ document.addEventListener('DOMContentLoaded', () => {
   </div> <!-- Close Left Column -->
 
   <!-- ══ COL DERECHA ══ -->
-  <div>
+  <div style="min-width: 0;">
 
     <?php if (RoleGuard::esAdmin()): ?>
     <!-- Financiero -->
@@ -648,7 +648,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="cv-fin-card" style="background:#ecfdf5; flex:1; min-width:140px; padding: 16px;"><span class="cv-fin-label" style="text-transform:uppercase; font-size:0.75rem; color:#10b981; font-weight:700;">Pagos al Abogado</span><div class="cv-fin-val" style="color:#10b981; font-size:1.5rem; margin-top:8px;">€<?php echo number_format($totalPagadoAbogado,2,',','.'); ?></div></div>
         </div>
         
-        <div style="display:flex;gap:16px;">
+        <div style="display:flex;gap:16px; flex-wrap: wrap;">
           <a href="<?php echo APP_URL; ?>/index.php?page=pagos/registrar&caso_id=<?php echo $id; ?>" class="cv-btn cv-btn-primary" style="flex:1; padding:12px; font-size:.9375rem; text-decoration:none; justify-content:center; text-align:center;">+ Registrar Pago Cliente</a>
           <button class="cv-btn cv-btn-primary" style="flex:1; padding:12px; font-size:.9375rem; justify-content:center; background:#1d4ed8;" data-bs-toggle="modal" data-bs-target="#modalRegistrarPagoAbogado">+ Registrar Pago Abogado</button>
         </div>
