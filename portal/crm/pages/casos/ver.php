@@ -146,16 +146,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_caso'])) {
         error_log('[CRM] financiero cols missing: ' . $e->getMessage());
     }
 
-    // Lógica para regenerar pagos_programados (protegido si las tablas no existen aún)
+    // Lógica para regenerar pagos_programados (con fallback a la tabla 'pagos' tradicional)
     try {
         $tipoPago = $_POST['tipo_pago_cliente'] ?? 'pago_unico';
         $honorariosTotales = (float)($_POST['honorarios_totales'] ?? 0);
-        $totalPagadoRow = $db->fetchOne("SELECT COALESCE(SUM(monto),0) as total FROM pagos_cliente WHERE caso_id = ?", [$id]);
-        $totalPagado = (float)($totalPagadoRow['total'] ?? 0);
+        
+        // Obtener total pagado con fallback de tablas
+        $totalPagado = 0.0;
+        try {
+            $r = $db->fetchOne("SELECT COALESCE(SUM(monto),0) as total FROM pagos_cliente WHERE caso_id = ?", [$id]);
+            $totalPagado = (float)($r['total'] ?? 0);
+        } catch (Throwable $e1) {
+            try {
+                $r = $db->fetchOne("SELECT COALESCE(SUM(cantidad),0) as total FROM pagos WHERE caso_id = ? AND (tipo_pago IS NULL OR tipo_pago != 'pago_abogado')", [$id]);
+                $totalPagado = (float)($r['total'] ?? 0);
+            } catch (Throwable $e2) {
+                $totalPagado = 0.0;
+            }
+        }
+        
         $saldoPendiente = max(0, $honorariosTotales - $totalPagado);
 
         // Borrar cuotas pendientes o vencidas existentes
-        $db->execute("DELETE FROM pagos_programados WHERE caso_id = ? AND estado IN ('pendiente', 'vencido')", [$id]);
+        try {
+            $db->execute("DELETE FROM pagos_programados WHERE caso_id = ? AND estado IN ('pendiente', 'vencido')", [$id]);
+        } catch (Throwable $eDel) {
+            // Si la tabla no existe aún, la creamos al vuelo
+            $db->execute("CREATE TABLE IF NOT EXISTS pagos_programados (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                caso_id INT NOT NULL,
+                monto DECIMAL(10,2) NOT NULL,
+                fecha_vencimiento DATE NOT NULL,
+                estado ENUM('pendiente','pagado','vencido') NOT NULL DEFAULT 'pendiente',
+                pagado_en DATETIME DEFAULT NULL,
+                notas VARCHAR(255) DEFAULT NULL,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                INDEX idx_caso (caso_id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+            $db->execute("DELETE FROM pagos_programados WHERE caso_id = ? AND estado IN ('pendiente', 'vencido')", [$id]);
+        }
 
         if ($saldoPendiente > 0) {
             if ($tipoPago === 'pago_unico') {
@@ -174,11 +203,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_caso'])) {
                             'caso_id' => $id, 'monto' => $montoCuota, 'fecha_vencimiento' => $fecha, 'estado' => 'pendiente'
                         ]);
                         $dateObj = new DateTime($fecha);
-                        if ($freq === 'semanal')      $dateObj->modify('+1 week');
-                        elseif ($freq === 'quincenal') $dateObj->modify('+15 days');
-                        elseif ($freq === 'mensual')   $dateObj->modify('+1 month');
-                        elseif ($freq === 'trimestral')$dateObj->modify('+3 months');
-                        elseif ($freq === 'semestral') $dateObj->modify('+6 months');
+                        if ($freq === 'semanal')        $dateObj->modify('+1 week');
+                        elseif ($freq === 'quincenal')  $dateObj->modify('+15 days');
+                        elseif ($freq === 'mensual')    $dateObj->modify('+1 month');
+                        elseif ($freq === 'trimestral') $dateObj->modify('+3 months');
+                        elseif ($freq === 'semestral')  $dateObj->modify('+6 months');
                         $fecha = $dateObj->format('Y-m-d');
                     }
                 }
@@ -196,8 +225,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_caso'])) {
             }
         }
     } catch (Throwable $eP) {
-        error_log('[CRM] pagos_programados error: ' . $eP->getMessage());
-        // Si las tablas aún no existen, continuar sin error
+        error_log('[CRM] error en regeneracion de pagos: ' . $eP->getMessage());
     }
 
     AuditLog::registrar('editar', 'casos', $id, 'Datos del caso y plan de pagos actualizados');
@@ -355,11 +383,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['registrar_pago_abogad
 }
 
 // Datos complementarios
-$pagos = $db->fetchAll("SELECT * FROM pagos WHERE caso_id = ? AND (tipo_pago IS NULL OR tipo_pago != 'pago_abogado') ORDER BY fecha_pago DESC, created_at DESC", [$id]);
+// pagos del cliente (tabla pagos, o pagos_cliente si existe)
+try {
+    // Intentar tabla pagos_cliente primero
+    $pagos = $db->fetchAll("SELECT id, caso_id, monto as cantidad, fecha as fecha_pago, metodo as metodo_pago, notas, created_at FROM pagos_cliente WHERE caso_id = ? ORDER BY fecha DESC", [$id]);
+} catch (Throwable $e1) {
+    // Fallback: tabla pagos original
+    try {
+        $pagos = $db->fetchAll("SELECT * FROM pagos WHERE caso_id = ? AND (tipo_pago IS NULL OR tipo_pago != 'pago_abogado') ORDER BY fecha_pago DESC, created_at DESC", [$id]);
+    } catch (Throwable $e2) {
+        $pagos = [];
+    }
+}
 $totalPagado = array_sum(array_column($pagos, 'cantidad'));
 $saldoPendiente = $caso['honorarios_totales'] - $totalPagado;
 
-$pagosAbogado = $db->fetchAll("SELECT * FROM pagos WHERE caso_id = ? AND tipo_pago = 'pago_abogado' ORDER BY fecha_pago DESC, created_at DESC", [$id]);
+try {
+    $pagosAbogado = $db->fetchAll("SELECT * FROM pagos WHERE caso_id = ? AND tipo_pago = 'pago_abogado' ORDER BY fecha_pago DESC, created_at DESC", [$id]);
+} catch (Throwable $eA) {
+    $pagosAbogado = [];
+}
 $totalPagadoAbogado = array_sum(array_column($pagosAbogado, 'cantidad'));
 
 // Obtener notas del caso
@@ -398,16 +441,22 @@ if (empty($documentos)) {
 $historial = $db->fetchAll("SELECT * FROM audit_log WHERE tabla_afectada = 'casos' AND registro_id = ? ORDER BY created_at DESC LIMIT 20", [$id]);
 $abogados = $db->fetchAll("SELECT id, nombre, apellidos FROM usuarios_internos WHERE rol = 'abogado' AND activo = 1");
 
-// Pagos programados (calendario)
-$pagosProgramados = $db->fetchAll("SELECT * FROM pagos_programados WHERE caso_id = ? ORDER BY fecha_vencimiento ASC", [$id]);
-// Marcar vencidos
-foreach ($pagosProgramados as &$pp) {
-    if ($pp['estado'] === 'pendiente' && $pp['fecha_vencimiento'] < date('Y-m-d')) {
-        $db->update('pagos_programados', ['estado' => 'vencido'], 'id = ?', [$pp['id']]);
-        $pp['estado'] = 'vencido';
+// Pagos programados (calendario) - protegido si la tabla no existe aún
+$pagosProgramados = [];
+try {
+    $pagosProgramados = $db->fetchAll("SELECT * FROM pagos_programados WHERE caso_id = ? ORDER BY fecha_vencimiento ASC", [$id]);
+    // Marcar vencidos
+    foreach ($pagosProgramados as &$pp) {
+        if ($pp['estado'] === 'pendiente' && $pp['fecha_vencimiento'] < date('Y-m-d')) {
+            $db->update('pagos_programados', ['estado' => 'vencido'], 'id = ?', [$pp['id']]);
+            $pp['estado'] = 'vencido';
+        }
     }
+    unset($pp);
+} catch (Throwable $ePP) {
+    // Tabla pagos_programados aún no existe
+    $pagosProgramados = [];
 }
-unset($pp);
 
 $tituloPagina = $caso['referencia'];
 include CRM_ROOT . '/templates/layout/header.php';
