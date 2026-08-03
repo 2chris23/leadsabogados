@@ -510,7 +510,7 @@ $extColors = ['PDF'=>['#fef2f2','#dc2626'],'DOC'=>['#e8f0fe','#2e6edd'],'DOCX'=>
   </div>
   <div style="display:flex;gap:8px;align-items:center">
     <?php if (RoleGuard::esAdmin()): ?>
-    <form method="POST" style="margin:0" onsubmit="return confirm('¿Seguro que deseas <?php echo $caso['estado'] === 'archivado' ? 'desarchivar' : 'archivar'; ?> este caso?');">
+    <form method="POST" style="margin:0" onsubmit="event.preventDefault(); crmConfirm('<?php echo $caso["estado"] === "archivado" ? "Desarchivar caso" : "Archivar caso"; ?>', '<?php echo $caso["estado"] === "archivado" ? "¿Seguro que deseas restaurar este caso?" : "¿Seguro que deseas archivar este caso?"; ?>', () => this.submit());">
       <?php echo CSRF::campo(); ?>
       <input type="hidden" name="cambiar_estado" value="1">
       <input type="hidden" name="nuevo_estado" value="<?php echo $caso['estado'] === 'archivado' ? 'en_estudio' : 'archivado'; ?>">
@@ -572,7 +572,7 @@ $extColors = ['PDF'=>['#fef2f2','#dc2626'],'DOC'=>['#e8f0fe','#2e6edd'],'DOCX'=>
 <!-- Script temporal para la alerta del Stepper -->
 <script>
 function confirmarCambioEstado(nuevoEstado, label) {
-    if (confirm('¿Estás seguro que deseas mover el caso al estado: ' + label + '?')) {
+    crmConfirm('Cambiar estado', '¿Estás seguro que deseas mover el caso al estado: <strong>' + label + '</strong>?', function() {
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = '';
@@ -597,7 +597,7 @@ function confirmarCambioEstado(nuevoEstado, label) {
         form.appendChild(input);
         document.body.appendChild(form);
         form.submit();
-    }
+    });
 }
 
 // Lógica para que la bola actual sea "arrastrable"
@@ -874,7 +874,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <button type="button" class="btn btn-sm btn-editar-nota" style="background:#f1f5f9; color:#475569; border:none; border-radius:6px; padding: 6px; cursor:pointer; transition:background 0.2s;" data-id="<?php echo $nota['id']; ?>" data-titulo="<?php echo e($nota['titulo']); ?>" data-contenido="<?php echo e($nota['contenido']); ?>" data-tipo="<?php echo $nota['tipo']; ?>" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                                 </button>
-                                <form method="POST" style="margin:0; display:inline;" onsubmit="return confirm('¿Eliminar esta nota de forma permanente?');">
+                                <form method="POST" style="margin:0; display:inline;" onsubmit="event.preventDefault(); crmConfirm('Eliminar nota', '¿Eliminar esta nota de forma permanente? Esta acción no se puede deshacer.', () => this.submit(), true);">
                                     <?php echo CSRF::campo(); ?>
                                     <input type="hidden" name="eliminar_nota" value="<?php echo $nota['id']; ?>">
                                     <button type="submit" style="background:#fef2f2; color:#ef4444; border:none; border-radius:6px; padding: 6px; cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='#fef2f2'">
@@ -1396,5 +1396,68 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 <?php include CRM_ROOT . '/templates/layout/footer.php'; ?>
+
+<!-- Modal de confirmación personalizado -->
+<div id="crmConfirmOverlay" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(15,23,42,.55);backdrop-filter:blur(4px);align-items:center;justify-content:center;">
+  <div id="crmConfirmBox" style="background:#fff;border-radius:16px;padding:28px 32px;max-width:420px;width:calc(100% - 32px);box-shadow:0 24px 48px rgba(0,0,0,.18);transform:translateY(10px);opacity:0;transition:all .22s cubic-bezier(.34,1.56,.64,1)">
+    <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:20px">
+      <div id="crmConfirmIcon" style="width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0"></div>
+      <div>
+        <div id="crmConfirmTitle" style="font-size:1rem;font-weight:800;color:#1a1a2e;margin-bottom:4px"></div>
+        <div id="crmConfirmMsg" style="font-size:.875rem;color:#64748b;line-height:1.5"></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button id="crmConfirmCancel" style="padding:9px 20px;border-radius:8px;border:1.5px solid #e2e8f0;background:#fff;color:#475569;font-size:.875rem;font-weight:600;cursor:pointer;transition:all .15s" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='#fff'">Cancelar</button>
+      <button id="crmConfirmOk" style="padding:9px 20px;border-radius:8px;border:none;font-size:.875rem;font-weight:700;cursor:pointer;transition:all .15s"></button>
+    </div>
+  </div>
+</div>
+
+<script>
+function crmConfirm(title, message, onConfirm, isDanger) {
+  const overlay = document.getElementById('crmConfirmOverlay');
+  const box     = document.getElementById('crmConfirmBox');
+  const icon    = document.getElementById('crmConfirmIcon');
+  const ttl     = document.getElementById('crmConfirmTitle');
+  const msg     = document.getElementById('crmConfirmMsg');
+  const okBtn   = document.getElementById('crmConfirmOk');
+  const cancelBtn = document.getElementById('crmConfirmCancel');
+
+  ttl.textContent = title;
+  msg.innerHTML   = message;
+
+  if (isDanger) {
+    icon.style.background = '#fef2f2';
+    icon.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
+    okBtn.style.background = '#ef4444';
+    okBtn.style.color = '#fff';
+    okBtn.textContent = 'Eliminar';
+  } else {
+    icon.style.background = '#eff6ff';
+    icon.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+    okBtn.style.background = '#2563eb';
+    okBtn.style.color = '#fff';
+    okBtn.textContent = 'Confirmar';
+  }
+
+  overlay.style.display = 'flex';
+  requestAnimationFrame(() => { box.style.transform = 'translateY(0)'; box.style.opacity = '1'; });
+
+  function close() {
+    box.style.transform = 'translateY(10px)'; box.style.opacity = '0';
+    setTimeout(() => { overlay.style.display = 'none'; }, 200);
+    okBtn.removeEventListener('click', onOk);
+    cancelBtn.removeEventListener('click', close);
+    overlay.removeEventListener('click', onOverlay);
+  }
+  function onOk() { close(); onConfirm(); }
+  function onOverlay(e) { if (e.target === overlay) close(); }
+
+  okBtn.addEventListener('click', onOk);
+  cancelBtn.addEventListener('click', close);
+  overlay.addEventListener('click', onOverlay);
+}
+</script>
 
 
