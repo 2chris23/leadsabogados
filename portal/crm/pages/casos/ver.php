@@ -1395,69 +1395,69 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
-<?php include CRM_ROOT . '/templates/layout/footer.php'; ?>
-
-<!-- Modal de confirmación personalizado -->
-<div id="crmConfirmOverlay" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(15,23,42,.55);backdrop-filter:blur(4px);align-items:center;justify-content:center;">
-  <div id="crmConfirmBox" style="background:#fff;border-radius:16px;padding:28px 32px;max-width:420px;width:calc(100% - 32px);box-shadow:0 24px 48px rgba(0,0,0,.18);transform:translateY(10px);opacity:0;transition:all .22s cubic-bezier(.34,1.56,.64,1)">
-    <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:20px">
-      <div id="crmConfirmIcon" style="width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0"></div>
-      <div>
-        <div id="crmConfirmTitle" style="font-size:1rem;font-weight:800;color:#1a1a2e;margin-bottom:4px"></div>
-        <div id="crmConfirmMsg" style="font-size:.875rem;color:#64748b;line-height:1.5"></div>
+<!-- ===== Modal de confirmación personalizado ===== -->
+<div id="crmConfirmOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;background:rgba(15,23,42,.6);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);">
+  <div style="display:flex;align-items:center;justify-content:center;min-height:100%;padding:16px;">
+    <div id="crmConfirmBox" style="background:#ffffff;border-radius:20px;padding:32px;max-width:400px;width:100%;box-shadow:0 32px 64px rgba(0,0,0,.22);position:relative;">
+      <!-- Icon -->
+      <div style="display:flex;align-items:flex-start;gap:16px;margin-bottom:24px;">
+        <div id="crmConfirmIcon" style="width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:22px;">?</div>
+        <div style="padding-top:2px;flex:1;">
+          <div id="crmConfirmTitle" style="font-size:1.0625rem;font-weight:800;color:#0f172a;margin-bottom:6px;line-height:1.3;">Confirmar</div>
+          <div id="crmConfirmMsg" style="font-size:.875rem;color:#64748b;line-height:1.6;"></div>
+        </div>
       </div>
-    </div>
-    <div style="display:flex;gap:10px;justify-content:flex-end">
-      <button id="crmConfirmCancel" style="padding:9px 20px;border-radius:8px;border:1.5px solid #e2e8f0;background:#fff;color:#475569;font-size:.875rem;font-weight:600;cursor:pointer;transition:all .15s" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='#fff'">Cancelar</button>
-      <button id="crmConfirmOk" style="padding:9px 20px;border-radius:8px;border:none;font-size:.875rem;font-weight:700;cursor:pointer;transition:all .15s"></button>
+      <!-- Buttons -->
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+        <button id="crmConfirmCancel" type="button" style="padding:10px 22px;border-radius:10px;border:1.5px solid #e2e8f0;background:#f8fafc;color:#475569;font-size:.875rem;font-weight:600;cursor:pointer;">Cancelar</button>
+        <button id="crmConfirmOk" type="button" style="padding:10px 22px;border-radius:10px;border:none;background:#2563eb;color:#fff;font-size:.875rem;font-weight:700;cursor:pointer;">Confirmar</button>
+      </div>
     </div>
   </div>
 </div>
 
 <script>
 function crmConfirm(title, message, onConfirm, isDanger) {
-  const overlay = document.getElementById('crmConfirmOverlay');
-  const box     = document.getElementById('crmConfirmBox');
-  const icon    = document.getElementById('crmConfirmIcon');
-  const ttl     = document.getElementById('crmConfirmTitle');
-  const msg     = document.getElementById('crmConfirmMsg');
-  const okBtn   = document.getElementById('crmConfirmOk');
-  const cancelBtn = document.getElementById('crmConfirmCancel');
+  var overlay = document.getElementById('crmConfirmOverlay');
+  var icon    = document.getElementById('crmConfirmIcon');
+  var ttl     = document.getElementById('crmConfirmTitle');
+  var msg     = document.getElementById('crmConfirmMsg');
+  var okBtn   = document.getElementById('crmConfirmOk');
+  var cancelBtn = document.getElementById('crmConfirmCancel');
 
   ttl.textContent = title;
   msg.innerHTML   = message;
 
   if (isDanger) {
     icon.style.background = '#fef2f2';
-    icon.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
+    icon.style.color = '#ef4444';
+    icon.textContent = '🗑️';
     okBtn.style.background = '#ef4444';
-    okBtn.style.color = '#fff';
     okBtn.textContent = 'Eliminar';
   } else {
     icon.style.background = '#eff6ff';
-    icon.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+    icon.style.color = '#2563eb';
+    icon.textContent = 'ℹ️';
     okBtn.style.background = '#2563eb';
-    okBtn.style.color = '#fff';
     okBtn.textContent = 'Confirmar';
   }
 
-  overlay.style.display = 'flex';
-  requestAnimationFrame(() => { box.style.transform = 'translateY(0)'; box.style.opacity = '1'; });
+  overlay.style.display = 'block';
 
-  function close() {
-    box.style.transform = 'translateY(10px)'; box.style.opacity = '0';
-    setTimeout(() => { overlay.style.display = 'none'; }, 200);
-    okBtn.removeEventListener('click', onOk);
-    cancelBtn.removeEventListener('click', close);
-    overlay.removeEventListener('click', onOverlay);
-  }
-  function onOk() { close(); onConfirm(); }
-  function onOverlay(e) { if (e.target === overlay) close(); }
+  // Clone buttons to remove old listeners
+  var newOk = okBtn.cloneNode(true);
+  var newCancel = cancelBtn.cloneNode(true);
+  okBtn.parentNode.replaceChild(newOk, okBtn);
+  cancelBtn.parentNode.replaceChild(newCancel, cancelBtn);
 
-  okBtn.addEventListener('click', onOk);
-  cancelBtn.addEventListener('click', close);
-  overlay.addEventListener('click', onOverlay);
+  function close() { overlay.style.display = 'none'; }
+
+  newOk.addEventListener('click', function() { close(); onConfirm(); });
+  newCancel.addEventListener('click', close);
+  overlay.addEventListener('click', function(e) { if (e.target === overlay || e.target.parentElement === overlay) close(); });
 }
 </script>
+
+<?php include CRM_ROOT . '/templates/layout/footer.php'; ?>
 
 
