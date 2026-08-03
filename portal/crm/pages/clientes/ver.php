@@ -107,11 +107,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['enviar_recovery'])) {
         
         $resetLink = str_replace('/crm', '/portal', APP_URL) . '/index.php?page=reset-password&token=' . $token;
         
-        require_once CRM_ROOT . '/includes/Mailer.php';
-        Mailer::recuperarPasswordPortal($cliente['email'], $cuentaPortal['nombre'], $resetLink);
+        // Sanitizar teléfono
+        $telefonoLimpio = preg_replace('/[^0-9]/', '', $cliente['telefono'] ?? '');
+        if (empty($telefonoLimpio)) {
+            setFlash('error', 'El cliente no tiene un teléfono válido para enviar por WhatsApp.');
+            header('Location: ' . APP_URL . '/index.php?page=clientes/ver&id=' . $id);
+            exit;
+        }
         
-        AuditLog::registrar('enviar_recovery', 'clientes', $id, 'Enlace de recuperación enviado al cliente');
-        setFlash('exito', 'Enlace de recuperación/acceso enviado al correo del cliente.');
+        $mensaje = "Hola " . $cuentaPortal['nombre'] . ", aquí tienes tu enlace para acceder al portal de clientes: " . $resetLink;
+        $waUrl = "https://wa.me/" . $telefonoLimpio . "?text=" . urlencode($mensaje);
+        
+        AuditLog::registrar('enviar_recovery', 'clientes', $id, 'Enlace de recuperación enviado al cliente por WhatsApp');
+        
+        header('Location: ' . $waUrl);
+        exit;
     } else {
         setFlash('error', 'Error al crear la cuenta del portal para el cliente.');
     }
@@ -346,8 +356,8 @@ include CRM_ROOT . '/templates/layout/header.php';
                     </button>
                     
                     <?php if ($auth->esAdmin()): ?>
-                    <button type="button" class="btn bg-warning-50 text-warning-600 border border-warning-200 hover-bg-warning-100 d-flex align-items-center justify-content-center gap-2 w-100 radius-8 py-12 fw-semibold transition-2" data-bs-toggle="modal" data-bs-target="#confirmRecoveryModal">
-                        <iconify-icon icon="solar:key-minimalistic-square-outline" class="text-lg"></iconify-icon> Enviar Link de Contraseña
+                    <button type="button" class="btn bg-success-50 text-success-600 border border-success-200 hover-bg-success-100 d-flex align-items-center justify-content-center gap-2 w-100 radius-8 py-12 fw-semibold transition-2" data-bs-toggle="modal" data-bs-target="#confirmRecoveryModal">
+                        <iconify-icon icon="ri:whatsapp-line" class="text-lg"></iconify-icon> Enviar Link por WhatsApp
                     </button>
 
                     <button type="button" class="btn bg-info-50 text-info-600 border border-info-200 hover-bg-info-100 d-flex align-items-center justify-content-center gap-2 w-100 radius-8 py-12 fw-semibold transition-2" data-bs-toggle="modal" data-bs-target="#regenerarPasswordModal">
@@ -358,17 +368,17 @@ include CRM_ROOT . '/templates/layout/header.php';
                     <div class="modal fade" id="confirmRecoveryModal" tabindex="-1">
                         <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
                             <div class="modal-content radius-12 border-0 shadow-lg text-center p-24">
-                                <div class="w-64-px h-64-px rounded-circle bg-warning-50 text-warning-500 d-flex justify-content-center align-items-center mx-auto mb-16 mt-8">
-                                    <iconify-icon icon="solar:key-minimalistic-square-outline" class="text-3xl"></iconify-icon>
+                                <div class="w-64-px h-64-px rounded-circle bg-success-50 text-success-500 d-flex justify-content-center align-items-center mx-auto mb-16 mt-8">
+                                    <iconify-icon icon="ri:whatsapp-line" class="text-3xl"></iconify-icon>
                                 </div>
-                                <h5 class="fw-bold text-neutral-800 mb-12">¿Enviar enlace de acceso?</h5>
-                                <p class="text-secondary-light text-sm mb-24 px-12">Se enviará un enlace seguro al correo del cliente para que pueda establecer una nueva contraseña y acceder a su portal.</p>
+                                <h5 class="fw-bold text-neutral-800 mb-12">¿Enviar enlace por WhatsApp?</h5>
+                                <p class="text-secondary-light text-sm mb-24 px-12">Se generará un enlace seguro y se abrirá WhatsApp para que puedas enviárselo directamente al cliente.</p>
                                 
-                                <form id="form-recovery" method="POST" class="w-100 d-flex gap-12">
+                                <form id="form-recovery" method="POST" class="w-100 d-flex gap-12" target="_blank" onsubmit="bootstrap.Modal.getInstance(document.getElementById('confirmRecoveryModal')).hide();">
                                     <?php echo CSRF::campo(); ?>
                                     <input type="hidden" name="enviar_recovery" value="1">
                                     <button type="button" class="btn btn-outline-secondary radius-8 fw-semibold flex-grow-1" data-bs-dismiss="modal">Cancelar</button>
-                                    <button type="submit" class="btn btn-warning radius-8 fw-semibold flex-grow-1 text-white shadow-sm hover-shadow-lg transition-2" style="background-color: #f59e0b; border-color: #f59e0b;">Sí, enviar enlace</button>
+                                    <button type="submit" class="btn btn-success radius-8 fw-semibold flex-grow-1 text-white shadow-sm hover-shadow-lg transition-2">Sí, abrir WhatsApp</button>
                                 </form>
                             </div>
                         </div>
