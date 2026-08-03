@@ -13,7 +13,7 @@
  */
 
 $db = Database::getInstance();
-$docId = (int)($_GET['doc'] ?? 0);
+$docId = (int)($_GET['id'] ?? $_GET['doc'] ?? 0);
 
 if (!$docId) {
     http_response_code(400);
