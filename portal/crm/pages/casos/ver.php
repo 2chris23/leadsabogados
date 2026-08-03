@@ -158,12 +158,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['crear_nota_feed'])) {
                 $resultado = FileUpload::subir($_FILES['documento_nota'], $id);
                 
                 if ($resultado['exito']) {
-                    $db->insert('documentos', array_merge($resultado['datos'], [
-                        'caso_id' => $id,
-                        'nota_id' => $notaId,
-                        'descripcion' => 'Adjunto a nota',
-                        'subido_por' => $usuarioAct['id'] ?? null
-                    ]));
+                    try {
+                        $db->insert('documentos', [
+                            'caso_id' => $id,
+                            'nota_id' => $notaId,
+                            'nombre_original' => $resultado['datos']['nombre_original'],
+                            'nombre_archivo' => $resultado['datos']['nombre_archivo'] ?? $resultado['datos']['nombre_original'],
+                            'ruta' => $resultado['datos']['ruta'],
+                            'tipo_mime' => $resultado['datos']['tipo_mime'] ?? null,
+                            'tamano_bytes' => $resultado['datos']['tamano_bytes'] ?? null,
+                            'descripcion' => 'Adjunto a nota',
+                            'subido_por' => $usuarioAct['id'] ?? null
+                        ]);
+                    } catch (Exception $e) {
+                        setFlash('error', 'La nota se guardó pero hubo un error al registrar el documento en la base de datos: ' . $e->getMessage());
+                    }
                 } else {
                     setFlash('error', 'La nota se guardó pero hubo un error con el archivo: ' . $resultado['mensaje']);
                 }

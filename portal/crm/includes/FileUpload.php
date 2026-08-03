@@ -117,6 +117,7 @@ class FileUpload {
             'ruta'            => 'storage/casos/' . $casoId . '/' . $nombreSeguro,
             'tipo_mime'       => $tipoReal,
             'tamano_bytes'    => $tamanoFinal,
+            'hash_archivo'    => hash_file('sha256', $rutaCompleta)
         ];
 
         return ['exito' => true, 'mensaje' => 'Archivo subido correctamente', 'datos' => $datos];
