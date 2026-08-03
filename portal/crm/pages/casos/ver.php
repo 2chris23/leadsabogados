@@ -955,56 +955,89 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       </div>
       <div class="cv-card-body" style="padding: 24px;">
-        <div style="display:flex;gap:16px;margin-bottom:24px; flex-wrap: wrap;">
+        <!-- FILA 1: CARDS CLIENTE -->
+        <div style="display:flex;gap:16px;margin-bottom:16px; flex-wrap: wrap;">
           <!-- VALOR DEL CASO -->
           <div class="cv-fin-card" style="background:#eff6ff; flex:1; min-width:140px; padding: 16px;"><span class="cv-fin-label" style="text-transform:uppercase; font-size:0.75rem; color:#2563eb; font-weight:700;">Valor del Caso</span><div class="cv-fin-val" style="color:#2563eb; font-size:1.5rem; margin-top:8px;">&euro;<?php echo number_format($caso['honorarios_totales'],2,',','.'); ?></div></div>
-          <!-- PAGADO -->
+          <!-- PAGADO CLIENTE -->
           <div class="cv-fin-card" style="background:#f0fdf4; flex:1; min-width:140px; padding: 16px;"><span class="cv-fin-label" style="text-transform:uppercase; font-size:0.75rem; color:#059669; font-weight:700;">Pagado</span><div class="cv-fin-val" style="color:#059669; font-size:1.5rem; margin-top:8px;">€<?php echo number_format($totalPagado,2,',','.'); ?></div></div>
-          <!-- PENDIENTE -->
+          <!-- PENDIENTE CLIENTE -->
           <div class="cv-fin-card" style="background:#fef2f2; flex:1; min-width:140px; padding: 16px;"><span class="cv-fin-label" style="text-transform:uppercase; font-size:0.75rem; color:#dc2626; font-weight:700;">Pendiente</span><div class="cv-fin-val" style="color:#dc2626; font-size:1.5rem; margin-top:8px;">€<?php echo number_format($saldoPendiente,2,',','.'); ?></div></div>
-          <!-- TOTAL PAGADO ABOGADO Y BONO -->
-          <div class="cv-fin-card" style="background:#ecfdf5; flex:1; min-width:170px; padding: 16px;">
-            <span class="cv-fin-label" style="text-transform:uppercase; font-size:0.75rem; color:#10b981; font-weight:700;">Honorarios Abogado</span>
-            <?php 
-                $honorarios_abogado_real = (float)($caso['honorarios_abogado'] ?? 0);
-                if ($honorarios_abogado_real == 0 && !empty($caso['abogado_id'])) {
-                    $uTipo = $caso['u_tipo_pago'] ?? 'fijo';
-                    if ($uTipo === 'hitos' || $uTipo === 'fijo') $honorarios_abogado_real = (float)$caso['u_tarifa_fija'];
-                    elseif ($uTipo === 'mensual') $honorarios_abogado_real = (float)$caso['u_tarifa_mensual'];
-                    elseif ($uTipo === 'exito') $honorarios_abogado_real = (float)$caso['u_tarifa_exito'];
-                }
-            ?>
-            <div class="cv-fin-val" style="color:#10b981; font-size:1.5rem; margin-top:4px;">€<?php echo number_format($honorarios_abogado_real,2,',','.'); ?></div>
-            
-            <?php 
-                $bono = (float)($caso['bono_abogado'] ?? 0);
-                if ($bono > 0): 
-                    $bonoPagado = min($totalPagadoAbogado, $bono);
-                    $estadoBono = $bonoPagado >= $bono ? 'Pagado' : ($bonoPagado > 0 ? "Pagado: €$bonoPagado" : 'Pendiente');
-                    $bgBono = $bonoPagado >= $bono ? '#dcfce7' : '#fef3c7';
-                    $colorBono = $bonoPagado >= $bono ? '#15803d' : '#b45309';
-            ?>
-                <div style="margin-top:8px; font-size:0.75rem; display:inline-block; padding:2px 6px; border-radius:4px; background:<?php echo $bgBono; ?>; color:<?php echo $colorBono; ?>; font-weight:600;">
-                    Bonus: €<?php echo number_format($bono,2,',','.'); ?> (<?php echo $estadoBono; ?>)
-                </div>
-            <?php else: ?>
-                <div style="margin-top:8px; font-size:0.75rem; display:inline-block; padding:2px 6px; border-radius:4px; background:#e2e8f0; color:#475569; font-weight:600;">
-                    Sin bono
-                </div>
-            <?php endif; ?>
-            
-            <div style="margin-top:6px; font-size:0.75rem; color:#64748b;">
-                Pagado Total: €<?php echo number_format($totalPagadoAbogado,2,',','.'); ?>
-            </div>
-            <div style="margin-top:2px; font-size:0.75rem; color:#64748b; font-weight:600;">
-                Tipo: <?php 
-                    $tipoAbogado = str_replace('_', ' ', ($caso['tipo_pago_abogado'] ?? 'Mensual'));
-                    echo ucfirst($tipoAbogado); 
+        </div>
+
+        <!-- FILA 2: PANEL ABOGADO -->
+        <?php
+            $honorarios_abogado_real = (float)($caso['honorarios_abogado'] ?? 0);
+            if ($honorarios_abogado_real == 0 && !empty($caso['abogado_id'])) {
+                $uTipo = $caso['u_tipo_pago'] ?? 'fijo';
+                if ($uTipo === 'hitos' || $uTipo === 'fijo') $honorarios_abogado_real = (float)$caso['u_tarifa_fija'];
+                elseif ($uTipo === 'mensual') $honorarios_abogado_real = (float)$caso['u_tarifa_mensual'];
+                elseif ($uTipo === 'exito') $honorarios_abogado_real = (float)$caso['u_tarifa_exito'];
+            }
+            $bono           = (float)($caso['bono_abogado'] ?? 0);
+            $totalAbogado   = $honorarios_abogado_real + $bono;
+            $pagadoAbogado  = $totalPagadoAbogado;
+            $pendienteAb    = max(0, $totalAbogado - $pagadoAbogado);
+            $pctAb          = $totalAbogado > 0 ? min(100, round(($pagadoAbogado / $totalAbogado) * 100)) : 0;
+
+            // Bono: se paga primero
+            $bonoPagado     = min($pagadoAbogado, $bono);
+            $bonoPendiente  = max(0, $bono - $bonoPagado);
+            $tarifaPagada   = max(0, $pagadoAbogado - $bonoPagado);
+            $tarifaPendiente= max(0, $honorarios_abogado_real - $tarifaPagada);
+        ?>
+        <div style="border:1.5px solid #e2e8f0; border-radius:14px; padding:16px 20px; margin-bottom:16px; background:#f8fafc;">
+          <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1d4ed8" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a6 6 0 0 1 12 0v2"/></svg>
+              <span style="font-size:0.8125rem;font-weight:700;color:#1e293b;">Honorarios Abogado</span>
+              <span style="font-size:0.75rem;padding:2px 8px;border-radius:99px;background:#e0e7ff;color:#3730a3;font-weight:600;">
+                <?php 
+                  $tpa = $caso['tipo_pago_abogado'] ?? ($caso['u_tipo_pago'] ?? 'fijo');
+                  $labelTpa = ['mensual_predeterminado'=>'Mensual Fijo','mensual_sin_predeterminar'=>'Mensual','por_hitos'=>'Por Hitos','de_exito'=>'De Éxito','hitos'=>'Por Hitos','mensual'=>'Mensual','fijo'=>'Fijo','exito'=>'De Éxito'];
+                  echo $labelTpa[$tpa] ?? ucfirst(str_replace('_',' ',$tpa));
                 ?>
+              </span>
+            </div>
+            <span style="font-size:1rem;font-weight:800;color:#1e293b;">Total: €<?php echo number_format($totalAbogado,2,',','.'); ?></span>
+          </div>
+
+          <!-- Barra de progreso -->
+          <div style="margin:14px 0 10px;">
+            <div style="height:10px;background:#e2e8f0;border-radius:99px;overflow:hidden;">
+              <div style="height:100%;width:<?php echo $pctAb; ?>%;background:linear-gradient(90deg,#22c55e,#16a34a);border-radius:99px;transition:width .4s;"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:0.7rem;color:#64748b;margin-top:4px;">
+              <span><?php echo $pctAb; ?>% pagado</span>
+              <span>€<?php echo number_format($pendienteAb,2,',','.'); ?> pendiente</span>
             </div>
           </div>
+
+          <!-- Desglose en 3 columnas -->
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
+            <!-- Pagado -->
+            <div style="flex:1;min-width:90px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:10px 12px;text-align:center;">
+              <div style="font-size:0.65rem;font-weight:700;color:#15803d;text-transform:uppercase;margin-bottom:4px;">Pagado</div>
+              <div style="font-size:1.1rem;font-weight:800;color:#16a34a;">€<?php echo number_format($pagadoAbogado,2,',','.'); ?></div>
+            </div>
+            <!-- Pendiente -->
+            <div style="flex:1;min-width:90px;background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:10px 12px;text-align:center;">
+              <div style="font-size:0.65rem;font-weight:700;color:#dc2626;text-transform:uppercase;margin-bottom:4px;">Pendiente</div>
+              <div style="font-size:1.1rem;font-weight:800;color:#dc2626;">€<?php echo number_format($pendienteAb,2,',','.'); ?></div>
+            </div>
+            <!-- Bono -->
+            <?php if ($bono > 0): ?>
+            <div style="flex:1;min-width:90px;background:<?php echo $bonoPendiente==0?'#f0fdf4':'#fefce8'; ?>;border:1px solid <?php echo $bonoPendiente==0?'#bbf7d0':'#fde68a'; ?>;border-radius:10px;padding:10px 12px;text-align:center;">
+              <div style="font-size:0.65rem;font-weight:700;color:<?php echo $bonoPendiente==0?'#15803d':'#92400e'; ?>;text-transform:uppercase;margin-bottom:4px;">
+                Bono <?php echo $bonoPendiente==0?'(Pagado)':'(Pend.)'; ?>
+              </div>
+              <div style="font-size:1.1rem;font-weight:800;color:<?php echo $bonoPendiente==0?'#16a34a':'#d97706'; ?>;">€<?php echo number_format($bono,2,',','.'); ?></div>
+            </div>
+            <?php endif; ?>
+          </div>
         </div>
-        
+
+        <!-- Botones acción -->
         <div style="display:flex;gap:16px; flex-wrap: wrap;">
           <a href="<?php echo APP_URL; ?>/index.php?page=pagos/registrar&caso_id=<?php echo $id; ?>" class="cv-btn cv-btn-primary" style="flex:1; padding:12px; font-size:.9375rem; text-decoration:none; justify-content:center; text-align:center;">+ Registrar Pago Cliente</a>
           <button class="cv-btn cv-btn-primary" style="flex:1; padding:12px; font-size:.9375rem; justify-content:center; background:#1d4ed8;" data-bs-toggle="modal" data-bs-target="#modalRegistrarPagoAbogado">+ Registrar Pago Abogado</button>
@@ -1013,6 +1046,7 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>
 
     <!-- Progreso de Pagos del Cliente -->
+
     <?php if(!empty($pagosProgramados)): ?>
     <div class="cv-card mb-24" style="margin-bottom: 24px;">
       <div class="cv-card-body" style="padding: 24px 32px;">
