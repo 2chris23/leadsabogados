@@ -109,22 +109,84 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_financiero']))
 // Procesar edición del caso
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_caso'])) {
     CSRF::verificarOAbortar();
-    // Optimistic locking: verificar que nadie editó mientras tanto
+    
+    // Optimistic locking
     $updatedAtEnviado = $_POST['caso_updated_at'] ?? '';
     $updatedAtActual  = $db->fetchOne("SELECT updated_at FROM casos WHERE id = ?", [$id])['updated_at'] ?? '';
     if ($updatedAtEnviado && $updatedAtEnviado !== $updatedAtActual) {
         setFlash('error', '⚠️ Otro usuario editó este caso mientras trabajabas. Recarga la página para ver los cambios actualizados antes de editarlo.');
         header('Location: ' . APP_URL . '/index.php?page=casos/ver&id=' . $id); exit;
     }
+
+    // Parsear tipo_caso (Tagify envía JSON)
+    $tipoCasoStr = trim($_POST['tipo_caso'] ?? '');
+    $decodedTipo = json_decode($tipoCasoStr, true);
+    if (is_array($decodedTipo) && isset($decodedTipo[0]['value'])) {
+        $tipoCasoStr = $decodedTipo[0]['value'];
+    }
+
     $db->update('casos', [
-        'titulo'         => trim($_POST['titulo']),
-        'tipo_caso'      => trim($_POST['tipo_caso']),
-        'descripcion'    => trim($_POST['descripcion']),
-        'abogado_id'     => $_POST['abogado_id'] ?: null,
-        'notas_internas' => trim($_POST['notas_internas'])
+        'titulo'            => trim($_POST['titulo']),
+        'tipo_caso'         => $tipoCasoStr,
+        'descripcion'       => trim($_POST['descripcion']),
+        'abogado_id'        => $_POST['abogado_id'] ?: null,
+        'honorarios_totales'=> (float)($_POST['honorarios_totales'] ?? 0),
+        'tipo_pago_cliente' => $_POST['tipo_pago_cliente'] ?? 'pago_unico',
+        'cuotas_cliente'    => (int)($_POST['num_cuotas'] ?? 1),
+        'frecuencia_pago'   => $_POST['frecuencia_pago'] ?? 'mensual',
     ], 'id = ?', [$id]);
-    AuditLog::registrar('editar', 'casos', $id, 'Datos del caso actualizados');
-    setFlash('exito', 'Caso actualizado');
+
+    // Lógica para regenerar pagos_programados
+    $tipoPago = $_POST['tipo_pago_cliente'] ?? 'pago_unico';
+    $honorariosTotales = (float)($_POST['honorarios_totales'] ?? 0);
+    $totalPagado = (float)($db->fetchOne("SELECT SUM(monto) as total FROM pagos_cliente WHERE caso_id = ?", [$id])['total'] ?? 0);
+    $saldoPendiente = max(0, $honorariosTotales - $totalPagado);
+
+    // Borrar cuotas pendientes o vencidas existentes
+    $db->execute("DELETE FROM pagos_programados WHERE caso_id = ? AND estado IN ('pendiente', 'vencido')", [$id]);
+
+    if ($saldoPendiente > 0) {
+        if ($tipoPago === 'pago_unico') {
+            $fecha = $_POST['fecha_pago_unico'] ?? date('Y-m-d');
+            $db->insert('pagos_programados', [
+                'caso_id' => $id, 'monto' => $saldoPendiente, 'fecha_vencimiento' => $fecha, 'estado' => 'pendiente'
+            ]);
+        } elseif ($tipoPago === 'cuotas') {
+            $numCuotas = (int)($_POST['num_cuotas'] ?? 1);
+            if ($numCuotas > 0) {
+                $montoCuota = $saldoPendiente / $numCuotas;
+                $freq = $_POST['frecuencia_pago'] ?? 'mensual';
+                $fecha = $_POST['fecha_inicio_cuotas'] ?? date('Y-m-d');
+                
+                for ($i = 1; $i <= $numCuotas; $i++) {
+                    $db->insert('pagos_programados', [
+                        'caso_id' => $id, 'monto' => $montoCuota, 'fecha_vencimiento' => $fecha, 'estado' => 'pendiente'
+                    ]);
+                    $dateObj = new DateTime($fecha);
+                    if ($freq === 'semanal') $dateObj->modify('+1 week');
+                    elseif ($freq === 'quincenal') $dateObj->modify('+15 days');
+                    elseif ($freq === 'mensual') $dateObj->modify('+1 month');
+                    elseif ($freq === 'trimestral') $dateObj->modify('+3 months');
+                    elseif ($freq === 'semestral') $dateObj->modify('+6 months');
+                    $fecha = $dateObj->format('Y-m-d');
+                }
+            }
+        } elseif ($tipoPago === 'fechas_custom') {
+            $montos = $_POST['montos_custom'] ?? [];
+            $fechas = $_POST['fechas_custom'] ?? [];
+            foreach ($montos as $i => $m) {
+                $montoCustom = (float)$m;
+                if ($montoCustom > 0) {
+                    $db->insert('pagos_programados', [
+                        'caso_id' => $id, 'monto' => $montoCustom, 'fecha_vencimiento' => $fechas[$i] ?? date('Y-m-d'), 'estado' => 'pendiente'
+                    ]);
+                }
+            }
+        }
+    }
+
+    AuditLog::registrar('editar', 'casos', $id, 'Datos del caso y plan de pagos actualizados');
+    setFlash('exito', 'Caso y plan de pagos actualizado');
     header('Location: ' . APP_URL . '/index.php?page=casos/ver&id=' . $id); exit;
 }
 
@@ -513,8 +575,17 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
       <div class="cv-card-body">
         <div class="cv-grid">
-          <div class="cv-field"><label>Tipo</label><p>
-            <span style="display:inline-block;background:#f1f5f9;color:#475569;padding:2px 8px;border-radius:12px;font-size:0.75rem;font-weight:600;border:1px solid #e2e8f0;"><?php echo e($caso['tipo_caso'] ?: 'General'); ?></span>
+          <div class="cv-field">
+            <?php
+            // Parsear tipo de caso si viene como JSON
+            $tipoVisual = $caso['tipo_caso'];
+            $decodedTipo = json_decode($tipoVisual, true);
+            if (is_array($decodedTipo) && isset($decodedTipo[0]['value'])) {
+                $tipoVisual = $decodedTipo[0]['value'];
+            }
+            ?>
+            <label>Tipo</label><p>
+            <span style="display:inline-block;background:#f1f5f9;color:#475569;padding:2px 8px;border-radius:12px;font-size:0.75rem;font-weight:600;border:1px solid #e2e8f0;"><?php echo e($tipoVisual ?: 'General'); ?></span>
           </p></div>
           <div class="cv-field"><label>Abogado</label><p><?php echo $caso['abogado_nombre'] ? e($caso['abogado_nombre'].' '.$caso['abogado_apellidos']) : '<span style="color:#94a3b8;font-weight:400">Sin asignar</span>'; ?></p></div>
           <div class="cv-field"><label>Apertura</label><p><?php echo date('d/m/Y',strtotime($caso['fecha_apertura'])); ?></p></div>
@@ -1047,7 +1118,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         <button type="button" onclick="addCustomRow()" class="cv-btn cv-btn-ghost" style="width:auto;padding:6px 14px;font-size:.8125rem;margin-top:4px">+ Añadir Fecha</button>
                     </div>
                     <div class="col-12"><label class="form-label">Descripción</label><textarea name="descripcion" class="form-control" rows="3"><?php echo e($caso['descripcion']); ?></textarea></div>
-                    <div class="col-12"><label class="form-label">Notas Internas</label><textarea name="notas_internas" class="form-control" rows="2"><?php echo e($caso['notas_internas']); ?></textarea></div>
                 </div>
             </div>
             <div class="modal-footer"><button type="button" class="btn btn-secondary radius-8" data-bs-dismiss="modal">Cancelar</button><button type="submit" class="btn btn-primary radius-8">Guardar</button></div>
