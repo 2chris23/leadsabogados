@@ -11,7 +11,8 @@ RoleGuard::verificarAccesoCaso($id);
 
 $caso = $db->fetchOne(
     "SELECT c.*, cl.nombre as cliente_nombre, cl.apellidos as cliente_apellidos, cl.email as cliente_email, cl.telefono as cliente_telefono, cl.dni_nif as cliente_dni, cl.direccion as cliente_direccion,
-            u.nombre as abogado_nombre, u.apellidos as abogado_apellidos
+            u.nombre as abogado_nombre, u.apellidos as abogado_apellidos,
+            u.tipo_pago_predeterminado as u_tipo_pago, u.tarifa_fija_default as u_tarifa_fija, u.tarifa_mensual_default as u_tarifa_mensual, u.tarifa_exito_default as u_tarifa_exito
      FROM casos c
      JOIN clientes cl ON c.cliente_id = cl.id
      LEFT JOIN usuarios_internos u ON c.abogado_id = u.id
@@ -411,6 +412,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['registrar_pago_abogad
                 'tipo_pago' => 'pago_abogado',
                 'registrado_por' => $_SESSION['usuario_id'] ?? 1
             ]);
+            AuditLog::registrar('pago_abogado', 'casos', $id, "Pago a abogado por €" . number_format((float)$_POST['cantidad'], 2) . " registrado");
             setFlash('exito', 'Pago al abogado registrado correctamente');
         } catch (Throwable $e) {
             try {
@@ -423,6 +425,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['registrar_pago_abogad
                     'concepto' => trim($_POST['concepto']),
                     'tipo_pago' => 'pago_abogado'
                 ]);
+                AuditLog::registrar('pago_abogado', 'casos', $id, "Pago a abogado por €" . number_format((float)$_POST['cantidad'], 2) . " registrado");
                 setFlash('exito', 'Pago al abogado registrado correctamente (fallback)');
             } catch (Throwable $e2) {
                 setFlash('error', 'Error al registrar pago al abogado: ' . $e2->getMessage());
@@ -962,7 +965,16 @@ document.addEventListener('DOMContentLoaded', () => {
           <!-- TOTAL PAGADO ABOGADO Y BONO -->
           <div class="cv-fin-card" style="background:#ecfdf5; flex:1; min-width:170px; padding: 16px;">
             <span class="cv-fin-label" style="text-transform:uppercase; font-size:0.75rem; color:#10b981; font-weight:700;">Honorarios Abogado</span>
-            <div class="cv-fin-val" style="color:#10b981; font-size:1.5rem; margin-top:4px;">€<?php echo number_format((float)($caso['honorarios_abogado'] ?? 0),2,',','.'); ?></div>
+            <?php 
+                $honorarios_abogado_real = (float)($caso['honorarios_abogado'] ?? 0);
+                if ($honorarios_abogado_real == 0 && !empty($caso['abogado_id'])) {
+                    $uTipo = $caso['u_tipo_pago'] ?? 'fijo';
+                    if ($uTipo === 'hitos' || $uTipo === 'fijo') $honorarios_abogado_real = (float)$caso['u_tarifa_fija'];
+                    elseif ($uTipo === 'mensual') $honorarios_abogado_real = (float)$caso['u_tarifa_mensual'];
+                    elseif ($uTipo === 'exito') $honorarios_abogado_real = (float)$caso['u_tarifa_exito'];
+                }
+            ?>
+            <div class="cv-fin-val" style="color:#10b981; font-size:1.5rem; margin-top:4px;">€<?php echo number_format($honorarios_abogado_real,2,',','.'); ?></div>
             
             <?php 
                 $bono = (float)($caso['bono_abogado'] ?? 0);
@@ -1155,7 +1167,14 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="modal-body">
                 <?php
                     // Calcular el máximo a pagar
-                    $maxPagoAbogado = max(0, ((float)$caso['honorarios_abogado'] + (float)$caso['bono_abogado']) - $totalPagadoAbogado);
+                    $honorarios_abogado_real = (float)($caso['honorarios_abogado'] ?? 0);
+                    if ($honorarios_abogado_real == 0 && !empty($caso['abogado_id'])) {
+                        $uTipo = $caso['u_tipo_pago'] ?? 'fijo';
+                        if ($uTipo === 'hitos' || $uTipo === 'fijo') $honorarios_abogado_real = (float)$caso['u_tarifa_fija'];
+                        elseif ($uTipo === 'mensual') $honorarios_abogado_real = (float)$caso['u_tarifa_mensual'];
+                        elseif ($uTipo === 'exito') $honorarios_abogado_real = (float)$caso['u_tarifa_exito'];
+                    }
+                    $maxPagoAbogado = max(0, ($honorarios_abogado_real + (float)$caso['bono_abogado']) - $totalPagadoAbogado);
                 ?>
                 <div class="mb-3">
                     <label class="form-label">Cantidad (&euro;)</label>
