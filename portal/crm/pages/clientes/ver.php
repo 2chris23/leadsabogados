@@ -550,9 +550,9 @@ include CRM_ROOT . '/templates/layout/header.php';
                                 </td>
                                 <?php if($auth->esAdmin()): ?>
                                 <!-- Cobro Cliente -->
-                                <td class="py-16 border-bottom border-neutral-100" style="min-width: 140px;">
+                                <td class="py-16 border-bottom border-neutral-100 text-wrap" style="min-width: 140px; max-width: 180px;">
                                      <div class="d-flex flex-column gap-1" style="font-size:0.8rem;">
-                                         <div class="d-flex justify-content-between mb-4">
+                                         <div class="d-flex justify-content-between mb-2">
                                              <span class="fw-bold text-neutral-800" style="font-size: 11px; text-transform: uppercase; color: #10b981;">Cliente</span>
                                              <span class="text-xs text-secondary-light">de €<?php echo number_format($caso['_honorarios_cliente'], 0, ',', '.'); ?></span>
                                          </div>
@@ -561,9 +561,9 @@ include CRM_ROOT . '/templates/layout/header.php';
                                      </div>
                                 </td>
                                 <!-- Pago Abogado -->
-                                <td class="py-16 border-bottom border-neutral-100" style="min-width: 140px;">
+                                <td class="py-16 border-bottom border-neutral-100 text-wrap" style="min-width: 140px; max-width: 180px;">
                                      <div class="d-flex flex-column gap-1" style="font-size:0.8rem;">
-                                         <div class="d-flex justify-content-between mb-4">
+                                         <div class="d-flex justify-content-between mb-2">
                                              <span class="fw-bold text-neutral-800" style="font-size: 11px; text-transform: uppercase; color: #3b82f6;">Abogado</span>
                                              <span class="text-xs text-secondary-light">de €<?php echo number_format($caso['_honorarios_abogado'], 0, ',', '.'); ?></span>
                                          </div>
