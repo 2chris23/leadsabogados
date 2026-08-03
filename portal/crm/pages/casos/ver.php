@@ -10,7 +10,7 @@ RoleGuard::verificarAccesoCaso($id);
 
 
 $caso = $db->fetchOne(
-    "SELECT c.*, cl.nombre as cliente_nombre, cl.apellidos as cliente_apellidos, cl.email as cliente_email,
+    "SELECT c.*, cl.nombre as cliente_nombre, cl.apellidos as cliente_apellidos, cl.email as cliente_email, cl.telefono as cliente_telefono, cl.dni_nif as cliente_dni, cl.direccion as cliente_direccion,
             u.nombre as abogado_nombre, u.apellidos as abogado_apellidos
      FROM casos c
      JOIN clientes cl ON c.cliente_id = cl.id
@@ -128,7 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_caso'])) {
     header('Location: ' . APP_URL . '/index.php?page=casos/ver&id=' . $id); exit;
 }
 
-// Guardar nueva nota en el feed
+// Guardar nueva nota
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['crear_nota_feed'])) {
     CSRF::verificarOAbortar();
     $usuarioAct = $auth->getUsuario();
@@ -136,6 +136,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['crear_nota_feed'])) {
     
     if ($puedeNotas) {
         $tipo = $_POST['tipo_nota'] === 'interna' ? 'interna' : 'publica';
+        $titulo = trim($_POST['titulo_nota'] ?? '');
         $contenido = trim($_POST['contenido_nota']);
         
         if (!empty($contenido) || (isset($_FILES['documento_nota']) && $_FILES['documento_nota']['error'] !== UPLOAD_ERR_NO_FILE)) {
@@ -143,6 +144,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['crear_nota_feed'])) {
             // Insertar la nota
             $notaId = $db->insert('notas_caso', [
                 'caso_id' => $id,
+                'titulo' => $titulo,
                 'tipo' => $tipo,
                 'contenido' => $contenido,
                 'created_by' => $usuarioAct['id'] ?? null
@@ -167,8 +169,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['crear_nota_feed'])) {
                 }
             }
 
-            // Aquí omitimos la notificación por correo según lo solicitado por el cliente
-
             if (!isset($_SESSION['flash']['error'])) {
                 setFlash('exito', 'Nota añadida correctamente');
             }
@@ -179,10 +179,73 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['crear_nota_feed'])) {
     header('Location: ' . APP_URL . '/index.php?page=casos/ver&id=' . $id); exit;
 }
 
+// Editar nota
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_nota_accion'])) {
+    CSRF::verificarOAbortar();
+    $notaId = (int)$_POST['nota_id'];
+    $nota = $db->fetchOne("SELECT * FROM notas_caso WHERE id = ?", [$notaId]);
+    
+    if ($nota && ($auth->esAdmin() || $nota['created_by'] === ($_SESSION['usuario_id']??0))) {
+        $db->update('notas_caso', [
+            'titulo' => trim($_POST['titulo_nota'] ?? ''),
+            'contenido' => trim($_POST['contenido_nota']),
+            'tipo' => $_POST['tipo_nota'] === 'interna' ? 'interna' : 'publica'
+        ], 'id = ?', [$notaId]);
+        setFlash('exito', 'Nota actualizada correctamente');
+    } else {
+        setFlash('error', 'No tienes permiso para editar esta nota');
+    }
+    header('Location: ' . APP_URL . '/index.php?page=casos/ver&id=' . $id); exit;
+}
+
+// Eliminar nota
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['eliminar_nota'])) {
+    CSRF::verificarOAbortar();
+    $notaId = (int)$_POST['eliminar_nota'];
+    $nota = $db->fetchOne("SELECT * FROM notas_caso WHERE id = ?", [$notaId]);
+    
+    if ($nota && ($auth->esAdmin() || $nota['created_by'] === ($_SESSION['usuario_id']??0))) {
+        // Eliminar adjunto si existe
+        $doc = $db->fetchOne("SELECT id, ruta FROM documentos WHERE nota_id = ?", [$notaId]);
+        if ($doc) {
+            if (file_exists(CRM_ROOT . '/' . $doc['ruta'])) {
+                unlink(CRM_ROOT . '/' . $doc['ruta']);
+            }
+            $db->query("DELETE FROM documentos WHERE id = ?", [$doc['id']]);
+        }
+        $db->query("DELETE FROM notas_caso WHERE id = ?", [$notaId]);
+        setFlash('exito', 'Nota eliminada');
+    }
+    header('Location: ' . APP_URL . '/index.php?page=casos/ver&id=' . $id); exit;
+}
+
+// Registrar pago a abogado
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['registrar_pago_abogado'])) {
+    CSRF::verificarOAbortar();
+    if (RoleGuard::esAdmin()) {
+        $db->insert('pagos', [
+            'caso_id' => $id,
+            'cantidad' => (float)$_POST['cantidad'],
+            'fecha_pago' => $_POST['fecha_pago'],
+            'metodo_pago' => $_POST['metodo_pago'],
+            'concepto' => trim($_POST['concepto']),
+            'tipo_pago' => 'pago_abogado',
+            'created_by' => $_SESSION['usuario_id']
+        ]);
+        setFlash('exito', 'Pago al abogado registrado correctamente');
+    } else {
+        setFlash('error', 'No tienes permisos');
+    }
+    header('Location: ' . APP_URL . '/index.php?page=casos/ver&id=' . $id); exit;
+}
+
 // Datos complementarios
 $pagos = $db->fetchAll("SELECT * FROM pagos WHERE caso_id = ? AND (tipo_pago IS NULL OR tipo_pago != 'pago_abogado') ORDER BY fecha_pago DESC, created_at DESC", [$id]);
 $totalPagado = array_sum(array_column($pagos, 'cantidad'));
 $saldoPendiente = $caso['honorarios_totales'] - $totalPagado;
+
+$pagosAbogado = $db->fetchAll("SELECT * FROM pagos WHERE caso_id = ? AND tipo_pago = 'pago_abogado' ORDER BY fecha_pago DESC, created_at DESC", [$id]);
+$totalPagadoAbogado = array_sum(array_column($pagosAbogado, 'cantidad'));
 
 // Obtener notas del caso
 $notasCaso = [];
@@ -248,7 +311,7 @@ $estadoMap = [
     'archivado'        => ['cls'=>'cv-state-arch',  'label'=>'Archivado',         'dot'=>'#64748b'],
 ];
 $eActual = $estadoMap[$caso['estado']] ?? ['cls'=>'cv-state-arch','label'=>ucfirst($caso['estado']),'dot'=>'#64748b'];
-$estados = array_keys($estadoMap);
+$estados = array_values(array_diff(array_keys($estadoMap), ['archivado']));
 $extColors = ['PDF'=>['#fef2f2','#dc2626'],'DOC'=>['#e8f0fe','#2e6edd'],'DOCX'=>['#e8f0fe','#2e6edd'],'XLS'=>['#ecfdf5','#059669'],'XLSX'=>['#ecfdf5','#059669'],'JPG'=>['#fff7ed','#ea580c'],'PNG'=>['#fff7ed','#ea580c'],'ZIP'=>['#f5f3ff','#7c3aed']];
 ?>
 
@@ -260,6 +323,15 @@ $extColors = ['PDF'=>['#fef2f2','#dc2626'],'DOC'=>['#e8f0fe','#2e6edd'],'DOCX'=>
   </div>
   <div style="display:flex;gap:8px;align-items:center">
     <?php if (RoleGuard::esAdmin()): ?>
+    <form method="POST" style="margin:0" onsubmit="return confirm('¿Seguro que deseas <?php echo $caso['estado'] === 'archivado' ? 'desarchivar' : 'archivar'; ?> este caso?');">
+      <?php echo CSRF::campo(); ?>
+      <input type="hidden" name="cambiar_estado" value="1">
+      <input type="hidden" name="nuevo_estado" value="<?php echo $caso['estado'] === 'archivado' ? 'en_estudio' : 'archivado'; ?>">
+      <button type="submit" class="cv-btn cv-btn-ghost" style="width:auto;padding:8px 16px;font-size:.8125rem">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="5" rx="2"/><path d="M4 9v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9"/><line x1="10" y1="13" x2="14" y2="13"/></svg>
+        <?php echo $caso['estado'] === 'archivado' ? 'Desarchivar' : 'Archivar'; ?>
+      </button>
+    </form>
     <button class="cv-btn cv-btn-primary" style="width:auto;padding:8px 16px;font-size:.8125rem" data-bs-toggle="modal" data-bs-target="#editarCasoModal">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
       Editar
@@ -271,7 +343,7 @@ $extColors = ['PDF'=>['#fef2f2','#dc2626'],'DOC'=>['#e8f0fe','#2e6edd'],'DOCX'=>
 <!-- Stepper de Estados -->
 <div class="cv-card mb-24" style="margin-bottom: 24px;">
   <div class="cv-card-body" style="padding: 24px 32px;">
-    <div style="display:flex; justify-content:space-between; position:relative;">
+    <div style="display:flex; justify-content:space-between; position:relative;" id="cvStepperContainer">
       <!-- Línea conectora base -->
       <div style="position:absolute; top:12px; left:0; right:0; height:3px; background:#e2e8f0; z-index:1;"></div>
       
@@ -293,9 +365,10 @@ $extColors = ['PDF'=>['#fef2f2','#dc2626'],'DOC'=>['#e8f0fe','#2e6edd'],'DOCX'=>
           $fontWeight = $isCurrent ? '700' : '600';
       ?>
       <div style="position:relative; z-index:3; display:flex; flex-direction:column; align-items:center; cursor:pointer;" 
+           class="stepper-step" data-estado="<?php echo $est; ?>" data-label="<?php echo $mapInfo['label']; ?>"
            onclick="confirmarCambioEstado('<?php echo $est; ?>', '<?php echo $mapInfo['label']; ?>')"
            title="Cambiar estado a <?php echo $mapInfo['label']; ?>">
-        <div style="width:28px; height:28px; border-radius:50%; background:<?php echo $bgColor; ?>; border:3px solid <?php echo $borderColor; ?>; display:flex; align-items:center; justify-content:center; box-shadow:0 0 0 4px #ffffff; transition:all 0.2s;">
+        <div class="stepper-ball <?php echo $isCurrent ? 'current-ball' : ''; ?>" style="width:28px; height:28px; border-radius:50%; background:<?php echo $bgColor; ?>; border:3px solid <?php echo $borderColor; ?>; display:flex; align-items:center; justify-content:center; box-shadow:0 0 0 4px #ffffff; transition:all 0.2s; <?php echo $isCurrent ? 'cursor:grab;' : ''; ?>">
             <?php if($isCurrent): ?>
             <div style="width:8px; height:8px; border-radius:50%; background:#ffffff;"></div>
             <?php elseif($isCompleted): ?>
@@ -313,7 +386,6 @@ $extColors = ['PDF'=>['#fef2f2','#dc2626'],'DOC'=>['#e8f0fe','#2e6edd'],'DOCX'=>
 <script>
 function confirmarCambioEstado(nuevoEstado, label) {
     if (confirm('¿Estás seguro que deseas mover el caso al estado: ' + label + '?')) {
-        // Usar un formulario invisible para enviar el POST
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = '';
@@ -340,6 +412,41 @@ function confirmarCambioEstado(nuevoEstado, label) {
         form.submit();
     }
 }
+
+// Lógica para que la bola actual sea "arrastrable"
+document.addEventListener('DOMContentLoaded', () => {
+    const currentBall = document.querySelector('.current-ball');
+    if (!currentBall) return;
+    
+    let isDragging = false;
+    
+    currentBall.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        currentBall.style.cursor = 'grabbing';
+        currentBall.style.transform = 'scale(1.2)';
+    });
+    
+    document.addEventListener('mouseup', (e) => {
+        if (!isDragging) return;
+        isDragging = false;
+        currentBall.style.cursor = 'grab';
+        currentBall.style.transform = 'scale(1)';
+        
+        // Detectar si soltó sobre otro paso
+        const steps = document.querySelectorAll('.stepper-step');
+        let droppedOn = null;
+        steps.forEach(step => {
+            const rect = step.getBoundingClientRect();
+            if (e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom) {
+                droppedOn = step;
+            }
+        });
+        
+        if (droppedOn && droppedOn !== currentBall.closest('.stepper-step')) {
+            confirmarCambioEstado(droppedOn.dataset.estado, droppedOn.dataset.label);
+        }
+    });
+});
 </script>
 
 <div class="cv-wrap">
@@ -359,12 +466,22 @@ function confirmarCambioEstado(nuevoEstado, label) {
       </div>
       <div class="cv-card-body">
         <div class="cv-grid">
-          <div class="cv-field"><label>Tipo</label><p><?php echo e($caso['tipo_caso']); ?></p></div>
+          <div class="cv-field"><label>Tipo</label><p>
+            <span style="display:inline-block;background:#f1f5f9;color:#475569;padding:2px 8px;border-radius:12px;font-size:0.75rem;font-weight:600;border:1px solid #e2e8f0;"><?php echo e($caso['tipo_caso'] ?: 'General'); ?></span>
+          </p></div>
           <div class="cv-field"><label>Abogado</label><p><?php echo $caso['abogado_nombre'] ? e($caso['abogado_nombre'].' '.$caso['abogado_apellidos']) : '<span style="color:#94a3b8;font-weight:400">Sin asignar</span>'; ?></p></div>
-          <div class="cv-field"><label>Cliente</label><p><a href="<?php echo APP_URL; ?>/index.php?page=clientes/ver&id=<?php echo $caso['cliente_id']; ?>" style="color:#2e6edd;font-weight:600;text-decoration:none"><?php echo e($caso['cliente_nombre'].' '.$caso['cliente_apellidos']); ?></a></p></div>
           <div class="cv-field"><label>Apertura</label><p><?php echo date('d/m/Y',strtotime($caso['fecha_apertura'])); ?></p></div>
           <div class="cv-field"><label>Cierre</label><p><?php echo $caso['fecha_cierre'] ? date('d/m/Y',strtotime($caso['fecha_cierre'])) : '—'; ?></p></div>
           <div class="cv-field"><label>Referencia</label><p style="font-family:monospace;font-size:.875rem"><?php echo e($caso['referencia']); ?></p></div>
+        </div>
+        
+        <h4 style="font-size: 0.875rem; color: #1a1a2e; font-weight: 700; margin: 24px 0 12px; padding-top: 16px; border-top: 1px solid #e2e8f0;">Datos del Cliente</h4>
+        <div class="cv-grid">
+          <div class="cv-field"><label>Cliente</label><p><a href="<?php echo APP_URL; ?>/index.php?page=clientes/ver&id=<?php echo $caso['cliente_id']; ?>" style="color:#2e6edd;font-weight:600;text-decoration:none"><?php echo e($caso['cliente_nombre'].' '.$caso['cliente_apellidos']); ?></a></p></div>
+          <div class="cv-field"><label>Teléfono</label><p><?php echo $caso['cliente_telefono'] ? e($caso['cliente_telefono']) : '—'; ?></p></div>
+          <div class="cv-field"><label>Email</label><p><?php echo $caso['cliente_email'] ? e($caso['cliente_email']) : '—'; ?></p></div>
+          <div class="cv-field"><label>DNI / NIF</label><p><?php echo $caso['cliente_dni'] ? e($caso['cliente_dni']) : '—'; ?></p></div>
+          <div class="cv-field" style="grid-column: 1 / -1;"><label>Dirección</label><p><?php echo $caso['cliente_direccion'] ? e($caso['cliente_direccion']) : '—'; ?></p></div>
         </div>
         <?php if($caso['descripcion']): ?>
         <?php endif; ?>
@@ -378,12 +495,12 @@ function confirmarCambioEstado(nuevoEstado, label) {
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
         </div>
         <h3>Notas del Caso</h3>
+        <button type="button" class="cv-btn cv-btn-primary" style="margin-left:auto; width:auto; padding:6px 14px; font-size:0.8125rem;" data-bs-toggle="modal" data-bs-target="#modalNuevaNota">
+          + Añadir Nueva Nota
+        </button>
       </div>
       <div class="cv-card-body">
-        <!-- Formulario nueva nota -->
-        <form method="POST" enctype="multipart/form-data" style="margin-bottom: 24px; background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid #e2e8f0;">
-            <?php echo CSRF::campo(); ?>
-            <input type="hidden" name="crear_nota_feed" value="1">
+        <!-- Feed de Notas -->
             
             <div style="display:flex; gap:16px; margin-bottom: 12px;">
                 <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size: 0.875rem; font-weight: 600; color: #1e293b;">
@@ -427,15 +544,25 @@ function confirmarCambioEstado(nuevoEstado, label) {
                                     <?php echo strtoupper(substr($nota['autor_nombre'] ?? 'S', 0, 1)); ?>
                                 </div>
                                 <div>
-                                    <div style="font-weight: 600; font-size: 0.875rem; color: #1e293b;"><?php echo e(($nota['autor_nombre'] ?? 'Sistema') . ' ' . ($nota['autor_apellidos'] ?? '')); ?></div>
-                                    <div style="font-size: 0.75rem; color: #64748b;"><?php echo date('d/m/Y H:i', strtotime($nota['created_at'])); ?></div>
+                                    <div style="font-weight: 700; font-size: 0.9375rem; color: #1e293b;"><?php echo e($nota['titulo'] ?? 'Nota sin título'); ?></div>
+                                    <div style="font-size: 0.75rem; color: #64748b;">Por <?php echo e(($nota['autor_nombre'] ?? 'Sistema') . ' ' . ($nota['autor_apellidos'] ?? '')); ?> el <?php echo date('d/m/Y H:i', strtotime($nota['created_at'])); ?></div>
                                 </div>
                             </div>
-                            <?php if($isInterna): ?>
-                                <span style="background:#fee2e2; color:#ef4444; padding:2px 8px; border-radius:12px; font-size:0.6875rem; font-weight:700;">INTERNA</span>
-                            <?php else: ?>
-                                <span style="background:#dbeafe; color:#3b82f6; padding:2px 8px; border-radius:12px; font-size:0.6875rem; font-weight:700;">PÚBLICA</span>
-                            <?php endif; ?>
+                            <div style="display:flex; align-items:center; gap: 8px;">
+                                <?php if($nota['created_by'] === ($_SESSION['usuario_id']??0) || RoleGuard::esAdmin()): ?>
+                                <button type="button" class="btn btn-sm btn-outline-secondary btn-editar-nota" style="padding: 2px 6px; font-size: 0.75rem;" data-id="<?php echo $nota['id']; ?>" data-titulo="<?php echo e($nota['titulo']); ?>" data-contenido="<?php echo e($nota['contenido']); ?>" data-tipo="<?php echo $nota['tipo']; ?>">Editar</button>
+                                <form method="POST" style="margin:0; display:inline;" onsubmit="return confirm('¿Eliminar esta nota?');">
+                                    <?php echo CSRF::campo(); ?>
+                                    <input type="hidden" name="eliminar_nota" value="<?php echo $nota['id']; ?>">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" style="padding: 2px 6px; font-size: 0.75rem;">X</button>
+                                </form>
+                                <?php endif; ?>
+                                <?php if($isInterna): ?>
+                                    <span style="background:#fee2e2; color:#ef4444; padding:2px 8px; border-radius:12px; font-size:0.6875rem; font-weight:700;">INTERNA</span>
+                                <?php else: ?>
+                                    <span style="background:#dbeafe; color:#3b82f6; padding:2px 8px; border-radius:12px; font-size:0.6875rem; font-weight:700;">PÚBLICA</span>
+                                <?php endif; ?>
+                            </div>
                         </div>
                         
                         <div style="font-size: 0.875rem; color: #334155; line-height: 1.5; white-space: pre-wrap;"><?php echo e($nota['contenido']); ?></div>
@@ -466,18 +593,19 @@ function confirmarCambioEstado(nuevoEstado, label) {
     <!-- Financiero -->
     <div class="cv-card">
       <div class="cv-card-header">
-        <div class="cv-icon" style="background:#f0fdf4;color:#16a34a">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div class="cv-icon" style="background:#ecfdf5;color:#059669"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+            <h3 style="margin:0;font-size:1.125rem">Módulo Financiero</h3>
+          </div>
+          <div style="display:flex;gap:8px">
+            <a href="<?php echo APP_URL; ?>/index.php?page=pagos/registrar&caso_id=<?php echo $id; ?>" class="cv-btn cv-btn-primary" style="width:auto;padding:7px 14px;font-size:.8125rem;text-decoration:none">+ Registrar Pago</a>
+            <button class="cv-btn cv-btn-ghost" style="width:auto;padding:7px 14px;font-size:.8125rem" data-bs-toggle="modal" data-bs-target="#editarFinancieroModal">Configurar Cobro</button>
+          </div>
         </div>
-        <h3>Módulo Financiero</h3>
-        <div style="margin-left:auto;display:flex;gap:8px">
-          <a href="<?php echo APP_URL; ?>/index.php?page=pagos/registrar&caso_id=<?php echo $id; ?>" class="cv-btn cv-btn-success" style="width:auto;padding:7px 14px;font-size:.8125rem">+ Registrar Pago</a>
-          <button class="cv-btn cv-btn-ghost" style="width:auto;padding:7px 14px;font-size:.8125rem" data-bs-toggle="modal" data-bs-target="#editarFinancieroModal">Honorarios</button>
-        </div>
-      </div>
-      <div class="cv-card-body">
-        <div class="cv-fin-grid">
-          <div class="cv-fin-card" style="background:#eff6ff"><span class="cv-fin-label">Honorarios</span><div class="cv-fin-val" style="color:#2563eb">€<?php echo number_format($caso['honorarios_totales'],2,',','.'); ?></div></div>
+
+        <div style="display:flex;gap:16px;margin-bottom:24px">
+          <div class="cv-fin-card" style="background:#eff6ff"><span class="cv-fin-label">Valor del Caso</span><div class="cv-fin-val" style="color:#2563eb">&euro;<?php echo number_format($caso['honorarios_totales'],2,',','.'); ?></div></div>
           <div class="cv-fin-card" style="background:#f0fdf4"><span class="cv-fin-label">Pagado</span><div class="cv-fin-val" style="color:#059669">€<?php echo number_format($totalPagado,2,',','.'); ?></div></div>
           <div class="cv-fin-card" style="background:#fef2f2"><span class="cv-fin-label">Pendiente</span><div class="cv-fin-val" style="color:#dc2626">€<?php echo number_format($saldoPendiente,2,',','.'); ?></div></div>
         </div>
@@ -489,7 +617,7 @@ function confirmarCambioEstado(nuevoEstado, label) {
         <?php endif; ?>
         <?php if(!empty($pagos)): ?>
         <div style="margin-top:16px;border-top:1px solid #f1f5f9;padding-top:14px">
-          <span class="cv-label">Pagos Registrados</span>
+          <span class="cv-label">Pagos del Cliente</span>
           <?php foreach($pagos as $p): ?>
           <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f8fafc">
             <div>
@@ -504,6 +632,32 @@ function confirmarCambioEstado(nuevoEstado, label) {
           <?php endforeach; ?>
         </div>
         <?php endif; ?>
+
+        <!-- Sección Abogado -->
+        <div style="margin-top: 24px; border-top: 2px dashed #e2e8f0; padding-top: 16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <span class="cv-label" style="font-size: 0.9375rem; color: #1e293b; margin: 0;">Pagos al Abogado</span>
+                <button class="cv-btn cv-btn-primary" style="width:auto;padding:4px 10px;font-size:.75rem" data-bs-toggle="modal" data-bs-target="#modalRegistrarPagoAbogado">+ Registrar Pago Abogado</button>
+            </div>
+            
+            <div style="display:flex; gap:16px; margin-bottom:12px;">
+                <div class="cv-fin-card" style="background:#f0fdf4; flex:1; padding:12px; min-height:0;"><span class="cv-fin-label" style="margin-bottom:2px;">Total Pagado</span><div class="cv-fin-val" style="color:#059669; font-size:1.125rem;">€<?php echo number_format($totalPagadoAbogado,2,',','.'); ?></div></div>
+            </div>
+            
+            <?php if(!empty($pagosAbogado)): ?>
+            <div style="margin-top:16px;">
+              <?php foreach($pagosAbogado as $pa): ?>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f8fafc">
+                <div>
+                  <p style="margin:0;font-weight:600;color:#1e293b;font-size:.875rem"><?php echo e($pa['concepto'] ?: 'Pago al Abogado'); ?></p>
+                  <p style="margin:2px 0 0;font-size:.75rem;color:#64748b"><?php echo date('d/m/Y',strtotime($pa['fecha_pago'])); ?> &middot; <?php echo e($pa['metodo_pago']); ?></p>
+                </div>
+                <span style="font-weight:800;color:#059669;font-size:.9375rem">€<?php echo number_format($pa['cantidad'],2,',','.'); ?></span>
+              </div>
+              <?php endforeach; ?>
+            </div>
+            <?php endif; ?>
+        </div>
       </div>
     </div>
 
@@ -623,7 +777,120 @@ function confirmarCambioEstado(nuevoEstado, label) {
   </div>
 </div>
 
-<!-- Modal editar caso -->
+<!-- Modal Registrar Pago Abogado -->
+<div class="modal fade" id="modalRegistrarPagoAbogado" tabindex="-1">
+    <div class="modal-dialog">
+        <form method="POST" action="" class="modal-content radius-8">
+            <?php echo CSRF::campo(); ?>
+            <input type="hidden" name="registrar_pago_abogado" value="1">
+            <div class="modal-header"><h6 class="modal-title">Registrar Pago a Abogado</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Cantidad (&euro;)</label>
+                    <input type="number" name="cantidad" step="0.01" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Fecha de Pago</label>
+                    <input type="date" name="fecha_pago" class="form-control" value="<?php echo date('Y-m-d'); ?>" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Método de Pago</label>
+                    <select name="metodo_pago" class="form-select" required>
+                        <option value="transferencia">Transferencia</option>
+                        <option value="efectivo">Efectivo</option>
+                        <option value="tarjeta">Tarjeta</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Concepto (Opcional)</label>
+                    <input type="text" name="concepto" class="form-control" placeholder="Ej: Pago hito 1">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary radius-8" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-primary radius-8">Guardar Pago</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Nueva Nota -->
+<div class="modal fade" id="modalNuevaNota" tabindex="-1">
+    <div class="modal-dialog">
+        <form method="POST" enctype="multipart/form-data" class="modal-content radius-8">
+            <?php echo CSRF::campo(); ?>
+            <input type="hidden" name="crear_nota_feed" value="1">
+            <div class="modal-header"><h6 class="modal-title">Añadir Nueva Nota</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Título de la nota</label>
+                    <input type="text" name="titulo_nota" class="form-control" placeholder="Ej: Llamada con cliente" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Tipo</label>
+                    <div style="display:flex; gap:16px;">
+                        <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size: 0.875rem; font-weight: 600; color: #1e293b;">
+                            <input type="radio" name="tipo_nota" value="publica" checked style="accent-color: #2563eb;"> Pública (Visible al cliente)
+                        </label>
+                        <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size: 0.875rem; font-weight: 600; color: #dc2626;">
+                            <input type="radio" name="tipo_nota" value="interna" style="accent-color: #dc2626;"> Interna (Privada)
+                        </label>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Descripción</label>
+                    <textarea name="contenido_nota" class="form-control" rows="4" placeholder="Escribe aquí el contenido..." required></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Adjuntar Archivo (Opcional)</label>
+                    <input type="file" name="documento_nota" class="form-control">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary radius-8" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-primary radius-8">Guardar Nota</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Editar Nota -->
+<div class="modal fade" id="modalEditarNota" tabindex="-1">
+    <div class="modal-dialog">
+        <form method="POST" class="modal-content radius-8">
+            <?php echo CSRF::campo(); ?>
+            <input type="hidden" name="editar_nota_accion" value="1">
+            <input type="hidden" name="nota_id" id="editar_nota_id">
+            <div class="modal-header"><h6 class="modal-title">Editar Nota</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Título de la nota</label>
+                    <input type="text" name="titulo_nota" id="editar_nota_titulo" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Tipo</label>
+                    <div style="display:flex; gap:16px;">
+                        <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size: 0.875rem; font-weight: 600; color: #1e293b;">
+                            <input type="radio" name="tipo_nota" id="editar_tipo_publica" value="publica" style="accent-color: #2563eb;"> Pública
+                        </label>
+                        <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size: 0.875rem; font-weight: 600; color: #dc2626;">
+                            <input type="radio" name="tipo_nota" id="editar_tipo_interna" value="interna" style="accent-color: #dc2626;"> Interna
+                        </label>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Descripción</label>
+                    <textarea name="contenido_nota" id="editar_nota_contenido" class="form-control" rows="4" required></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary radius-8" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-primary radius-8">Actualizar Nota</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <div class="modal fade" id="editarCasoModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <form method="POST" class="modal-content radius-8">
@@ -634,7 +901,7 @@ function confirmarCambioEstado(nuevoEstado, label) {
             <div class="modal-body">
                 <div class="row gy-3">
                     <div class="col-sm-8"><label class="form-label">Título</label><input type="text" name="titulo" class="form-control" value="<?php echo e($caso['titulo']); ?>" required></div>
-                    <div class="col-sm-4"><label class="form-label">Tipo de Caso</label><input type="text" name="tipo_caso" class="form-control" value="<?php echo e($caso['tipo_caso']); ?>" required></div>
+                    <div class="col-sm-4"><label class="form-label">Tipo de Caso</label><input type="text" name="tipo_caso" id="inputTipoCaso" class="form-control" value="<?php echo e($caso['tipo_caso']); ?>" placeholder="Ej: Penal, Civil..."></div>
                     <div class="col-sm-6"><label class="form-label fw-semibold" style="font-size:.8125rem">Abogado Asignado</label>
                         <?php
                         $abSel = $caso['abogado_id'] ?? '';
@@ -686,7 +953,7 @@ function confirmarCambioEstado(nuevoEstado, label) {
                 <?php $tpc = $caso['tipo_pago_cliente'] ?? 'pago_unico'; $freq = $caso['frecuencia_pago'] ?? 'mensual'; ?>
                 <div class="row gy-3">
                     <div class="col-12">
-                        <label class="cv-label">Honorarios Totales (&euro;)</label>
+                        <label class="cv-label">Valor Total a Cobrar al Cliente (&euro;)</label>
                         <input type="number" name="honorarios_totales" class="cv-input" id="finHonorarios"
                                step="0.01" min="0" value="<?php echo $caso['honorarios_totales']; ?>" required>
                     </div>
@@ -849,5 +1116,43 @@ document.addEventListener('DOMContentLoaded',()=>{
 });
 </script>
 
+<!-- Scripts para Notas y Tagify -->
+<script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
+<link href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css" rel="stylesheet" type="text/css" />
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Configurar Tagify para Tipo de Caso
+    const inputTipoCaso = document.querySelector('#inputTipoCaso');
+    if (inputTipoCaso) {
+        new Tagify(inputTipoCaso, {
+            maxTags: 1, // Solo un tipo principal o varios si quieren, la base de datos es VARCHAR
+            dropdown: {
+                maxItems: 20,
+                classname: "tags-look",
+                enabled: 0,
+                closeOnSelect: true
+            }
+        });
+    }
+
+    // Editar nota
+    document.querySelectorAll('.btn-editar-nota').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = btn.dataset.id;
+            const titulo = btn.dataset.titulo;
+            const contenido = btn.dataset.contenido;
+            const tipo = btn.dataset.tipo;
+            
+            document.getElementById('editar_nota_id').value = id;
+            document.getElementById('editar_nota_titulo').value = titulo;
+            document.getElementById('editar_nota_contenido').value = contenido;
+            if (tipo === 'publica') document.getElementById('editar_tipo_publica').checked = true;
+            else document.getElementById('editar_tipo_interna').checked = true;
+            
+            new bootstrap.Modal(document.getElementById('modalEditarNota')).show();
+        });
+    });
+});
+</script>
 
 <?php include CRM_ROOT . '/templates/layout/footer.php'; ?>
