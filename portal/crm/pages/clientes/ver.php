@@ -492,14 +492,17 @@ include CRM_ROOT . '/templates/layout/header.php';
                                 <th class="py-16 border-bottom border-neutral-100">Asunto</th>
                                 <th class="py-16 border-bottom border-neutral-100">Abogado Asignado</th>
                                 <th class="py-16 border-bottom border-neutral-100">Estado</th>
-                                <?php if($auth->esAdmin()): ?><th class="py-16 border-bottom border-neutral-100">Honorarios</th><?php endif; ?>
+                                <?php if($auth->esAdmin()): ?>
+                                    <th class="py-16 border-bottom border-neutral-100">Cobro Cliente</th>
+                                    <th class="py-16 border-bottom border-neutral-100">Pago Abogado</th>
+                                <?php endif; ?>
                                 <th class="pe-24 py-16 border-bottom border-neutral-100 text-end">Acción</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php if (empty($casos)): ?>
                             <tr>
-                                <td colspan="6" class="text-center py-48">
+                                <td colspan="7" class="text-center py-48">
                                     <div class="d-flex flex-column align-items-center justify-content-center">
                                         <iconify-icon icon="solar:folder-cross-outline" class="text-neutral-300 text-6xl mb-16"></iconify-icon>
                                         <h6 class="text-neutral-800 fw-semibold mb-4">No hay expedientes</h6>
@@ -546,31 +549,27 @@ include CRM_ROOT . '/templates/layout/header.php';
                                     </span>
                                 </td>
                                 <?php if($auth->esAdmin()): ?>
-                                <td class="py-16 border-bottom border-neutral-100" style="min-width: 220px;">
-                                    <div class="d-flex flex-column gap-2" style="font-size:0.8rem;">
-                                         <!-- Cliente -->
-                                         <div>
-                                             <div class="d-flex justify-content-between mb-2">
-                                                 <span class="fw-bold text-neutral-800" style="font-size: 11px; text-transform: uppercase; color: #10b981;">Cliente</span>
-                                                 <span class="text-xs text-secondary-light">de €<?php echo number_format($caso['_honorarios_cliente'], 0, ',', '.'); ?></span>
-                                             </div>
-                                             <div class="d-flex align-items-center justify-content-between">
-                                                 <span class="text-success-main fw-bold">Cobrado: €<?php echo number_format($caso['_pagado_cliente'], 2, ',', '.'); ?></span>
-                                                 <span class="text-danger-main text-xs fw-semibold">Falta: €<?php echo number_format($caso['_pendiente_cliente'], 2, ',', '.'); ?></span>
-                                             </div>
+                                <!-- Cobro Cliente -->
+                                <td class="py-16 border-bottom border-neutral-100" style="min-width: 140px;">
+                                     <div class="d-flex flex-column gap-1" style="font-size:0.8rem;">
+                                         <div class="d-flex justify-content-between mb-4">
+                                             <span class="fw-bold text-neutral-800" style="font-size: 11px; text-transform: uppercase; color: #10b981;">Cliente</span>
+                                             <span class="text-xs text-secondary-light">de €<?php echo number_format($caso['_honorarios_cliente'], 0, ',', '.'); ?></span>
                                          </div>
-                                         <!-- Abogado -->
-                                         <div style="border-top:1px dashed #e2e8f0; padding-top:6px; margin-top:4px;">
-                                             <div class="d-flex justify-content-between mb-2">
-                                                 <span class="fw-bold text-neutral-800" style="font-size: 11px; text-transform: uppercase; color: #3b82f6;">Abogado</span>
-                                                 <span class="text-xs text-secondary-light">de €<?php echo number_format($caso['_honorarios_abogado'], 0, ',', '.'); ?></span>
-                                             </div>
-                                             <div class="d-flex align-items-center justify-content-between">
-                                                 <span class="text-info-main fw-bold">Pagado: €<?php echo number_format($caso['_pagado_abogado'], 2, ',', '.'); ?></span>
-                                                 <span class="text-danger-main text-xs fw-semibold">Falta: €<?php echo number_format($caso['_pendiente_abogado'], 2, ',', '.'); ?></span>
-                                             </div>
+                                         <div class="text-success-main fw-bold">Cobrado: €<?php echo number_format($caso['_pagado_cliente'], 2, ',', '.'); ?></div>
+                                         <div class="text-danger-main text-xs fw-semibold">Falta: €<?php echo number_format($caso['_pendiente_cliente'], 2, ',', '.'); ?></div>
+                                     </div>
+                                </td>
+                                <!-- Pago Abogado -->
+                                <td class="py-16 border-bottom border-neutral-100" style="min-width: 140px;">
+                                     <div class="d-flex flex-column gap-1" style="font-size:0.8rem;">
+                                         <div class="d-flex justify-content-between mb-4">
+                                             <span class="fw-bold text-neutral-800" style="font-size: 11px; text-transform: uppercase; color: #3b82f6;">Abogado</span>
+                                             <span class="text-xs text-secondary-light">de €<?php echo number_format($caso['_honorarios_abogado'], 0, ',', '.'); ?></span>
                                          </div>
-                                    </div>
+                                         <div class="text-info-main fw-bold">Pagado: €<?php echo number_format($caso['_pagado_abogado'], 2, ',', '.'); ?></div>
+                                         <div class="text-danger-main text-xs fw-semibold">Falta: €<?php echo number_format($caso['_pendiente_abogado'], 2, ',', '.'); ?></div>
+                                     </div>
                                 </td>
                                 <?php endif; ?>
                                 <td class="pe-24 py-16 border-bottom border-neutral-100 text-end">
