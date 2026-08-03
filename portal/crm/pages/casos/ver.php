@@ -133,6 +133,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_caso'])) {
         'descripcion'       => trim($_POST['descripcion']),
         'abogado_id'        => $_POST['abogado_id'] ?: null,
         'honorarios_totales'=> (float)($_POST['honorarios_totales'] ?? 0),
+        'honorarios_abogado'=> (float)($_POST['honorarios_abogado'] ?? 0),
     ];
     $db->update('casos', $datosBase, 'id = ?', [$id]);
 
@@ -1301,9 +1302,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                     </div>
                     <div class="col-sm-6">
-                        <label class="form-label">Valor Total a Cobrar al Cliente (&euro;)</label>
+                        <label class="form-label">Cobro Cliente (&euro;)</label>
                         <input type="number" name="honorarios_totales" class="form-control"
                                step="0.01" min="0" value="<?php echo $caso['honorarios_totales']; ?>" required>
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="form-label">Pago Abogado (&euro;)</label>
+                        <input type="number" name="honorarios_abogado" class="form-control"
+                               step="0.01" min="0" value="<?php echo $caso['honorarios_abogado'] ?? 0; ?>" title="Opcional. Lo que se le paga al abogado por este caso (0 = usar su tarifa por defecto)">
                     </div>
 
                     <?php $tpc = $caso['tipo_pago_cliente'] ?? 'pago_unico'; ?>

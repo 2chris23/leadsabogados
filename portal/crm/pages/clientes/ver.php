@@ -182,6 +182,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['crear_caso'])) {
         'referencia' => $referencia,
         'estado' => $_POST['estado'] ?? 'en_estudio',
         'honorarios_totales' => (float)$_POST['honorarios_totales'],
+        'honorarios_abogado' => isset($_POST['honorarios_abogado']) ? (float)$_POST['honorarios_abogado'] : 0,
         'fecha_apertura' => $_POST['fecha_apertura'] ?: date('Y-m-d'),
         'descripcion' => $_POST['descripcion'] ?? ''
     ]);
@@ -203,6 +204,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_caso'])) {
         'abogado_id' => $_POST['abogado_id'] ?: null,
         'estado' => $_POST['estado'],
         'honorarios_totales' => (float)$_POST['honorarios_totales'],
+        'honorarios_abogado' => isset($_POST['honorarios_abogado']) ? (float)$_POST['honorarios_abogado'] : 0,
         'tipo_caso' => $_POST['tipo_caso'],
         'descripcion' => $_POST['descripcion']
     ], 'id = ?', [$casoId]);
@@ -740,8 +742,12 @@ include CRM_ROOT . '/templates/layout/header.php';
                         </select>
                     </div>
                     <div class="col-sm-6">
-                        <label class="form-label fw-semibold">Honorarios Totales (€)</label>
-                        <input type="number" step="0.01" name="honorarios_totales" class="form-control" value="0.00">
+                        <label class="form-label fw-semibold">Cobro Cliente (€)</label>
+                        <input type="number" step="0.01" name="honorarios_totales" class="form-control" value="0.00" title="Lo que se le cobra al cliente">
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="form-label fw-semibold">Pago Abogado (€)</label>
+                        <input type="number" step="0.01" name="honorarios_abogado" class="form-control" value="0.00" title="Opcional. Lo que se le paga al abogado por este caso específico (0 para usar su tarifa por defecto)">
                     </div>
                     <div class="col-sm-6">
                         <label class="form-label fw-semibold">Fecha de Apertura</label>
@@ -807,8 +813,12 @@ include CRM_ROOT . '/templates/layout/header.php';
                         </select>
                     </div>
                     <div class="col-sm-6">
-                        <label class="form-label fw-semibold">Honorarios Totales (€)</label>
-                        <input type="number" step="0.01" name="honorarios_totales" id="editCasoHonorarios" class="form-control">
+                        <label class="form-label fw-semibold">Cobro Cliente (€)</label>
+                        <input type="number" step="0.01" name="honorarios_totales" id="editCasoHonorarios" class="form-control" title="Lo que se le cobra al cliente">
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="form-label fw-semibold">Pago Abogado (€)</label>
+                        <input type="number" step="0.01" name="honorarios_abogado" id="editCasoHonorariosAbogado" class="form-control" title="Opcional. Lo que se le paga al abogado por este caso (0 para usar tarifa por defecto)">
                     </div>
                     <?php /* DESCRIPCION - oculto temporalmente
                     <div class="col-12">
@@ -878,7 +888,8 @@ function openEditCaso(caso) {
     document.getElementById('editCasoAbogado').value = caso.abogado_id || '';
     document.getElementById('editCasoEstado').value = caso.estado;
     document.getElementById('editCasoHonorarios').value = caso.honorarios_totales;
-    document.getElementById('editCasoDescripcion').value = caso.descripcion || '';
+    document.getElementById('editCasoHonorariosAbogado').value = caso.honorarios_abogado || 0;
+    // document.getElementById('editCasoDescripcion').value = caso.descripcion || '';
     bootstrap.Modal.getOrCreateInstance(document.getElementById('editarCasoModal')).show();
 }
 
