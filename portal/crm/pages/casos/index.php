@@ -115,7 +115,7 @@ $estados = ['en_estudio','en_proceso','en_tramitacion','pendiente_juicio','cerra
                                 <?php echo e($caso['cliente_nombre'] . ' ' . $caso['cliente_apellidos']); ?>
                             </a>
                         </td>
-                        <td class="text-sm text-secondary-light"><?php echo ucfirst(e($caso['tipo'] ?? '')); ?></td>
+                        <td class="text-sm text-secondary-light"><?php echo ucfirst(e($caso['tipo_caso'] ?? '')); ?></td>
                         <td>
                             <a href="<?php echo APP_URL; ?>/index.php?page=casos/ver&id=<?php echo $caso['id']; ?>" class="fw-medium text-primary-600">
                                 <?php echo e($caso['titulo']); ?>
