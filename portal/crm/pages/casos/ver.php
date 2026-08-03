@@ -146,53 +146,58 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_caso'])) {
         error_log('[CRM] financiero cols missing: ' . $e->getMessage());
     }
 
-    // Lógica para regenerar pagos_programados
-    $tipoPago = $_POST['tipo_pago_cliente'] ?? 'pago_unico';
-    $honorariosTotales = (float)($_POST['honorarios_totales'] ?? 0);
-    $totalPagado = (float)($db->fetchOne("SELECT SUM(monto) as total FROM pagos_cliente WHERE caso_id = ?", [$id])['total'] ?? 0);
-    $saldoPendiente = max(0, $honorariosTotales - $totalPagado);
+    // Lógica para regenerar pagos_programados (protegido si las tablas no existen aún)
+    try {
+        $tipoPago = $_POST['tipo_pago_cliente'] ?? 'pago_unico';
+        $honorariosTotales = (float)($_POST['honorarios_totales'] ?? 0);
+        $totalPagadoRow = $db->fetchOne("SELECT COALESCE(SUM(monto),0) as total FROM pagos_cliente WHERE caso_id = ?", [$id]);
+        $totalPagado = (float)($totalPagadoRow['total'] ?? 0);
+        $saldoPendiente = max(0, $honorariosTotales - $totalPagado);
 
-    // Borrar cuotas pendientes o vencidas existentes
-    $db->execute("DELETE FROM pagos_programados WHERE caso_id = ? AND estado IN ('pendiente', 'vencido')", [$id]);
+        // Borrar cuotas pendientes o vencidas existentes
+        $db->execute("DELETE FROM pagos_programados WHERE caso_id = ? AND estado IN ('pendiente', 'vencido')", [$id]);
 
-    if ($saldoPendiente > 0) {
-        if ($tipoPago === 'pago_unico') {
-            $fecha = $_POST['fecha_pago_unico'] ?? date('Y-m-d');
-            $db->insert('pagos_programados', [
-                'caso_id' => $id, 'monto' => $saldoPendiente, 'fecha_vencimiento' => $fecha, 'estado' => 'pendiente'
-            ]);
-        } elseif ($tipoPago === 'cuotas') {
-            $numCuotas = (int)($_POST['num_cuotas'] ?? 1);
-            if ($numCuotas > 0) {
-                $montoCuota = $saldoPendiente / $numCuotas;
-                $freq = $_POST['frecuencia_pago'] ?? 'mensual';
-                $fecha = $_POST['fecha_inicio_cuotas'] ?? date('Y-m-d');
-                
-                for ($i = 1; $i <= $numCuotas; $i++) {
-                    $db->insert('pagos_programados', [
-                        'caso_id' => $id, 'monto' => $montoCuota, 'fecha_vencimiento' => $fecha, 'estado' => 'pendiente'
-                    ]);
-                    $dateObj = new DateTime($fecha);
-                    if ($freq === 'semanal') $dateObj->modify('+1 week');
-                    elseif ($freq === 'quincenal') $dateObj->modify('+15 days');
-                    elseif ($freq === 'mensual') $dateObj->modify('+1 month');
-                    elseif ($freq === 'trimestral') $dateObj->modify('+3 months');
-                    elseif ($freq === 'semestral') $dateObj->modify('+6 months');
-                    $fecha = $dateObj->format('Y-m-d');
+        if ($saldoPendiente > 0) {
+            if ($tipoPago === 'pago_unico') {
+                $fecha = $_POST['fecha_pago_unico'] ?? date('Y-m-d');
+                $db->insert('pagos_programados', [
+                    'caso_id' => $id, 'monto' => $saldoPendiente, 'fecha_vencimiento' => $fecha, 'estado' => 'pendiente'
+                ]);
+            } elseif ($tipoPago === 'cuotas') {
+                $numCuotas = (int)($_POST['num_cuotas'] ?? 1);
+                if ($numCuotas > 0) {
+                    $montoCuota = round($saldoPendiente / $numCuotas, 2);
+                    $freq = $_POST['frecuencia_pago'] ?? 'mensual';
+                    $fecha = $_POST['fecha_inicio_cuotas'] ?? date('Y-m-d');
+                    for ($i = 1; $i <= $numCuotas; $i++) {
+                        $db->insert('pagos_programados', [
+                            'caso_id' => $id, 'monto' => $montoCuota, 'fecha_vencimiento' => $fecha, 'estado' => 'pendiente'
+                        ]);
+                        $dateObj = new DateTime($fecha);
+                        if ($freq === 'semanal')      $dateObj->modify('+1 week');
+                        elseif ($freq === 'quincenal') $dateObj->modify('+15 days');
+                        elseif ($freq === 'mensual')   $dateObj->modify('+1 month');
+                        elseif ($freq === 'trimestral')$dateObj->modify('+3 months');
+                        elseif ($freq === 'semestral') $dateObj->modify('+6 months');
+                        $fecha = $dateObj->format('Y-m-d');
+                    }
                 }
-            }
-        } elseif ($tipoPago === 'fechas_custom') {
-            $montos = $_POST['montos_custom'] ?? [];
-            $fechas = $_POST['fechas_custom'] ?? [];
-            foreach ($montos as $i => $m) {
-                $montoCustom = (float)$m;
-                if ($montoCustom > 0) {
-                    $db->insert('pagos_programados', [
-                        'caso_id' => $id, 'monto' => $montoCustom, 'fecha_vencimiento' => $fechas[$i] ?? date('Y-m-d'), 'estado' => 'pendiente'
-                    ]);
+            } elseif ($tipoPago === 'fechas_custom') {
+                $montos = $_POST['montos_custom'] ?? [];
+                $fechas = $_POST['fechas_custom'] ?? [];
+                foreach ($montos as $i => $m) {
+                    $montoCustom = (float)$m;
+                    if ($montoCustom > 0) {
+                        $db->insert('pagos_programados', [
+                            'caso_id' => $id, 'monto' => $montoCustom, 'fecha_vencimiento' => $fechas[$i] ?? date('Y-m-d'), 'estado' => 'pendiente'
+                        ]);
+                    }
                 }
             }
         }
+    } catch (Throwable $eP) {
+        error_log('[CRM] pagos_programados error: ' . $eP->getMessage());
+        // Si las tablas aún no existen, continuar sin error
     }
 
     AuditLog::registrar('editar', 'casos', $id, 'Datos del caso y plan de pagos actualizados');

@@ -176,6 +176,9 @@ $rutas = [
     // Tools (solo admin)
     'tools/backups'         => ['archivo' => 'pages/tools/backups.php',          'roles' => ['admin', 'superadmin']],
     'tools/migrar-storage'  => ['archivo' => 'pages/tools/migrar-storage.php',   'roles' => ['admin', 'superadmin']],
+
+    // Migración de base de datos (solo admin)
+    'admin/migracion'       => ['archivo' => 'pages/admin/migracion.php',        'roles' => ['admin']],
 ];
 
 // Buscar ruta
