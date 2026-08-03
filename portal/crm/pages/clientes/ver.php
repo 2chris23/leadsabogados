@@ -810,10 +810,12 @@ include CRM_ROOT . '/templates/layout/header.php';
                         <label class="form-label fw-semibold">Honorarios Totales (€)</label>
                         <input type="number" step="0.01" name="honorarios_totales" id="editCasoHonorarios" class="form-control">
                     </div>
+                    <?php /* DESCRIPCION - oculto temporalmente
                     <div class="col-12">
                         <label class="form-label fw-semibold">Descripción</label>
                         <textarea name="descripcion" id="editCasoDescripcion" class="form-control" rows="3"></textarea>
                     </div>
+                    */ ?>
                 </div>
             </div>
             <div class="modal-footer bg-neutral-50 radius-bottom-12">
