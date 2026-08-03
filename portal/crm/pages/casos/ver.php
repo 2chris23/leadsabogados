@@ -252,7 +252,7 @@ $notasCaso = [];
 try {
     $notasCaso = $db->fetchAll("
         SELECT n.*, u.nombre as autor_nombre, u.apellidos as autor_apellidos,
-               d.id as doc_id, d.nombre_original as doc_nombre, d.ruta as doc_ruta, d.tipo as doc_tipo, d.tamano_bytes as doc_tamano
+               d.id as doc_id, d.nombre_original as doc_nombre, d.ruta as doc_ruta, d.tipo_mime as doc_tipo, d.tamano_bytes as doc_tamano
         FROM notas_caso n
         LEFT JOIN usuarios_internos u ON n.created_by = u.id
         LEFT JOIN documentos d ON d.nota_id = n.id
