@@ -1,0 +1,1 @@
+<?php define('CRM_ROOT', __DIR__); require 'includes/config.php'; require 'includes/Database.php'; $db = Database::getInstance(); $db->getConnection()->exec(file_get_contents('sql/update_casos.sql')); echo 'Done'; ?>

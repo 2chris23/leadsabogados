@@ -1,0 +1,1 @@
+<?php $pdo = new PDO('mysql:host=localhost;dbname=crm;charset=utf8mb4', 'root', ''); $pdo->query('ALTER TABLE usuarios_internos ADD COLUMN tarifa_hitos_senal DECIMAL(10,2) DEFAULT 0, ADD COLUMN tarifa_hitos_intermedio DECIMAL(10,2) DEFAULT 0, ADD COLUMN tarifa_hitos_final DECIMAL(10,2) DEFAULT 0'); echo 'OK'; ?>
