@@ -63,6 +63,20 @@ $historial = $db->fetchAll(
     "SELECT * FROM audit_log WHERE tabla_afectada = 'casos' AND registro_id = ? ORDER BY created_at DESC LIMIT 15", [$casoId]
 );
 
+// Notas públicas del caso (feed)
+try {
+    $notasPublicas = $db->fetchAll(
+        "SELECT cn.*, ui.nombre as autor_nombre, ui.apellidos as autor_apellidos
+         FROM caso_notas cn
+         LEFT JOIN usuarios_internos ui ON cn.created_by = ui.id
+         WHERE cn.caso_id = ? AND cn.tipo = 'publica'
+         ORDER BY cn.created_at DESC",
+        [$casoId]
+    );
+} catch (\Throwable $e) {
+    $notasPublicas = [];
+}
+
 // Estados
 $estadoCaso = [
     'en_estudio'       => ['label' => 'En Estudio',       'color' => '#2563eb', 'bg' => '#eff6ff',  'step' => 1],
@@ -332,11 +346,24 @@ $stepsOrden = array_keys($estadoCaso);
             <h2>Mis Fechas de Pago</h2>
         </div>
         <div class="card-body">
-            <?php foreach($ppPortal as $pp):
-                $ppEst = match($pp['estado']) {
-                    'pagado'  => ['#059669','#f0fdf4','Pagado'],
-                    'vencido' => ['#dc2626','#fef2f2','Vencido'],
-                    default   => ['#d97706','#fffbeb','Pendiente'],
+            <?php
+            // Calcular estado real de cada cuota comparando total pagado acumulado
+            $totalPagadoAcum = $totalPagado;
+            $acumuladoCuotas = 0.0;
+            foreach($ppPortal as $pp):
+                $acumuladoCuotas += (float)$pp['monto'];
+                if ($totalPagadoAcum >= $acumuladoCuotas) {
+                    $estadoReal = 'pagado';
+                } elseif ($totalPagadoAcum > ($acumuladoCuotas - (float)$pp['monto'])) {
+                    $estadoReal = 'progreso';
+                } else {
+                    $estadoReal = (strtotime($pp['fecha_vencimiento']) < strtotime('today')) ? 'vencido' : 'pendiente';
+                }
+                $ppEst = match($estadoReal) {
+                    'pagado'   => ['#059669','#f0fdf4','Pagado'],
+                    'progreso' => ['#d97706','#fffbeb','En progreso'],
+                    'vencido'  => ['#dc2626','#fef2f2','Vencido'],
+                    default    => ['#d97706','#fffbeb','Pendiente'],
                 };
                 $ppHoy = $pp['fecha_vencimiento'] === date('Y-m-d');
             ?>
@@ -354,6 +381,33 @@ $stepsOrden = array_keys($estadoCaso);
                 </div>
                 <span style="font-weight:800;font-size:.9375rem;color:<?php echo $ppEst[0]; ?>">&euro;<?php echo number_format($pp['monto'],2,',','.'); ?></span>
                 <span style="padding:3px 10px;border-radius:8px;font-size:.6875rem;font-weight:700;background:<?php echo $ppEst[1]; ?>;color:<?php echo $ppEst[0]; ?>"><?php echo $ppEst[2]; ?></span>
+            </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+    <?php endif; ?>
+
+    <!-- Notas Públicas del Caso -->
+    <?php if(!empty($notasPublicas)): ?>
+    <div class="card">
+        <div class="card-hdr">
+            <div class="ico" style="background:#f3e8ff;color:#9333ea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+            <h2>Novedades del Caso</h2>
+            <span class="cnt" style="background:#f3e8ff;color:#9333ea"><?php echo count($notasPublicas); ?></span>
+        </div>
+        <div class="card-body">
+            <?php foreach($notasPublicas as $np):
+                $autor = trim(($np['autor_nombre'] ?? '') . ' ' . ($np['autor_apellidos'] ?? '')) ?: 'Sistema';
+            ?>
+            <div style="padding:14px 0;border-bottom:1px solid #f8fafc;display:flex;gap:12px;align-items:flex-start">
+                <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#9333ea,#7c3aed);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.875rem;flex-shrink:0">
+                    <?php echo strtoupper(substr($np['autor_nombre'] ?? 'S', 0, 1)); ?>
+                </div>
+                <div style="flex:1;min-width:0">
+                    <div style="font-size:.9375rem;font-weight:700;color:#0f172a"><?php echo e($np['titulo'] ?? 'Nota'); ?></div>
+                    <div style="font-size:.75rem;color:#64748b;margin-bottom:6px">Por <strong><?php echo e($autor); ?></strong> &bull; <?php echo date('d M Y, H:i', strtotime($np['created_at'])); ?></div>
+                    <div style="font-size:.875rem;color:#374151;line-height:1.6;white-space:pre-wrap"><?php echo e($np['contenido']); ?></div>
+                </div>
             </div>
             <?php endforeach; ?>
         </div>
