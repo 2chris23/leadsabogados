@@ -515,11 +515,29 @@ document.addEventListener('DOMContentLoaded', () => {
             <input type="hidden" name="crear_nota_feed" value="1">
             
             <div style="display:flex; gap:16px; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #e2e8f0;">
-                <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size: 0.875rem; font-weight: 600; color: #1e293b;">
-                    <input type="radio" name="tipo_nota" value="publica" checked style="accent-color: #2563eb;"> Nota Pública (Visible al cliente)
+                <label style="flex:1; cursor:pointer;">
+                    <input type="radio" name="tipo_nota" value="publica" checked style="display:none;" onchange="
+                        this.nextElementSibling.style.border='2px solid #2563eb'; 
+                        this.nextElementSibling.style.background='#eff6ff';
+                        const otherLbl = document.getElementById('lblInternaUI');
+                        otherLbl.style.border='1px solid #e2e8f0';
+                        otherLbl.style.background='#ffffff';
+                    ">
+                    <div id="lblPublicaUI" style="border: 2px solid #2563eb; background: #eff6ff; padding: 10px; border-radius: 8px; text-align: center; font-weight: 600; color: #1e293b; transition: all 0.2s;">
+                        <span style="color:#2563eb; font-size:1.2rem; vertical-align:middle; margin-right:4px;">●</span> Nota Pública (Visible al cliente)
+                    </div>
                 </label>
-                <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size: 0.875rem; font-weight: 600; color: #dc2626;">
-                    <input type="radio" name="tipo_nota" value="interna" style="accent-color: #dc2626;"> Nota Interna (Privada)
+                <label style="flex:1; cursor:pointer;">
+                    <input type="radio" name="tipo_nota" value="interna" style="display:none;" onchange="
+                        this.nextElementSibling.style.border='2px solid #dc2626'; 
+                        this.nextElementSibling.style.background='#fef2f2';
+                        const otherLbl = document.getElementById('lblPublicaUI');
+                        otherLbl.style.border='1px solid #e2e8f0';
+                        otherLbl.style.background='#ffffff';
+                    ">
+                    <div id="lblInternaUI" style="border: 1px solid #e2e8f0; background: #ffffff; padding: 10px; border-radius: 8px; text-align: center; font-weight: 600; color: #1e293b; transition: all 0.2s;">
+                        <span style="color:#dc2626; font-size:1.2rem; vertical-align:middle; margin-right:4px;">●</span> Nota Interna (Privada)
+                    </div>
                 </label>
             </div>
             
@@ -601,45 +619,7 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       </div>
     </div>
-    <!-- Documentos -->
-    <div class="cv-card">
-      <div class="cv-card-header">
-        <div class="cv-icon" style="background:#f5f3ff;color:#7c3aed">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-        </div>
-        <h3>Documentos</h3>
-        <span style="margin-left:auto;background:#f5f3ff;color:#7c3aed;padding:3px 10px;border-radius:8px;font-size:.75rem;font-weight:700"><?php echo count($documentos); ?></span>
-      </div>
-      <div class="cv-card-body">
-        <?php if(empty($documentos)): ?>
-        <p style="text-align:center;color:#94a3b8;padding:20px 0;font-size:.875rem">No hay documentos adjuntos</p>
-        <?php else: ?>
-        <?php foreach($documentos as $doc):
-          $ext=strtoupper(pathinfo($doc['nombre_original'],PATHINFO_EXTENSION));
-          [$bg,$clr]=$extColors[$ext]??['#f1f5f9','#64748b'];
-          $kb=round($doc['tamano_bytes']/1024,1);
-          
-          if (isset($doc['origen']) && $doc['origen'] === 'portal') {
-              $dlUrl = APP_URL . '/index.php?page=solicitudes/descargar&id=' . $doc['id'];
-          } else {
-              $dlUrl = APP_URL . '/index.php?page=casos/descargar&id=' . $doc['id'];
-          }
-        ?>
-        <div class="cv-file">
-          <div class="cv-file-ico" style="background:<?php echo $bg;?>;color:<?php echo $clr;?>"><?php echo $ext;?></div>
-          <div style="flex:1;min-width:0">
-            <div class="cv-file-name"><?php echo e($doc['nombre_original']);?></div>
-            <div class="cv-file-meta"><?php echo $kb;?> KB · <?php echo date('d/m/Y',strtotime($doc['created_at']));?><?php if(!empty($doc['descripcion'])): ?> · <?php echo e($doc['descripcion']);?><?php endif;?></div>
-          </div>
-          <a href="<?php echo $dlUrl;?>" target="_blank" class="cv-dl">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Descargar
-          </a>
-        </div>
-        <?php endforeach;?>
-        <?php endif;?>
-      </div>
-    </div>
+
   </div> <!-- Close Left Column -->
 
   <!-- ══ COL DERECHA ══ -->
@@ -647,115 +627,76 @@ document.addEventListener('DOMContentLoaded', () => {
 
     <?php if (RoleGuard::esAdmin()): ?>
     <!-- Financiero -->
-    <div class="cv-card">
+    <div class="cv-card" style="margin-bottom: 24px;">
       <div class="cv-card-header">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
           <div style="display:flex;align-items:center;gap:12px">
             <div class="cv-icon" style="background:#ecfdf5;color:#059669"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
             <h3 style="margin:0;font-size:1.125rem">Módulo Financiero</h3>
           </div>
-          <div style="display:flex;gap:8px">
-            <a href="<?php echo APP_URL; ?>/index.php?page=pagos/registrar&caso_id=<?php echo $id; ?>" class="cv-btn cv-btn-primary" style="width:auto;padding:7px 14px;font-size:.8125rem;text-decoration:none">+ Registrar Pago Cliente</a>
-          </div>
         </div>
-
-        <div style="display:flex;gap:16px;margin-bottom:24px">
-          <div class="cv-fin-card" style="background:#eff6ff"><span class="cv-fin-label">Valor del Caso</span><div class="cv-fin-val" style="color:#2563eb">&euro;<?php echo number_format($caso['honorarios_totales'],2,',','.'); ?></div></div>
-          <div class="cv-fin-card" style="background:#f0fdf4"><span class="cv-fin-label">Pagado</span><div class="cv-fin-val" style="color:#059669">€<?php echo number_format($totalPagado,2,',','.'); ?></div></div>
-          <div class="cv-fin-card" style="background:#fef2f2"><span class="cv-fin-label">Pendiente</span><div class="cv-fin-val" style="color:#dc2626">€<?php echo number_format($saldoPendiente,2,',','.'); ?></div></div>
+      </div>
+      <div class="cv-card-body" style="padding: 24px;">
+        <div style="display:flex;gap:16px;margin-bottom:24px; flex-wrap: wrap;">
+          <!-- VALOR DEL CASO -->
+          <div class="cv-fin-card" style="background:#eff6ff; flex:1; min-width:140px; padding: 16px;"><span class="cv-fin-label" style="text-transform:uppercase; font-size:0.75rem; color:#2563eb; font-weight:700;">Valor del Caso</span><div class="cv-fin-val" style="color:#2563eb; font-size:1.5rem; margin-top:8px;">&euro;<?php echo number_format($caso['honorarios_totales'],2,',','.'); ?></div></div>
+          <!-- PAGADO -->
+          <div class="cv-fin-card" style="background:#f0fdf4; flex:1; min-width:140px; padding: 16px;"><span class="cv-fin-label" style="text-transform:uppercase; font-size:0.75rem; color:#059669; font-weight:700;">Pagado</span><div class="cv-fin-val" style="color:#059669; font-size:1.5rem; margin-top:8px;">€<?php echo number_format($totalPagado,2,',','.'); ?></div></div>
+          <!-- PENDIENTE -->
+          <div class="cv-fin-card" style="background:#fef2f2; flex:1; min-width:140px; padding: 16px;"><span class="cv-fin-label" style="text-transform:uppercase; font-size:0.75rem; color:#dc2626; font-weight:700;">Pendiente</span><div class="cv-fin-val" style="color:#dc2626; font-size:1.5rem; margin-top:8px;">€<?php echo number_format($saldoPendiente,2,',','.'); ?></div></div>
+          <!-- TOTAL PAGADO ABOGADO -->
+          <div class="cv-fin-card" style="background:#ecfdf5; flex:1; min-width:140px; padding: 16px;"><span class="cv-fin-label" style="text-transform:uppercase; font-size:0.75rem; color:#10b981; font-weight:700;">Pagos al Abogado</span><div class="cv-fin-val" style="color:#10b981; font-size:1.5rem; margin-top:8px;">€<?php echo number_format($totalPagadoAbogado,2,',','.'); ?></div></div>
         </div>
-        <?php if($caso['honorarios_totales']>0): $pct=min(100,($totalPagado/$caso['honorarios_totales']*100)); ?>
-        <div style="background:#f1f5f9;border-radius:99px;height:6px;margin-top:14px;overflow:hidden">
-          <div style="width:<?php echo $pct; ?>%;height:100%;background:#10b981;border-radius:99px"></div>
-        </div>
-        <p style="font-size:.75rem;color:#94a3b8;margin:4px 0 0"><?php echo round($pct,1); ?>% pagado</p>
-        <?php endif; ?>
-        <?php if(!empty($pagos)): ?>
-        <div style="margin-top:16px;border-top:1px solid #f1f5f9;padding-top:14px">
-          <span class="cv-label">Pagos del Cliente</span>
-          <?php foreach($pagos as $p): ?>
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f8fafc">
-            <div>
-              <p style="font-size:.875rem;font-weight:600;color:#1a1a2e;margin:0"><?php echo e($p['concepto']); ?></p>
-              <?php if(!empty($p['notas'])): ?>
-              <p style="font-size:.8125rem;color:#475569;margin:2px 0 0;font-style:italic">"<?php echo e($p['notas']); ?>"</p>
-              <?php endif; ?>
-              <p style="font-size:.75rem;color:#94a3b8;margin:2px 0 0"><?php echo date('d/m/Y',strtotime($p['fecha_pago'])); ?> <span style="opacity:0.7"><?php echo date('H:i',strtotime($p['created_at'])); ?></span> · <?php echo ucfirst($p['metodo_pago']); ?></p>
-            </div>
-            <span style="font-weight:800;color:#059669;font-size:.9375rem">€<?php echo number_format($p['cantidad'],2,',','.'); ?></span>
-          </div>
-          <?php endforeach; ?>
-        </div>
-        <?php endif; ?>
-
-        <!-- Sección Abogado -->
-        <div style="margin-top: 24px; border-top: 2px dashed #e2e8f0; padding-top: 16px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                <span class="cv-label" style="font-size: 0.9375rem; color: #1e293b; margin: 0;">Pagos al Abogado</span>
-                <button class="cv-btn cv-btn-primary" style="width:auto;padding:4px 10px;font-size:.75rem" data-bs-toggle="modal" data-bs-target="#modalRegistrarPagoAbogado">+ Registrar Pago Abogado</button>
-            </div>
-            
-            <div style="display:flex; gap:16px; margin-bottom:12px;">
-                <div class="cv-fin-card" style="background:#f0fdf4; flex:1; padding:12px; min-height:0;"><span class="cv-fin-label" style="margin-bottom:2px;">Total Pagado</span><div class="cv-fin-val" style="color:#059669; font-size:1.125rem;">€<?php echo number_format($totalPagadoAbogado,2,',','.'); ?></div></div>
-            </div>
-            
-            <?php if(!empty($pagosAbogado)): ?>
-            <div style="margin-top:16px;">
-              <?php foreach($pagosAbogado as $pa): ?>
-              <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f8fafc">
-                <div>
-                  <p style="margin:0;font-weight:600;color:#1e293b;font-size:.875rem"><?php echo e($pa['concepto'] ?: 'Pago al Abogado'); ?></p>
-                  <p style="margin:2px 0 0;font-size:.75rem;color:#64748b"><?php echo date('d/m/Y',strtotime($pa['fecha_pago'])); ?> &middot; <?php echo e($pa['metodo_pago']); ?></p>
-                </div>
-                <span style="font-weight:800;color:#059669;font-size:.9375rem">€<?php echo number_format($pa['cantidad'],2,',','.'); ?></span>
-              </div>
-              <?php endforeach; ?>
-            </div>
-            <?php endif; ?>
+        
+        <div style="display:flex;gap:16px;">
+          <a href="<?php echo APP_URL; ?>/index.php?page=pagos/registrar&caso_id=<?php echo $id; ?>" class="cv-btn cv-btn-primary" style="flex:1; padding:12px; font-size:.9375rem; text-decoration:none; justify-content:center; text-align:center;">+ Registrar Pago Cliente</a>
+          <button class="cv-btn cv-btn-primary" style="flex:1; padding:12px; font-size:.9375rem; justify-content:center; background:#1d4ed8;" data-bs-toggle="modal" data-bs-target="#modalRegistrarPagoAbogado">+ Registrar Pago Abogado</button>
         </div>
       </div>
     </div>
 
-    <!-- Calendario de Pagos -->
+    <!-- Progreso de Pagos del Cliente -->
     <?php if(!empty($pagosProgramados)): ?>
-    <div class="cv-card">
-      <div class="cv-card-header">
-        <div class="cv-icon" style="background:#fff7ed;color:#d97706">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        </div>
-        <h3>Calendario de Pagos</h3>
-        <?php
-        $tipoPagoLabel = match($caso['tipo_pago_cliente'] ?? '') {
-            'pago_unico'     => 'Pago Único',
-            'cuotas'         => 'Cuotas (' . ucfirst($caso['frecuencia_pago'] ?? 'mensual') . ')',
-            'fechas_custom'  => 'Fechas Personalizadas',
-            default          => $caso['plan_pago'] ?? 'Sin definir'
-        };
-        ?>
-        <span style="margin-left:auto;background:#fff7ed;color:#d97706;padding:3px 10px;border-radius:8px;font-size:.6875rem;font-weight:700"><?php echo $tipoPagoLabel; ?></span>
-      </div>
-      <div class="cv-card-body" style="padding:12px 22px">
-        <?php foreach($pagosProgramados as $pp):
-            $estColor = match($pp['estado']) {
-                'pagado'  => ['#059669','#f0fdf4','Pagado'],
-                'vencido' => ['#dc2626','#fef2f2','Vencido'],
-                default   => ['#d97706','#fffbeb','Pendiente'],
-            };
-            $esHoy = $pp['fecha_vencimiento'] === date('Y-m-d');
-        ?>
-        <div style="display:flex;align-items:center;gap:14px;padding:10px 0;border-bottom:1px solid #f8fafc;<?php echo $esHoy ? 'background:#fffef5;margin:0 -22px;padding:10px 22px;border-radius:8px' : ''; ?>">
-          <div style="width:44px;height:44px;border-radius:12px;background:<?php echo $estColor[1]; ?>;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0">
-            <span style="font-size:.625rem;font-weight:700;color:<?php echo $estColor[0]; ?>;text-transform:uppercase;line-height:1"><?php echo strtoupper(strftime('%b', strtotime($pp['fecha_vencimiento']))); ?></span>
-            <span style="font-size:1rem;font-weight:800;color:<?php echo $estColor[0]; ?>;line-height:1.1"><?php echo date('d', strtotime($pp['fecha_vencimiento'])); ?></span>
+    <div class="cv-card mb-24" style="margin-bottom: 24px;">
+      <div class="cv-card-body" style="padding: 24px 32px; overflow-x: auto;">
+        <h4 style="margin: 0 0 24px 0; font-size: 1rem; color: #1e293b; display:flex; align-items:center; gap:8px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Estado de Pagos del Cliente
+        </h4>
+        <div style="display:flex; justify-content:space-between; position:relative; min-width: <?php echo max(100, count($pagosProgramados)*110); ?>px; padding-top:10px;">
+          <!-- Línea conectora base -->
+          <div style="position:absolute; top:22px; left:0; right:0; height:3px; background:#e2e8f0; z-index:1;"></div>
+          
+          <?php foreach ($pagosProgramados as $index => $pp): 
+              $isPagado = $pp['estado'] === 'pagado';
+              $isPendiente = $pp['estado'] === 'pendiente';
+              $isVencido = $isPendiente && strtotime($pp['fecha_vencimiento']) < time();
+              
+              if ($isPagado) {
+                  $bgColor = '#10b981'; // green
+                  $borderColor = '#10b981';
+                  $textColor = '#10b981';
+              } elseif ($isVencido) {
+                  $bgColor = '#fef2f2';
+                  $borderColor = '#ef4444'; // red
+                  $textColor = '#ef4444';
+              } else {
+                  $bgColor = '#fffbeb';
+                  $borderColor = '#f59e0b'; // yellow
+                  $textColor = '#f59e0b';
+              }
+          ?>
+          <div style="position:relative; z-index:3; display:flex; flex-direction:column; align-items:center; width: 110px;">
+            <div style="width:28px; height:28px; border-radius:50%; background:<?php echo $bgColor; ?>; border:3px solid <?php echo $borderColor; ?>; display:flex; align-items:center; justify-content:center; box-shadow:0 0 0 4px #ffffff; z-index:2;">
+                <?php if($isPagado): ?>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                <?php endif; ?>
+            </div>
+            <span style="margin-top:12px; font-size:0.75rem; font-weight:700; color:<?php echo $textColor; ?>; text-transform:uppercase; text-align:center; line-height:1.2;"><?php echo e($pp['concepto']); ?></span>
+            <span style="margin-top:4px; font-size:0.75rem; color:#64748b; font-weight:600;">€<?php echo number_format($pp['monto'], 2, ',', '.'); ?></span>
           </div>
-          <div style="flex:1;min-width:0">
-            <div style="font-size:.875rem;font-weight:600;color:#1a1a2e"><?php echo e($pp['concepto']); ?><?php if($esHoy): ?> <span style="font-size:.625rem;background:#fef3c7;color:#92400e;padding:1px 6px;border-radius:6px;font-weight:700">HOY</span><?php endif; ?></div>
-            <div style="font-size:.75rem;color:#94a3b8"><?php echo date('d/m/Y', strtotime($pp['fecha_vencimiento'])); ?></div>
-          </div>
-          <span style="font-weight:800;font-size:.9375rem;color:<?php echo $estColor[0]; ?>">€<?php echo number_format($pp['monto'],2,',','.'); ?></span>
-          <span style="padding:3px 10px;border-radius:8px;font-size:.6875rem;font-weight:700;background:<?php echo $estColor[1]; ?>;color:<?php echo $estColor[0]; ?>"><?php echo $estColor[2]; ?></span>
+          <?php endforeach; ?>
         </div>
-        <?php endforeach; ?>
       </div>
     </div>
     <?php endif; ?>
@@ -907,7 +848,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     <?php $tpc = $caso['tipo_pago_cliente'] ?? 'pago_unico'; ?>
                     <div class="col-sm-6">
                         <label class="form-label">Tipo de Pago del Cliente</label>
-                        <select name="tipo_pago_cliente" class="form-select">
+                        <select name="tipo_pago_cliente" id="tipo_pago_cliente_select" class="form-select" onchange="
+                            document.getElementById('wrapPagoUnico').style.display = this.value === 'pago_unico' ? 'block' : 'none';
+                            document.getElementById('wrapCuotas').style.display = this.value === 'cuotas' ? 'block' : 'none';
+                            document.getElementById('wrapCustom').style.display = this.value === 'fechas_custom' ? 'block' : 'none';
+                        ">
                             <option value="pago_unico" <?php echo $tpc==='pago_unico'?'selected':''; ?>>Pago Único</option>
                             <option value="cuotas" <?php echo $tpc==='cuotas'?'selected':''; ?>>Pago por Cuotas</option>
                             <option value="fechas_custom" <?php echo $tpc==='fechas_custom'?'selected':''; ?>>Fechas Personalizadas</option>
