@@ -178,7 +178,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['crear_nota_feed'])) {
                 }
             }
 
-            if (!isset($_SESSION['flash']['error'])) {
+            if (!isset($_SESSION['flash']) || $_SESSION['flash']['tipo'] !== 'error') {
                 setFlash('exito', 'Nota añadida correctamente');
             }
         } else {
@@ -227,7 +227,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_nota_accion'])
             }
         }
         
-        if (!isset($_SESSION['flash']['error'])) {
+        if (!isset($_SESSION['flash']) || $_SESSION['flash']['tipo'] !== 'error') {
             setFlash('exito', 'Nota actualizada correctamente');
         }
     } else {
