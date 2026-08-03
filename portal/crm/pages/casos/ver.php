@@ -560,56 +560,146 @@ document.addEventListener('DOMContentLoaded', () => {
 
         <!-- Feed de Notas -->
         <div>
+            <style>
+                .feed-nota-card {
+                    border-radius: 16px;
+                    padding: 20px;
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    position: relative;
+                    overflow: hidden;
+                }
+                .feed-nota-card:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.08);
+                }
+                .feed-nota-interna {
+                    background: linear-gradient(145deg, #fffafa, #fff1f2);
+                    border: 1px solid #ffe4e6;
+                }
+                .feed-nota-publica {
+                    background: #ffffff;
+                    border: 1px solid #f1f5f9;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+                }
+                .feed-nota-avatar {
+                    width: 38px;
+                    height: 38px;
+                    border-radius: 12px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-weight: 800;
+                    font-size: 1rem;
+                    color: #fff;
+                    box-shadow: 0 4px 10px -2px rgba(0,0,0,0.1);
+                }
+                .avatar-interna { background: linear-gradient(135deg, #f43f5e, #e11d48); }
+                .avatar-publica { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+                
+                .feed-nota-tag {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 4px;
+                    padding: 4px 10px;
+                    border-radius: 20px;
+                    font-size: 0.6875rem;
+                    font-weight: 700;
+                    letter-spacing: 0.05em;
+                }
+                .tag-interna { background: #ffe4e6; color: #e11d48; }
+                .tag-publica { background: #dbeafe; color: #2563eb; }
+                .tag-dot { width: 6px; height: 6px; border-radius: 50%; }
+                .dot-interna { background: #e11d48; }
+                .dot-publica { background: #2563eb; }
+                
+                .feed-nota-actions {
+                    opacity: 0;
+                    transition: opacity 0.2s;
+                }
+                .feed-nota-card:hover .feed-nota-actions {
+                    opacity: 1;
+                }
+                .doc-attachment {
+                    transition: all 0.2s;
+                }
+                .doc-attachment:hover {
+                    background: #f1f5f9 !important;
+                    border-color: #cbd5e1 !important;
+                }
+            </style>
+
             <?php if(empty($notasCaso)): ?>
-            <p style="text-align:center; color:#94a3b8; font-size:.875rem; padding: 20px 0;">No hay notas en este caso.</p>
+            <div style="text-align:center; padding: 40px 20px; background: #f8fafc; border-radius: 16px; border: 1px dashed #cbd5e1;">
+                <div style="width: 48px; height: 48px; background: #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                </div>
+                <h4 style="margin: 0 0 4px; color: #334155; font-size: 1rem;">No hay notas aún</h4>
+                <p style="margin: 0; color: #64748b; font-size: 0.875rem;">Las notas que agregues aparecerán aquí.</p>
+            </div>
             <?php else: ?>
-                <div style="display:flex; flex-direction:column; gap: 16px;">
+                <div style="display:flex; flex-direction:column; gap: 20px;">
                 <?php foreach($notasCaso as $nota): 
                     $isInterna = $nota['tipo'] === 'interna';
-                    $bgClass = $isInterna ? 'background: #fef2f2; border: 1px solid #fecaca;' : 'background: #ffffff; border: 1px solid #e2e8f0;';
+                    $cardClass = $isInterna ? 'feed-nota-interna' : 'feed-nota-publica';
+                    $avatarClass = $isInterna ? 'avatar-interna' : 'avatar-publica';
+                    $tagClass = $isInterna ? 'tag-interna' : 'tag-publica';
+                    $dotClass = $isInterna ? 'dot-interna' : 'dot-publica';
                 ?>
-                    <div style="<?php echo $bgClass; ?> border-radius: 12px; padding: 16px;">
-                        <div style="display:flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-                            <div style="display:flex; align-items:center; gap:8px;">
-                                <div style="width:32px; height:32px; border-radius:50%; background:#2563eb; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.75rem;">
+                    <div class="feed-nota-card <?php echo $cardClass; ?>">
+                        <div style="display:flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                            <div style="display:flex; align-items:center; gap: 12px;">
+                                <div class="feed-nota-avatar <?php echo $avatarClass; ?>">
                                     <?php echo strtoupper(substr($nota['autor_nombre'] ?? 'S', 0, 1)); ?>
                                 </div>
                                 <div>
-                                    <div style="font-weight: 700; font-size: 0.9375rem; color: #1e293b;"><?php echo e($nota['titulo'] ?? 'Nota sin título'); ?></div>
-                                    <div style="font-size: 0.75rem; color: #64748b;">Por <?php echo e(($nota['autor_nombre'] ?? 'Sistema') . ' ' . ($nota['autor_apellidos'] ?? '')); ?> el <?php echo date('d/m/Y H:i', strtotime($nota['created_at'])); ?></div>
+                                    <div style="display:flex; align-items:center; gap: 8px;">
+                                        <h4 style="margin:0; font-weight: 700; font-size: 1rem; color: #0f172a; letter-spacing: -0.01em;">
+                                            <?php echo e($nota['titulo'] ?? 'Nota sin título'); ?>
+                                        </h4>
+                                        <span class="feed-nota-tag <?php echo $tagClass; ?>">
+                                            <span class="tag-dot <?php echo $dotClass; ?>"></span>
+                                            <?php echo $isInterna ? 'INTERNA' : 'PÚBLICA'; ?>
+                                        </span>
+                                    </div>
+                                    <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">
+                                        Por <strong style="color: #475569;"><?php echo e(($nota['autor_nombre'] ?? 'Sistema') . ' ' . ($nota['autor_apellidos'] ?? '')); ?></strong> 
+                                        &bull; <?php echo date('d M, Y \a \l\a\s H:i', strtotime($nota['created_at'])); ?>
+                                    </div>
                                 </div>
                             </div>
-                            <div style="display:flex; align-items:center; gap: 8px;">
+                            
+                            <div class="feed-nota-actions" style="display:flex; align-items:center; gap: 8px;">
                                 <?php if($nota['created_by'] === ($_SESSION['usuario_id']??0) || RoleGuard::esAdmin()): ?>
-                                <button type="button" class="btn btn-sm btn-outline-secondary btn-editar-nota" style="padding: 2px 6px; font-size: 0.75rem;" data-id="<?php echo $nota['id']; ?>" data-titulo="<?php echo e($nota['titulo']); ?>" data-contenido="<?php echo e($nota['contenido']); ?>" data-tipo="<?php echo $nota['tipo']; ?>">Editar</button>
-                                <form method="POST" style="margin:0; display:inline;" onsubmit="return confirm('¿Eliminar esta nota?');">
+                                <button type="button" class="btn btn-sm btn-editar-nota" style="background:#f1f5f9; color:#475569; border:none; border-radius:6px; padding: 6px; cursor:pointer; transition:background 0.2s;" data-id="<?php echo $nota['id']; ?>" data-titulo="<?php echo e($nota['titulo']); ?>" data-contenido="<?php echo e($nota['contenido']); ?>" data-tipo="<?php echo $nota['tipo']; ?>" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                </button>
+                                <form method="POST" style="margin:0; display:inline;" onsubmit="return confirm('¿Eliminar esta nota de forma permanente?');">
                                     <?php echo CSRF::campo(); ?>
                                     <input type="hidden" name="eliminar_nota" value="<?php echo $nota['id']; ?>">
-                                    <button type="submit" class="btn btn-sm btn-outline-danger" style="padding: 2px 6px; font-size: 0.75rem;">X</button>
+                                    <button type="submit" style="background:#fef2f2; color:#ef4444; border:none; border-radius:6px; padding: 6px; cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='#fef2f2'">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                                    </button>
                                 </form>
-                                <?php endif; ?>
-                                <?php if($isInterna): ?>
-                                    <span style="background:#fee2e2; color:#ef4444; padding:2px 8px; border-radius:12px; font-size:0.6875rem; font-weight:700;">INTERNA</span>
-                                <?php else: ?>
-                                    <span style="background:#dbeafe; color:#3b82f6; padding:2px 8px; border-radius:12px; font-size:0.6875rem; font-weight:700;">PÚBLICA</span>
                                 <?php endif; ?>
                             </div>
                         </div>
                         
-                        <div style="font-size: 0.875rem; color: #334155; line-height: 1.5; white-space: pre-wrap;"><?php echo e($nota['contenido']); ?></div>
+                        <div style="font-size: 0.9375rem; color: #334155; line-height: 1.6; white-space: pre-wrap; padding-left: 50px;"><?php echo e($nota['contenido']); ?></div>
                         
                         <?php if(!empty($nota['doc_id'])): ?>
-                        <div style="margin-top: 12px; padding: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; display:flex; align-items:center; justify-content: space-between;">
-                            <div style="display:flex; align-items:center; gap: 8px;">
-                                <div style="background:#e8f0fe; color:#2e6edd; padding:6px; border-radius:6px;">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                        <div class="doc-attachment" style="margin-top: 16px; margin-left: 50px; padding: 12px 16px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; display:flex; align-items:center; justify-content: space-between; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
+                            <div style="display:flex; align-items:center; gap: 12px;">
+                                <div style="background: linear-gradient(135deg, #eff6ff, #dbeafe); color: #2563eb; padding: 8px; border-radius: 8px;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
                                 </div>
                                 <div>
-                                    <div style="font-size: 0.8125rem; font-weight: 600; color: #1e293b;"><?php echo e($nota['doc_nombre']); ?></div>
-                                    <div style="font-size: 0.6875rem; color: #64748b;"><?php echo round($nota['doc_tamano']/1024, 1); ?> KB</div>
+                                    <div style="font-size: 0.875rem; font-weight: 600; color: #1e293b;"><?php echo e($nota['doc_nombre']); ?></div>
+                                    <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;"><?php echo round($nota['doc_tamano']/1024, 1); ?> KB &bull; Adjunto</div>
                                 </div>
                             </div>
-                            <a href="<?php echo APP_URL; ?>/index.php?page=casos/descargar&id=<?php echo $nota['doc_id']; ?>" target="_blank" class="cv-btn cv-btn-ghost" style="padding: 4px 8px; font-size: 0.75rem; width: auto; color: #2e6edd; background: #e8f0fe;">Descargar</a>
+                            <a href="<?php echo APP_URL; ?>/index.php?page=casos/descargar&id=<?php echo $nota['doc_id']; ?>" target="_blank" style="padding: 6px 12px; font-size: 0.8125rem; font-weight: 600; color: #2563eb; background: #eff6ff; border-radius: 8px; text-decoration: none; transition: background 0.2s;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#eff6ff'">
+                                Descargar
+                            </a>
                         </div>
                         <?php endif; ?>
                     </div>
