@@ -1032,11 +1032,6 @@ document.addEventListener('DOMContentLoaded', () => {
           ?>
           <div style="position:relative; z-index:3; display:flex; flex-direction:column; align-items:center; flex:1; min-width:52px;">
 
-            <?php if ($esActivo): ?>
-            <!-- Flechita indicadora de cuota actual -->
-            <div style="position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:.65rem;color:#2563eb;font-weight:800;white-space:nowrap">▼ Aquí</div>
-            <?php endif; ?>
-
             <!-- Círculo -->
             <div style="width:24px;height:24px;border-radius:50%;background:<?php echo $bg; ?>;border:3px solid <?php echo $bord; ?>;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 4px #fff;z-index:2;position:relative;<?php echo $esActivo?'box-shadow:0 0 0 4px #dbeafe, 0 0 0 2px #2563eb;':'' ?>">
               <?php if ($esPagado): ?>
