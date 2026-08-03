@@ -96,7 +96,7 @@ $stepsOrden = array_keys($estadoCaso);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <?php echo portalPwaHead(); ?>
     <title><?php echo e($caso['referencia']); ?> — Mi Portal</title>
-    <link rel="icon" type="image/png" href="crm/assets/images/logo.png?v=2">
+    <link rel="icon" type="image/png" href="../assets/images/logo.png?v=2">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -192,7 +192,7 @@ $stepsOrden = array_keys($estadoCaso);
 
 <div class="topbar">
     <a href="<?php echo portalUrl(); ?>/index.php?page=dashboard" class="topbar-logo">
-        <img src="crm/assets/images/logo.png?v=2" alt="Logo">
+        <img src="../assets/images/logo.png?v=2" alt="Logo">
         <span>Portal del Cliente</span>
     </a>
     <div class="topbar-right">
@@ -387,17 +387,32 @@ $stepsOrden = array_keys($estadoCaso);
     </div>
     <?php endif; ?>
 
-    <!-- Notas Públicas del Caso -->
-    <?php if(!empty($notasPublicas)): ?>
+    <!-- Notas Públicas del Caso y Documentos -->
+    <?php
+    $feedItems = [];
+    foreach($notasPublicas as $n) {
+        $feedItems[] = ['type'=>'nota', 'date'=>strtotime($n['created_at']), 'data'=>$n];
+    }
+    foreach($todosDocumentos as $d) {
+        $feedItems[] = ['type'=>'doc', 'date'=>strtotime($d['created_at']), 'data'=>$d];
+    }
+    usort($feedItems, function($a, $b) {
+        return $b['date'] <=> $a['date'];
+    });
+    ?>
+    <?php if(!empty($feedItems)): ?>
     <div class="card">
         <div class="card-hdr">
             <div class="ico" style="background:#f3e8ff;color:#9333ea"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
-            <h2>Novedades del Caso</h2>
-            <span class="cnt" style="background:#f3e8ff;color:#9333ea"><?php echo count($notasPublicas); ?></span>
+            <h2>Novedades y Documentos</h2>
+            <span class="cnt" style="background:#f3e8ff;color:#9333ea"><?php echo count($feedItems); ?></span>
+        </div>
         </div>
         <div class="card-body">
-            <?php foreach($notasPublicas as $np):
-                $autor = trim(($np['autor_nombre'] ?? '') . ' ' . ($np['autor_apellidos'] ?? '')) ?: 'Sistema';
+            <?php foreach($feedItems as $item): 
+                if ($item['type'] === 'nota'):
+                    $np = $item['data'];
+                    $autor = trim(($np['autor_nombre'] ?? '') . ' ' . ($np['autor_apellidos'] ?? '')) ?: 'Sistema';
             ?>
             <div style="padding:14px 0;border-bottom:1px solid #f8fafc;display:flex;gap:12px;align-items:flex-start">
                 <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#9333ea,#7c3aed);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.875rem;flex-shrink:0">
@@ -405,11 +420,39 @@ $stepsOrden = array_keys($estadoCaso);
                 </div>
                 <div style="flex:1;min-width:0">
                     <div style="font-size:.9375rem;font-weight:700;color:#0f172a"><?php echo e($np['titulo'] ?? 'Nota'); ?></div>
-                    <div style="font-size:.75rem;color:#64748b;margin-bottom:6px">Por <strong><?php echo e($autor); ?></strong> &bull; <?php echo date('d M Y, H:i', strtotime($np['created_at'])); ?></div>
+                    <div style="font-size:.75rem;color:#64748b;margin-bottom:6px">Por <strong><?php echo e($autor); ?></strong> &bull; <?php echo date('d M Y, H:i', $item['date']); ?></div>
                     <div style="font-size:.875rem;color:#374151;line-height:1.6;white-space:pre-wrap"><?php echo e($np['contenido']); ?></div>
                 </div>
             </div>
-            <?php endforeach; ?>
+            <?php else: 
+                $doc = $item['data'];
+                $extColors=['PDF'=>['#fef2f2','#dc2626'],'DOC'=>['#e8f0fe','#2e6edd'],'DOCX'=>['#e8f0fe','#2e6edd'],'XLS'=>['#ecfdf5','#059669'],'XLSX'=>['#ecfdf5','#059669'],'JPG'=>['#fff7ed','#ea580c'],'PNG'=>['#fff7ed','#ea580c'],'ZIP'=>['#f5f3ff','#7c3aed']];
+                $fname = $doc['nombre_original'] ?? $doc['nombre_archivo'] ?? 'Archivo';
+                $ext = strtoupper(pathinfo($fname, PATHINFO_EXTENSION));
+                [$bg,$clr] = $extColors[$ext] ?? ['#f1f5f9','#64748b'];
+                $size = isset($doc['tamano_bytes']) ? round($doc['tamano_bytes']/1024,1).' KB' : '';
+                
+                if (isset($doc['caso_id'])) {
+                    $url = portalUrl() . '/index.php?page=descargar-doc&doc=' . (int)$doc['id'];
+                } elseif (isset($doc['solicitud_id'])) {
+                    $url = $crmUrl . '/index.php?page=solicitudes/descargar&id=' . (int)$doc['id'];
+                } else {
+                    $url = '#';
+                }
+            ?>
+            <div style="padding:14px 0;border-bottom:1px solid #f8fafc;display:flex;gap:12px;align-items:center">
+                <div class="file-ext" style="background:<?php echo $bg;?>;color:<?php echo $clr;?>;width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.75rem;flex-shrink:0"><?php echo $ext ?: 'DOC';?></div>
+                <div style="flex:1;min-width:0">
+                    <div style="font-size:.9375rem;font-weight:700;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><?php echo e($fname); ?></div>
+                    <div style="font-size:.75rem;color:#64748b;margin-bottom:2px">Documento subido &bull; <?php echo date('d M Y, H:i', $item['date']); ?></div>
+                </div>
+                <?php if($url !== '#'): ?>
+                <a href="<?php echo $url;?>" target="_blank" style="padding:6px 12px;border-radius:8px;background:#e8f0fe;color:#2e6edd;font-weight:600;font-size:.8125rem;display:inline-flex;align-items:center;gap:6px">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                </a>
+                <?php endif;?>
+            </div>
+            <?php endif; endforeach; ?>
         </div>
     </div>
     <?php endif; ?>
@@ -436,76 +479,7 @@ $stepsOrden = array_keys($estadoCaso);
     </div>
     <?php endif; ?>
 
-    <!-- Documentos -->
-    <div class="card">
-        <div class="card-hdr">
-            <div class="ico" style="background:#f5f3ff;color:#7c3aed"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></div>
-            <h2>Documentos</h2>
-            <span class="cnt" style="background:#f5f3ff;color:#7c3aed"><?php echo count($todosDocumentos); ?></span>
-        </div>
-        <div class="card-body">
-            <?php if(empty($todosDocumentos)): ?>
-            <p class="empty-msg">No hay documentos adjuntos en este caso</p>
-            <?php else: ?>
-            <?php
-            $extColors=['PDF'=>['#fef2f2','#dc2626'],'DOC'=>['#e8f0fe','#2e6edd'],'DOCX'=>['#e8f0fe','#2e6edd'],'XLS'=>['#ecfdf5','#059669'],'XLSX'=>['#ecfdf5','#059669'],'JPG'=>['#fff7ed','#ea580c'],'PNG'=>['#fff7ed','#ea580c'],'ZIP'=>['#f5f3ff','#7c3aed']];
-            foreach($todosDocumentos as $doc):
-                $fname = $doc['nombre_original'] ?? $doc['nombre_archivo'] ?? 'Archivo';
-                $ext = strtoupper(pathinfo($fname, PATHINFO_EXTENSION));
-                [$bg,$clr] = $extColors[$ext] ?? ['#f1f5f9','#64748b'];
-                $size = isset($doc['tamano_bytes']) ? round($doc['tamano_bytes']/1024,1).' KB' : '';
-                $date = date('d/m/Y', strtotime($doc['created_at']));
-                // Usar proxy autenticado según el tipo de documento
-                if (isset($doc['caso_id'])) {
-                    // Documento de caso → proxy CRM (requiere sesión CRM — para el portal usamos el proxy del portal)
-                    $url = portalUrl() . '/index.php?page=descargar-doc&doc=' . (int)$doc['id'];
-                } elseif (isset($doc['solicitud_id'])) {
-                    // Adjunto de solicitud → proxy CRM de solicitudes
-                    $url = $crmUrl . '/index.php?page=solicitudes/descargar&id=' . (int)$doc['id'];
-                } else {
-                    $url = '#';
-                }
-            ?>
-            <div class="file-row">
-                <div class="file-ext" style="background:<?php echo $bg;?>;color:<?php echo $clr;?>"><?php echo $ext ?: 'DOC';?></div>
-                <div style="flex:1;min-width:0">
-                    <div class="file-name"><?php echo e($fname);?></div>
-                    <div class="file-meta"><?php echo $size;?> &middot; <?php echo $date;?></div>
-                </div>
-                <?php if($url !== '#'): ?>
-                <a href="<?php echo $url;?>" target="_blank" class="file-dl">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                    Descargar
-                </a>
-                <?php endif;?>
-            </div>
-            <?php endforeach;?>
-            <?php endif;?>
-        </div>
-    </div>
 
-    <!-- Historial -->
-    <div class="card">
-        <div class="card-hdr">
-            <div class="ico" style="background:#fff7ed;color:#d97706"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-            <h2>Historial de Actividad</h2>
-        </div>
-        <div class="card-body" style="max-height:350px;overflow-y:auto">
-            <?php if(empty($historial)): ?>
-            <p class="empty-msg">Sin actividad registrada</p>
-            <?php else: ?>
-            <?php foreach($historial as $h): ?>
-            <div class="tl-item">
-                <div class="tl-dot"></div>
-                <div>
-                    <div class="tl-txt"><?php echo e($h['detalles']);?></div>
-                    <div class="tl-date"><?php echo e($h['usuario_nombre'] ?? 'Sistema');?> &middot; <?php echo date('d/m/Y H:i', strtotime($h['created_at']));?></div>
-                </div>
-            </div>
-            <?php endforeach;?>
-            <?php endif;?>
-        </div>
-    </div>
 
 </div>
 

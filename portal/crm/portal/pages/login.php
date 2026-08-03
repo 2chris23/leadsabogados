@@ -128,7 +128,7 @@ $crmUrl = APP_URL . '/portal/crm';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <?php echo portalPwaHead(); ?>
     <title>Portal del Cliente — <?php echo e($nombreDespacho); ?></title>
-    <link rel="icon" type="image/png" href="crm/assets/images/logo.png?v=<?php echo time(); ?>">
+    <link rel="icon" type="image/png" href="../assets/images/logo.png?v=<?php echo time(); ?>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
@@ -451,10 +451,10 @@ $crmUrl = APP_URL . '/portal/crm';
 <div class="portal-login">
     <!-- Visual -->
     <div class="portal-visual">
-        <img src="crm/assets/images/steptodown.com552020.jpg?v=<?php echo time(); ?>" alt="Justicia">
+        <img src="../assets/images/steptodown.com552020.jpg?v=<?php echo time(); ?>" alt="Justicia">
         <div class="portal-visual-content">
             <div class="portal-visual-logo">
-                <img src="crm/assets/images/logo.png?v=<?php echo time(); ?>" alt="Logo">
+                <img src="../assets/images/logo.png?v=<?php echo time(); ?>" alt="Logo">
                 <span><?php echo e($nombreDespacho); ?></span>
             </div>
 

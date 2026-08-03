@@ -153,22 +153,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
                 $uploadsDir = CRM_ROOT . '/public/uploads/solicitudes/';
                 if (!is_dir($uploadsDir)) @mkdir($uploadsDir, 0755, true);
 
-                $allowedExts = ['jpg','jpeg','png','gif','webp','pdf','doc','docx','xls','xlsx','zip','rar','txt'];
-                $blockedExts = ['php','php3','php4','php5','phtml','js','sh','exe','bat','cmd','msi','vbs','py','rb'];
-                $maxFileSize = 10 * 1024 * 1024;
+                $blockedExts = ['php','php3','php4','php5','phtml','js','sh','exe','bat','cmd','msi','vbs','py','rb','cgi','pl'];
+                $maxFileSize = 10 * 1024 * 1024; // 10 MB
 
                 if (!empty($_FILES['archivos']['name'][0])) {
                     $files = $_FILES['archivos'];
                     $count = count($files['name']);
                     for ($i = 0; $i < $count; $i++) {
+                        if ($files['error'][$i] === UPLOAD_ERR_INI_SIZE || $files['size'][$i] > $maxFileSize) {
+                            throw new Exception('Uno de los archivos seleccionados ("' . htmlspecialchars($files['name'][$i]) . '") pesa demasiado. El límite es de 10MB.');
+                        }
                         if ($files['error'][$i] !== UPLOAD_ERR_OK) continue;
-                        if ($files['size'][$i] > $maxFileSize) continue;
 
                         $nombreOriginal = basename($files['name'][$i]);
                         $ext = strtolower(pathinfo($nombreOriginal, PATHINFO_EXTENSION));
 
-                        if (in_array($ext, $blockedExts)) continue;
-                        if (!in_array($ext, $allowedExts)) continue;
+                        if (in_array($ext, $blockedExts)) {
+                            throw new Exception('El tipo de archivo ".' . $ext . '" no está permitido por motivos de seguridad.');
+                        }
 
                         $realMime = $files['type'][$i];
                         if (function_exists('finfo_open')) {
@@ -214,7 +216,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
 
             } catch (Exception $ex) {
                 if ($pdo->inTransaction()) $pdo->rollBack();
-                $formError = 'Error al procesar su solicitud. Intente de nuevo.';
+                $formError = $ex->getMessage() ?: 'Error al procesar su solicitud. Intente de nuevo.';
             }
         }
     }

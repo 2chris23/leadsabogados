@@ -53,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$error && !$exito) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nueva Contraseña — <?php echo e($nombreDespacho); ?></title>
-    <link rel="icon" type="image/png" href="crm/assets/images/logo.png?v=2">
+    <link rel="icon" type="image/png" href="../assets/images/logo.png?v=2">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }

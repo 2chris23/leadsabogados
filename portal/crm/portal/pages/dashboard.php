@@ -68,7 +68,7 @@ $tiposConsulta = ['Civil','Penal','Laboral','Mercantil','Inmobiliario','Familia'
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <?php echo portalPwaHead(); ?>
     <title>Mi Portal — <?php echo e($nombre); ?></title>
-    <link rel="icon" type="image/png" href="crm/assets/images/logo.png?v=2">
+    <link rel="icon" type="image/png" href="../assets/images/logo.png?v=2">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -171,7 +171,7 @@ $tiposConsulta = ['Civil','Penal','Laboral','Mercantil','Inmobiliario','Familia'
 <!-- Topbar -->
 <div class="topbar">
     <a href="index.php?page=dashboard" class="topbar-logo">
-        <img src="crm/assets/images/logo.png?v=2" alt="Logo">
+        <img src="../assets/images/logo.png?v=2" alt="Logo">
         <span>Portal del Cliente</span>
     </a>
     <div class="topbar-right">

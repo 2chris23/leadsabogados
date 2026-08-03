@@ -1,0 +1,70 @@
+.crm-abogados-form-wrapper {
+    background: #fff;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    font-family: inherit;
+}
+
+.crm-abogados-form-wrapper h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.crm-form-group {
+    margin-bottom: 16px;
+}
+
+.crm-form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.crm-form-group input[type="text"],
+.crm-form-group input[type="email"],
+.crm-form-group input[type="tel"],
+.crm-form-group select,
+.crm-form-group textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    background: #f8fafc;
+    transition: border-color 0.2s;
+}
+
+.crm-form-group input:focus,
+.crm-form-group select:focus,
+.crm-form-group textarea:focus {
+    outline: none;
+    border-color: #2e6edd;
+    background: #fff;
+}
+
+.crm-abogados-submit {
+    display: inline-block;
+    width: 100%;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.crm-abogados-submit:hover {
+    opacity: 0.9;
+}
+
+.crm-abogados-submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}

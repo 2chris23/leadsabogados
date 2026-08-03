@@ -18,6 +18,7 @@ function portalPwaHead() {
 }
 
 function portalPwaScript() {
+    $portalBase = portalUrl();
     return '
 <script>
 if ("serviceWorker" in navigator) {

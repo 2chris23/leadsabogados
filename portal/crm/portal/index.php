@@ -5,7 +5,7 @@
  */
 
 define('PORTAL_ROOT', __DIR__);
-define('CRM_ROOT', __DIR__ . '/crm');
+define('CRM_ROOT', dirname(__DIR__));
 
 require_once CRM_ROOT . '/includes/config.php';
 require_once CRM_ROOT . '/includes/Database.php';
