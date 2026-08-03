@@ -141,9 +141,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_caso'])) {
         $db->update('casos', [
             'tipo_pago_cliente' => $_POST['tipo_pago_cliente'] ?? 'pago_unico',
             'frecuencia_pago'   => $_POST['frecuencia_pago'] ?? 'mensual',
-            'honorarios_abogado'=> (float)($_POST['honorarios_abogado'] ?? 0),
-            'bono_abogado'      => (float)($_POST['bono_abogado'] ?? 0),
-            'tipo_pago_abogado' => $_POST['tipo_pago_abogado'] ?? 'mensual_sin_predeterminar',
         ], 'id = ?', [$id]);
     } catch (Throwable $e) {
         // Si las columnas no existen, ignorar silenciosamente
@@ -1307,25 +1304,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         <label class="form-label">Valor Total a Cobrar al Cliente (&euro;)</label>
                         <input type="number" name="honorarios_totales" class="form-control"
                                step="0.01" min="0" value="<?php echo $caso['honorarios_totales']; ?>" required>
-                    </div>
-                    
-                    <div class="col-sm-4">
-                        <label class="form-label">Honorario Abogado (&euro;)</label>
-                        <input type="number" name="honorarios_abogado" class="form-control" step="0.01" min="0" value="<?php echo $caso['honorarios_abogado'] ?? 0; ?>">
-                    </div>
-                    <div class="col-sm-4">
-                        <label class="form-label">Bono Abogado (&euro;)</label>
-                        <input type="number" name="bono_abogado" class="form-control" step="0.01" min="0" value="<?php echo $caso['bono_abogado'] ?? 0; ?>">
-                    </div>
-                    <div class="col-sm-4">
-                        <label class="form-label">Tipo Pago Abogado</label>
-                        <select name="tipo_pago_abogado" class="form-select">
-                            <?php $tpa = $caso['tipo_pago_abogado'] ?? 'mensual_sin_predeterminar'; ?>
-                            <option value="mensual_sin_predeterminar" <?php echo $tpa==='mensual_sin_predeterminar'?'selected':''; ?>>Mensual</option>
-                            <option value="mensual_predeterminado" <?php echo $tpa==='mensual_predeterminado'?'selected':''; ?>>Mensual Predeterminado</option>
-                            <option value="por_hitos" <?php echo $tpa==='por_hitos'?'selected':''; ?>>Por Hitos</option>
-                            <option value="de_exito" <?php echo $tpa==='de_exito'?'selected':''; ?>>De Éxito</option>
-                        </select>
                     </div>
 
                     <?php $tpc = $caso['tipo_pago_cliente'] ?? 'pago_unico'; ?>
