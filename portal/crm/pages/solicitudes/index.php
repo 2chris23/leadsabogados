@@ -273,6 +273,8 @@ $params = [];
 if ($filtroEstado && in_array($filtroEstado, ['pendiente', 'aceptada', 'denegada', 'archivada', 'cancelada'])) {
     $whereEstado = 'WHERE s.estado = ?';
     $params[] = $filtroEstado;
+} else {
+    $whereEstado = "WHERE s.estado != 'aceptada'";
 }
 
 // El sistema de permisos ya controla quién puede acceder a esta página.

@@ -128,39 +128,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_caso'])) {
     header('Location: ' . APP_URL . '/index.php?page=casos/ver&id=' . $id); exit;
 }
 
-// Guardar notas internas
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['guardar_notas'])) {
+// Guardar nueva nota en el feed
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['crear_nota_feed'])) {
     CSRF::verificarOAbortar();
     $usuarioAct = $auth->getUsuario();
     $puedeNotas = $auth->esAdmin() || ($auth->esAbogado() && $caso['abogado_id'] == ($usuarioAct['id'] ?? 0));
+    
     if ($puedeNotas) {
-        $db->update('casos', ['notas_internas' => trim($_POST['notas_internas'])], 'id = ?', [$id]);
-        AuditLog::registrar('editar_notas', 'casos', $id, 'Notas internas actualizadas');
+        $tipo = $_POST['tipo_nota'] === 'interna' ? 'interna' : 'publica';
+        $contenido = trim($_POST['contenido_nota']);
         
-        // Notificar al cliente si está habilitado y la nota no está vacía
-        $notaTexto = trim($_POST['notas_internas']);
-        if (!empty($notaTexto)) {
-            $notifNota = $db->fetchColumn("SELECT valor FROM configuracion WHERE clave = 'email_notif_nota'") ?? '1';
-            if ($notifNota === '1') {
-                $clienteInfo = $db->fetchOne(
-                    "SELECT cl.email, cl.nombre, cl.apellidos, c.referencia 
-                     FROM casos c JOIN clientes cl ON c.cliente_id = cl.id 
-                     WHERE c.id = ?", [$id]
-                );
-                if ($clienteInfo && filter_var($clienteInfo['email'], FILTER_VALIDATE_EMAIL)) {
-                    require_once dirname(__DIR__, 2) . '/includes/Mailer.php';
-                    Mailer::nuevaNota(
-                        $clienteInfo['email'],
-                        $clienteInfo['nombre'] . ' ' . $clienteInfo['apellidos'],
-                        $clienteInfo['referencia'],
-                        $notaTexto,
-                        APP_URL . '/../portal/index.php?page=dashboard'
-                    );
+        if (!empty($contenido) || (isset($_FILES['documento_nota']) && $_FILES['documento_nota']['error'] !== UPLOAD_ERR_NO_FILE)) {
+            
+            // Insertar la nota
+            $notaId = $db->insert('notas_caso', [
+                'caso_id' => $id,
+                'tipo' => $tipo,
+                'contenido' => $contenido,
+                'created_by' => $usuarioAct['id'] ?? null
+            ]);
+
+            AuditLog::registrar('crear_nota', 'casos', $id, "Nota $tipo añadida");
+
+            // Subir archivo adjunto si lo hay
+            if (isset($_FILES['documento_nota']) && $_FILES['documento_nota']['error'] !== UPLOAD_ERR_NO_FILE) {
+                require_once CRM_ROOT . '/includes/FileUpload.php';
+                $resultado = FileUpload::subir($_FILES['documento_nota'], $id);
+                
+                if ($resultado['exito']) {
+                    $db->insert('documentos', array_merge($resultado['datos'], [
+                        'caso_id' => $id,
+                        'nota_id' => $notaId,
+                        'descripcion' => 'Adjunto a nota',
+                        'subido_por' => $usuarioAct['id'] ?? null
+                    ]));
+                } else {
+                    setFlash('error', 'La nota se guardó pero hubo un error con el archivo: ' . $resultado['mensaje']);
                 }
             }
+
+            // Aquí omitimos la notificación por correo según lo solicitado por el cliente
+
+            if (!isset($_SESSION['flash']['error'])) {
+                setFlash('exito', 'Nota añadida correctamente');
+            }
+        } else {
+            setFlash('error', 'La nota no puede estar vacía');
         }
-        
-        setFlash('exito', 'Notas guardadas');
     }
     header('Location: ' . APP_URL . '/index.php?page=casos/ver&id=' . $id); exit;
 }
@@ -170,8 +184,25 @@ $pagos = $db->fetchAll("SELECT * FROM pagos WHERE caso_id = ? AND (tipo_pago IS 
 $totalPagado = array_sum(array_column($pagos, 'cantidad'));
 $saldoPendiente = $caso['honorarios_totales'] - $totalPagado;
 
+// Obtener notas del caso
+$notasCaso = [];
+try {
+    $notasCaso = $db->fetchAll("
+        SELECT n.*, u.nombre as autor_nombre, u.apellidos as autor_apellidos,
+               d.id as doc_id, d.nombre_original as doc_nombre, d.ruta as doc_ruta, d.tipo as doc_tipo, d.tamano_bytes as doc_tamano
+        FROM notas_caso n
+        LEFT JOIN usuarios_internos u ON n.created_by = u.id
+        LEFT JOIN documentos d ON d.nota_id = n.id
+        WHERE n.caso_id = ?
+        ORDER BY n.created_at DESC
+    ", [$id]);
+} catch (Exception $e) {
+    // Si la tabla no existe aún, ignorar o mostrar mensaje vacío
+    $notasCaso = [];
+}
+
 // Documentos: tabla propia + archivos del portal vinculados al caso
-$documentos = $db->fetchAll("SELECT * FROM documentos WHERE caso_id = ? ORDER BY created_at DESC", [$id]);
+$documentos = $db->fetchAll("SELECT * FROM documentos WHERE caso_id = ? AND nota_id IS NULL ORDER BY created_at DESC", [$id]);
 // Si no hay documentos propios, buscar en solicitud_archivos via solicitudes del cliente
 if (empty($documentos)) {
     $solId = $db->fetchColumn(
@@ -228,10 +259,6 @@ $extColors = ['PDF'=>['#fef2f2','#dc2626'],'DOC'=>['#e8f0fe','#2e6edd'],'DOCX'=>
     <p style="font-size:.8125rem;color:#94a3b8;margin:2px 0 0"><?php echo e($caso['titulo']); ?></p>
   </div>
   <div style="display:flex;gap:8px;align-items:center">
-    <a href="<?php echo APP_URL; ?>/index.php?page=casos/documentos&id=<?php echo $id; ?>" class="cv-btn cv-btn-ghost" style="width:auto;padding:8px 14px;font-size:.8125rem">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-      Subir Documento
-    </a>
     <?php if (RoleGuard::esAdmin()): ?>
     <button class="cv-btn cv-btn-primary" style="width:auto;padding:8px 16px;font-size:.8125rem" data-bs-toggle="modal" data-bs-target="#editarCasoModal">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -240,6 +267,80 @@ $extColors = ['PDF'=>['#fef2f2','#dc2626'],'DOC'=>['#e8f0fe','#2e6edd'],'DOCX'=>
     <?php endif; ?>
   </div>
 </div>
+
+<!-- Stepper de Estados -->
+<div class="cv-card mb-24" style="margin-bottom: 24px;">
+  <div class="cv-card-body" style="padding: 24px 32px;">
+    <div style="display:flex; justify-content:space-between; position:relative;">
+      <!-- Línea conectora base -->
+      <div style="position:absolute; top:12px; left:0; right:0; height:3px; background:#e2e8f0; z-index:1;"></div>
+      
+      <?php 
+      $idxActual = array_search($caso['estado'], $estados);
+      $progressWidth = ($idxActual / (count($estados) - 1)) * 100;
+      ?>
+      <!-- Línea de progreso -->
+      <div style="position:absolute; top:12px; left:0; width:<?php echo $progressWidth; ?>%; height:3px; background:#2563eb; z-index:2; transition: width 0.3s ease;"></div>
+
+      <?php foreach ($estados as $index => $est): 
+          $mapInfo = $estadoMap[$est];
+          $isCompleted = $index <= $idxActual;
+          $isCurrent = $index === $idxActual;
+          
+          $bgColor = $isCurrent ? '#2563eb' : ($isCompleted ? '#bfdbfe' : '#ffffff');
+          $borderColor = $isCurrent ? '#2563eb' : ($isCompleted ? '#2563eb' : '#cbd5e1');
+          $textColor = $isCurrent ? '#2563eb' : ($isCompleted ? '#64748b' : '#94a3b8');
+          $fontWeight = $isCurrent ? '700' : '600';
+      ?>
+      <div style="position:relative; z-index:3; display:flex; flex-direction:column; align-items:center; cursor:pointer;" 
+           onclick="confirmarCambioEstado('<?php echo $est; ?>', '<?php echo $mapInfo['label']; ?>')"
+           title="Cambiar estado a <?php echo $mapInfo['label']; ?>">
+        <div style="width:28px; height:28px; border-radius:50%; background:<?php echo $bgColor; ?>; border:3px solid <?php echo $borderColor; ?>; display:flex; align-items:center; justify-content:center; box-shadow:0 0 0 4px #ffffff; transition:all 0.2s;">
+            <?php if($isCurrent): ?>
+            <div style="width:8px; height:8px; border-radius:50%; background:#ffffff;"></div>
+            <?php elseif($isCompleted): ?>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            <?php endif; ?>
+        </div>
+        <span style="margin-top:10px; font-size:0.75rem; font-weight:<?php echo $fontWeight; ?>; color:<?php echo $textColor; ?>; text-transform:uppercase; letter-spacing:0.5px;"><?php echo $mapInfo['label']; ?></span>
+      </div>
+      <?php endforeach; ?>
+    </div>
+  </div>
+</div>
+
+<!-- Script temporal para la alerta del Stepper -->
+<script>
+function confirmarCambioEstado(nuevoEstado, label) {
+    if (confirm('¿Estás seguro que deseas mover el caso al estado: ' + label + '?')) {
+        // Usar un formulario invisible para enviar el POST
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '';
+        
+        const csrf = document.createElement('input');
+        csrf.type = 'hidden';
+        csrf.name = 'csrf_token';
+        csrf.value = document.querySelector('input[name="csrf_token"]').value;
+        
+        const action = document.createElement('input');
+        action.type = 'hidden';
+        action.name = 'cambiar_estado';
+        action.value = '1';
+        
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'nuevo_estado';
+        input.value = nuevoEstado;
+        
+        form.appendChild(csrf);
+        form.appendChild(action);
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+</script>
 
 <div class="cv-wrap">
   <!-- ══ COL IZQUIERDA ══ -->
@@ -266,8 +367,98 @@ $extColors = ['PDF'=>['#fef2f2','#dc2626'],'DOC'=>['#e8f0fe','#2e6edd'],'DOCX'=>
           <div class="cv-field"><label>Referencia</label><p style="font-family:monospace;font-size:.875rem"><?php echo e($caso['referencia']); ?></p></div>
         </div>
         <?php if($caso['descripcion']): ?>
-        <div style="margin-top:16px"><div class="cv-field"><label>Descripción</label></div><div class="cv-desc"><?php echo nl2br(e($caso['descripcion'])); ?></div></div>
         <?php endif; ?>
+      </div>
+    </div>
+
+    <!-- Notas del Caso -->
+    <div class="cv-card" style="margin-bottom: 24px;">
+      <div class="cv-card-header">
+        <div class="cv-icon" style="background:#f3e8ff;color:#9333ea">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <h3>Notas del Caso</h3>
+      </div>
+      <div class="cv-card-body">
+        <!-- Formulario nueva nota -->
+        <form method="POST" enctype="multipart/form-data" style="margin-bottom: 24px; background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid #e2e8f0;">
+            <?php echo CSRF::campo(); ?>
+            <input type="hidden" name="crear_nota_feed" value="1">
+            
+            <div style="display:flex; gap:16px; margin-bottom: 12px;">
+                <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size: 0.875rem; font-weight: 600; color: #1e293b;">
+                    <input type="radio" name="tipo_nota" value="publica" checked style="accent-color: #2563eb;"> Nota Pública (Visible al cliente)
+                </label>
+                <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size: 0.875rem; font-weight: 600; color: #dc2626;">
+                    <input type="radio" name="tipo_nota" value="interna" style="accent-color: #dc2626;"> Nota Interna (Privada)
+                </label>
+            </div>
+            
+            <textarea name="contenido_nota" class="cv-input" rows="3" placeholder="Escribe una nota aquí..." style="width: 100%; margin-bottom: 12px; border: 1px solid #cbd5e1; padding: 10px; border-radius: 8px; resize: vertical;"></textarea>
+            
+            <div style="display:flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                <div>
+                    <label class="cv-btn cv-btn-ghost" style="padding: 6px 12px; font-size: 0.8125rem; cursor: pointer; display: inline-flex; width: auto; background: #ffffff; border: 1px solid #e2e8f0;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                        <span id="file-name-display" style="margin-left:6px; font-weight: 500;">Adjuntar Archivo</span>
+                        <input type="file" name="documento_nota" style="display:none" onchange="document.getElementById('file-name-display').textContent = this.files[0] ? this.files[0].name : 'Adjuntar Archivo'">
+                    </label>
+                </div>
+                <button type="submit" class="cv-btn cv-btn-primary" style="width: auto; padding: 6px 16px;">
+                    Publicar Nota
+                </button>
+            </div>
+        </form>
+
+        <!-- Feed de Notas -->
+        <div>
+            <?php if(empty($notasCaso)): ?>
+            <p style="text-align:center; color:#94a3b8; font-size:.875rem; padding: 20px 0;">No hay notas en este caso.</p>
+            <?php else: ?>
+                <div style="display:flex; flex-direction:column; gap: 16px;">
+                <?php foreach($notasCaso as $nota): 
+                    $isInterna = $nota['tipo'] === 'interna';
+                    $bgClass = $isInterna ? 'background: #fef2f2; border: 1px solid #fecaca;' : 'background: #ffffff; border: 1px solid #e2e8f0;';
+                ?>
+                    <div style="<?php echo $bgClass; ?> border-radius: 12px; padding: 16px;">
+                        <div style="display:flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <div style="width:32px; height:32px; border-radius:50%; background:#2563eb; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.75rem;">
+                                    <?php echo strtoupper(substr($nota['autor_nombre'] ?? 'S', 0, 1)); ?>
+                                </div>
+                                <div>
+                                    <div style="font-weight: 600; font-size: 0.875rem; color: #1e293b;"><?php echo e(($nota['autor_nombre'] ?? 'Sistema') . ' ' . ($nota['autor_apellidos'] ?? '')); ?></div>
+                                    <div style="font-size: 0.75rem; color: #64748b;"><?php echo date('d/m/Y H:i', strtotime($nota['created_at'])); ?></div>
+                                </div>
+                            </div>
+                            <?php if($isInterna): ?>
+                                <span style="background:#fee2e2; color:#ef4444; padding:2px 8px; border-radius:12px; font-size:0.6875rem; font-weight:700;">INTERNA</span>
+                            <?php else: ?>
+                                <span style="background:#dbeafe; color:#3b82f6; padding:2px 8px; border-radius:12px; font-size:0.6875rem; font-weight:700;">PÚBLICA</span>
+                            <?php endif; ?>
+                        </div>
+                        
+                        <div style="font-size: 0.875rem; color: #334155; line-height: 1.5; white-space: pre-wrap;"><?php echo e($nota['contenido']); ?></div>
+                        
+                        <?php if(!empty($nota['doc_id'])): ?>
+                        <div style="margin-top: 12px; padding: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; display:flex; align-items:center; justify-content: space-between;">
+                            <div style="display:flex; align-items:center; gap: 8px;">
+                                <div style="background:#e8f0fe; color:#2e6edd; padding:6px; border-radius:6px;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.8125rem; font-weight: 600; color: #1e293b;"><?php echo e($nota['doc_nombre']); ?></div>
+                                    <div style="font-size: 0.6875rem; color: #64748b;"><?php echo round($nota['doc_tamano']/1024, 1); ?> KB</div>
+                                </div>
+                            </div>
+                            <a href="<?php echo APP_URL; ?>/index.php?page=casos/descargar&id=<?php echo $nota['doc_id']; ?>" target="_blank" class="cv-btn cv-btn-ghost" style="padding: 4px 8px; font-size: 0.75rem; width: auto; color: #2e6edd; background: #e8f0fe;">Descargar</a>
+                        </div>
+                        <?php endif; ?>
+                    </div>
+                <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+        </div>
       </div>
     </div>
 
@@ -404,44 +595,6 @@ $extColors = ['PDF'=>['#fef2f2','#dc2626'],'DOC'=>['#e8f0fe','#2e6edd'],'DOCX'=>
 
 
   <div>
-    <!-- Estado -->
-    <div class="cv-card">
-      <div class="cv-card-header">
-        <div class="cv-icon" style="background:#f0f9ff;color:#0284c7">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        </div>
-        <h3>Estado del Caso</h3>
-      </div>
-      <div class="cv-card-body">
-        <form method="POST">
-          <?php echo CSRF::campo(); ?>
-          <input type="hidden" name="cambiar_estado" value="1">
-          <span class="cv-label">Estado actual</span>
-          <!-- Custom select estado -->
-          <div class="cs-w" id="csEstW" style="margin-bottom:14px">
-            <div class="cs-btn hv" id="csEstBtn">
-              <span class="cs-dot" style="background:<?php echo $eActual['dot'];?>"></span>
-              <span id="csEstLbl"><?php echo $eActual['label'];?></span>
-            </div>
-            <svg class="cs-arr" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-            <div class="cs-drop" id="csEstDrop">
-              <?php foreach($estadoMap as $k=>$v): ?>
-              <div class="cs-item <?php echo $caso['estado']===$k?'sel':'';?>" data-val="<?php echo $k;?>" data-nom="<?php echo $v['label'];?>" data-dot="<?php echo $v['dot'];?>">
-                <span class="cs-dot" style="background:<?php echo $v['dot'];?>"></span>
-                <?php echo $v['label'];?>
-              </div>
-              <?php endforeach; ?>
-            </div>
-            <input type="hidden" name="nuevo_estado" id="csEstHid" value="<?php echo $caso['estado'];?>">
-          </div>
-          <button type="submit" class="cv-btn cv-btn-primary" data-confirm="¿Cambiar el estado del caso?">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-            Actualizar Estado
-          </button>
-        </form>
-      </div>
-    </div>
-
     <?php if (RoleGuard::esAdmin()): ?>
     <!-- Historial -->
     <div class="cv-card">
@@ -466,29 +619,7 @@ $extColors = ['PDF'=>['#fef2f2','#dc2626'],'DOC'=>['#e8f0fe','#2e6edd'],'DOCX'=>
     </div>
     <?php endif; ?>
 
-    <!-- Notas Internas: solo admin + abogado asignado -->
-    <?php if($auth->esAdmin() || ($auth->esAbogado() && ($caso['abogado_id'] == ($usuario['id'] ?? 0)))): ?>
-    <div class="cv-card">
-      <div class="cv-card-header">
-        <div class="cv-icon" style="background:#fef2f2;color:#dc2626">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        </div>
-        <h3>Notas Internas</h3>
-        <span style="margin-left:auto;background:#fef2f2;color:#dc2626;padding:3px 10px;border-radius:8px;font-size:.6875rem;font-weight:700">PRIVADO</span>
-      </div>
-      <div class="cv-card-body">
-        <form method="POST">
-          <?php echo CSRF::campo(); ?>
-          <input type="hidden" name="guardar_notas" value="1">
-          <textarea name="notas_internas" class="cv-input" rows="5" placeholder="A&#241;ade notas internas... (solo visible para admins y abogado asignado)" style="min-height:110px;resize:vertical;width:100%"><?php echo e($caso['notas_internas'] ?? ''); ?></textarea>
-          <button type="submit" class="cv-btn cv-btn-primary" style="margin-top:10px">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
-            Guardar Notas
-          </button>
-        </form>
-      </div>
-    </div>
-    <?php endif; ?>
+    <!-- El antiguo bloque de notas internas fue eliminado -->
   </div>
 </div>
 
