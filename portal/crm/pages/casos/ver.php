@@ -140,6 +140,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_caso'])) {
         $db->update('casos', [
             'tipo_pago_cliente' => $_POST['tipo_pago_cliente'] ?? 'pago_unico',
             'frecuencia_pago'   => $_POST['frecuencia_pago'] ?? 'mensual',
+            'honorarios_abogado'=> (float)($_POST['honorarios_abogado'] ?? 0),
+            'bono_abogado'      => (float)($_POST['bono_abogado'] ?? 0),
+            'tipo_pago_abogado' => $_POST['tipo_pago_abogado'] ?? 'mensual_sin_predeterminar',
         ], 'id = ?', [$id]);
     } catch (Throwable $e) {
         // Si las columnas no existen, ignorar silenciosamente
@@ -956,8 +959,38 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="cv-fin-card" style="background:#f0fdf4; flex:1; min-width:140px; padding: 16px;"><span class="cv-fin-label" style="text-transform:uppercase; font-size:0.75rem; color:#059669; font-weight:700;">Pagado</span><div class="cv-fin-val" style="color:#059669; font-size:1.5rem; margin-top:8px;">€<?php echo number_format($totalPagado,2,',','.'); ?></div></div>
           <!-- PENDIENTE -->
           <div class="cv-fin-card" style="background:#fef2f2; flex:1; min-width:140px; padding: 16px;"><span class="cv-fin-label" style="text-transform:uppercase; font-size:0.75rem; color:#dc2626; font-weight:700;">Pendiente</span><div class="cv-fin-val" style="color:#dc2626; font-size:1.5rem; margin-top:8px;">€<?php echo number_format($saldoPendiente,2,',','.'); ?></div></div>
-          <!-- TOTAL PAGADO ABOGADO -->
-          <div class="cv-fin-card" style="background:#ecfdf5; flex:1; min-width:140px; padding: 16px;"><span class="cv-fin-label" style="text-transform:uppercase; font-size:0.75rem; color:#10b981; font-weight:700;">Pagos al Abogado</span><div class="cv-fin-val" style="color:#10b981; font-size:1.5rem; margin-top:8px;">€<?php echo number_format($totalPagadoAbogado,2,',','.'); ?></div></div>
+          <!-- TOTAL PAGADO ABOGADO Y BONO -->
+          <div class="cv-fin-card" style="background:#ecfdf5; flex:1; min-width:170px; padding: 16px;">
+            <span class="cv-fin-label" style="text-transform:uppercase; font-size:0.75rem; color:#10b981; font-weight:700;">Honorarios Abogado</span>
+            <div class="cv-fin-val" style="color:#10b981; font-size:1.5rem; margin-top:4px;">€<?php echo number_format((float)($caso['honorarios_abogado'] ?? 0),2,',','.'); ?></div>
+            
+            <?php 
+                $bono = (float)($caso['bono_abogado'] ?? 0);
+                if ($bono > 0): 
+                    $bonoPagado = min($totalPagadoAbogado, $bono);
+                    $estadoBono = $bonoPagado >= $bono ? 'Pagado' : ($bonoPagado > 0 ? "Pagado: €$bonoPagado" : 'Pendiente');
+                    $bgBono = $bonoPagado >= $bono ? '#dcfce7' : '#fef3c7';
+                    $colorBono = $bonoPagado >= $bono ? '#15803d' : '#b45309';
+            ?>
+                <div style="margin-top:8px; font-size:0.75rem; display:inline-block; padding:2px 6px; border-radius:4px; background:<?php echo $bgBono; ?>; color:<?php echo $colorBono; ?>; font-weight:600;">
+                    Bonus: €<?php echo number_format($bono,2,',','.'); ?> (<?php echo $estadoBono; ?>)
+                </div>
+            <?php else: ?>
+                <div style="margin-top:8px; font-size:0.75rem; display:inline-block; padding:2px 6px; border-radius:4px; background:#e2e8f0; color:#475569; font-weight:600;">
+                    Sin bono
+                </div>
+            <?php endif; ?>
+            
+            <div style="margin-top:6px; font-size:0.75rem; color:#64748b;">
+                Pagado Total: €<?php echo number_format($totalPagadoAbogado,2,',','.'); ?>
+            </div>
+            <div style="margin-top:2px; font-size:0.75rem; color:#64748b; font-weight:600;">
+                Tipo: <?php 
+                    $tipoAbogado = str_replace('_', ' ', ($caso['tipo_pago_abogado'] ?? 'Mensual'));
+                    echo ucfirst($tipoAbogado); 
+                ?>
+            </div>
+          </div>
         </div>
         
         <div style="display:flex;gap:16px; flex-wrap: wrap;">
@@ -1120,9 +1153,16 @@ document.addEventListener('DOMContentLoaded', () => {
             <input type="hidden" name="registrar_pago_abogado" value="1">
             <div class="modal-header"><h6 class="modal-title">Registrar Pago a Abogado</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
             <div class="modal-body">
+                <?php
+                    // Calcular el máximo a pagar
+                    $maxPagoAbogado = max(0, ((float)$caso['honorarios_abogado'] + (float)$caso['bono_abogado']) - $totalPagadoAbogado);
+                ?>
                 <div class="mb-3">
                     <label class="form-label">Cantidad (&euro;)</label>
-                    <input type="number" name="cantidad" step="0.01" class="form-control" required>
+                    <input type="number" name="cantidad" step="0.01" max="<?php echo $maxPagoAbogado; ?>" class="form-control" required>
+                    <div class="form-text text-muted" style="font-size:0.75rem;">
+                        Límite restante para este caso: &euro;<?php echo number_format($maxPagoAbogado, 2, ',', '.'); ?>
+                    </div>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Fecha de Pago</label>
@@ -1227,6 +1267,26 @@ document.addEventListener('DOMContentLoaded', () => {
                         <input type="number" name="honorarios_totales" class="form-control"
                                step="0.01" min="0" value="<?php echo $caso['honorarios_totales']; ?>" required>
                     </div>
+                    
+                    <div class="col-sm-4">
+                        <label class="form-label">Honorario Abogado (&euro;)</label>
+                        <input type="number" name="honorarios_abogado" class="form-control" step="0.01" min="0" value="<?php echo $caso['honorarios_abogado'] ?? 0; ?>">
+                    </div>
+                    <div class="col-sm-4">
+                        <label class="form-label">Bono Abogado (&euro;)</label>
+                        <input type="number" name="bono_abogado" class="form-control" step="0.01" min="0" value="<?php echo $caso['bono_abogado'] ?? 0; ?>">
+                    </div>
+                    <div class="col-sm-4">
+                        <label class="form-label">Tipo Pago Abogado</label>
+                        <select name="tipo_pago_abogado" class="form-select">
+                            <?php $tpa = $caso['tipo_pago_abogado'] ?? 'mensual_sin_predeterminar'; ?>
+                            <option value="mensual_sin_predeterminar" <?php echo $tpa==='mensual_sin_predeterminar'?'selected':''; ?>>Mensual</option>
+                            <option value="mensual_predeterminado" <?php echo $tpa==='mensual_predeterminado'?'selected':''; ?>>Mensual Predeterminado</option>
+                            <option value="por_hitos" <?php echo $tpa==='por_hitos'?'selected':''; ?>>Por Hitos</option>
+                            <option value="de_exito" <?php echo $tpa==='de_exito'?'selected':''; ?>>De Éxito</option>
+                        </select>
+                    </div>
+
                     <?php $tpc = $caso['tipo_pago_cliente'] ?? 'pago_unico'; ?>
                     <div class="col-sm-6">
                         <label class="form-label">Tipo de Pago del Cliente</label>

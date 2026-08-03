@@ -44,6 +44,7 @@ addCol($pdo, 'casos', 'tipo_caso',        "VARCHAR(100) DEFAULT 'General'", $ok,
 addCol($pdo, 'casos', 'tipo_pago_cliente',"VARCHAR(30) DEFAULT 'pago_unico'", $ok, $err);
 addCol($pdo, 'casos', 'frecuencia_pago',  "VARCHAR(30) DEFAULT 'mensual'", $ok, $err);
 addCol($pdo, 'casos', 'honorarios_abogado', "DECIMAL(10,2) DEFAULT 0", $ok, $err);
+addCol($pdo, 'casos', 'bono_abogado',       "DECIMAL(10,2) DEFAULT 0", $ok, $err);
 addCol($pdo, 'casos', 'tipo_pago_abogado',  "VARCHAR(20) DEFAULT 'fijo'", $ok, $err);
 addCol($pdo, 'casos', 'cuota_abogado',       "DECIMAL(10,2) DEFAULT 0", $ok, $err);
 
