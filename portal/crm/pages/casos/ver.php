@@ -419,11 +419,21 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!currentBall) return;
     
     let isDragging = false;
+    let startX = 0;
     
     currentBall.addEventListener('mousedown', (e) => {
         isDragging = true;
+        startX = e.clientX;
         currentBall.style.cursor = 'grabbing';
         currentBall.style.transform = 'scale(1.2)';
+        currentBall.style.position = 'relative';
+        currentBall.style.zIndex = '99';
+    });
+    
+    document.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const dx = (e.clientX - startX) / 1.2; // Adjust for scale
+        currentBall.style.transform = `scale(1.2) translateX(${dx}px)`;
     });
     
     document.addEventListener('mouseup', (e) => {
@@ -431,6 +441,8 @@ document.addEventListener('DOMContentLoaded', () => {
         isDragging = false;
         currentBall.style.cursor = 'grab';
         currentBall.style.transform = 'scale(1)';
+        currentBall.style.position = 'static';
+        currentBall.style.zIndex = 'auto';
         
         // Detectar si soltó sobre otro paso
         const steps = document.querySelectorAll('.stepper-step');
@@ -495,14 +507,14 @@ document.addEventListener('DOMContentLoaded', () => {
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
         </div>
         <h3>Notas del Caso</h3>
-        <button type="button" class="cv-btn cv-btn-primary" style="margin-left:auto; width:auto; padding:6px 14px; font-size:0.8125rem;" data-bs-toggle="modal" data-bs-target="#modalNuevaNota">
-          + Añadir Nueva Nota
-        </button>
       </div>
       <div class="cv-card-body">
         <!-- Feed de Notas -->
+        <form method="POST" enctype="multipart/form-data" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
+            <?php echo CSRF::campo(); ?>
+            <input type="hidden" name="crear_nota_feed" value="1">
             
-            <div style="display:flex; gap:16px; margin-bottom: 12px;">
+            <div style="display:flex; gap:16px; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #e2e8f0;">
                 <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size: 0.875rem; font-weight: 600; color: #1e293b;">
                     <input type="radio" name="tipo_nota" value="publica" checked style="accent-color: #2563eb;"> Nota Pública (Visible al cliente)
                 </label>
@@ -511,7 +523,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 </label>
             </div>
             
-            <textarea name="contenido_nota" class="cv-input" rows="3" placeholder="Escribe una nota aquí..." style="width: 100%; margin-bottom: 12px; border: 1px solid #cbd5e1; padding: 10px; border-radius: 8px; resize: vertical;"></textarea>
+            <input type="text" name="titulo_nota" class="cv-input" placeholder="Título de la nota..." style="width: 100%; margin-bottom: 12px;" required>
+            <textarea name="contenido_nota" class="cv-input" rows="3" placeholder="Escribe la descripción aquí..." style="width: 100%; margin-bottom: 12px; resize: vertical;" required></textarea>
             
             <div style="display:flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
                 <div>
@@ -588,6 +601,49 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       </div>
     </div>
+    <!-- Documentos -->
+    <div class="cv-card">
+      <div class="cv-card-header">
+        <div class="cv-icon" style="background:#f5f3ff;color:#7c3aed">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+        </div>
+        <h3>Documentos</h3>
+        <span style="margin-left:auto;background:#f5f3ff;color:#7c3aed;padding:3px 10px;border-radius:8px;font-size:.75rem;font-weight:700"><?php echo count($documentos); ?></span>
+      </div>
+      <div class="cv-card-body">
+        <?php if(empty($documentos)): ?>
+        <p style="text-align:center;color:#94a3b8;padding:20px 0;font-size:.875rem">No hay documentos adjuntos</p>
+        <?php else: ?>
+        <?php foreach($documentos as $doc):
+          $ext=strtoupper(pathinfo($doc['nombre_original'],PATHINFO_EXTENSION));
+          [$bg,$clr]=$extColors[$ext]??['#f1f5f9','#64748b'];
+          $kb=round($doc['tamano_bytes']/1024,1);
+          
+          if (isset($doc['origen']) && $doc['origen'] === 'portal') {
+              $dlUrl = APP_URL . '/index.php?page=solicitudes/descargar&id=' . $doc['id'];
+          } else {
+              $dlUrl = APP_URL . '/index.php?page=casos/descargar&id=' . $doc['id'];
+          }
+        ?>
+        <div class="cv-file">
+          <div class="cv-file-ico" style="background:<?php echo $bg;?>;color:<?php echo $clr;?>"><?php echo $ext;?></div>
+          <div style="flex:1;min-width:0">
+            <div class="cv-file-name"><?php echo e($doc['nombre_original']);?></div>
+            <div class="cv-file-meta"><?php echo $kb;?> KB · <?php echo date('d/m/Y',strtotime($doc['created_at']));?><?php if(!empty($doc['descripcion'])): ?> · <?php echo e($doc['descripcion']);?><?php endif;?></div>
+          </div>
+          <a href="<?php echo $dlUrl;?>" target="_blank" class="cv-dl">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Descargar
+          </a>
+        </div>
+        <?php endforeach;?>
+        <?php endif;?>
+      </div>
+    </div>
+  </div> <!-- Close Left Column -->
+
+  <!-- ══ COL DERECHA ══ -->
+  <div>
 
     <?php if (RoleGuard::esAdmin()): ?>
     <!-- Financiero -->
@@ -599,8 +655,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <h3 style="margin:0;font-size:1.125rem">Módulo Financiero</h3>
           </div>
           <div style="display:flex;gap:8px">
-            <a href="<?php echo APP_URL; ?>/index.php?page=pagos/registrar&caso_id=<?php echo $id; ?>" class="cv-btn cv-btn-primary" style="width:auto;padding:7px 14px;font-size:.8125rem;text-decoration:none">+ Registrar Pago</a>
-            <button class="cv-btn cv-btn-ghost" style="width:auto;padding:7px 14px;font-size:.8125rem" data-bs-toggle="modal" data-bs-target="#editarFinancieroModal">Configurar Cobro</button>
+            <a href="<?php echo APP_URL; ?>/index.php?page=pagos/registrar&caso_id=<?php echo $id; ?>" class="cv-btn cv-btn-primary" style="width:auto;padding:7px 14px;font-size:.8125rem;text-decoration:none">+ Registrar Pago Cliente</a>
           </div>
         </div>
 
@@ -706,49 +761,7 @@ document.addEventListener('DOMContentLoaded', () => {
     <?php endif; ?>
     <?php endif; /* esAdmin financiero */ ?>
 
-    <!-- Documentos -->
-    <div class="cv-card">
-      <div class="cv-card-header">
-        <div class="cv-icon" style="background:#f5f3ff;color:#7c3aed">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-        </div>
-        <h3>Documentos</h3>
-        <span style="margin-left:auto;background:#f5f3ff;color:#7c3aed;padding:3px 10px;border-radius:8px;font-size:.75rem;font-weight:700"><?php echo count($documentos); ?></span>
-      </div>
-      <div class="cv-card-body">
-        <?php if(empty($documentos)): ?>
-        <p style="text-align:center;color:#94a3b8;padding:20px 0;font-size:.875rem">No hay documentos adjuntos</p>
-        <?php else: ?>
-        <?php foreach($documentos as $doc):
-          $ext=strtoupper(pathinfo($doc['nombre_original'],PATHINFO_EXTENSION));
-          [$bg,$clr]=$extColors[$ext]??['#f1f5f9','#64748b'];
-          $kb=round($doc['tamano_bytes']/1024,1);
-          
-          if (isset($doc['origen']) && $doc['origen'] === 'portal') {
-              $dlUrl = APP_URL . '/index.php?page=solicitudes/descargar&id=' . $doc['id'];
-          } else {
-              $dlUrl = APP_URL . '/index.php?page=casos/descargar&id=' . $doc['id'];
-          }
-        ?>
-        <div class="cv-file">
-          <div class="cv-file-ico" style="background:<?php echo $bg;?>;color:<?php echo $clr;?>"><?php echo $ext;?></div>
-          <div style="flex:1;min-width:0">
-            <div class="cv-file-name"><?php echo e($doc['nombre_original']);?></div>
-            <div class="cv-file-meta"><?php echo $kb;?> KB · <?php echo date('d/m/Y',strtotime($doc['created_at']));?><?php if(!empty($doc['descripcion'])): ?> · <?php echo e($doc['descripcion']);?><?php endif;?></div>
-          </div>
-          <a href="<?php echo $dlUrl;?>" target="_blank" class="cv-dl">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Descargar
-          </a>
-        </div>
-        <?php endforeach;?>
-        <?php endif;?>
-      </div>
-    </div>
-  </div>
 
-
-  <div>
     <?php if (RoleGuard::esAdmin()): ?>
     <!-- Historial -->
     <div class="cv-card">
@@ -809,46 +822,6 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary radius-8" data-bs-dismiss="modal">Cancelar</button>
                 <button type="submit" class="btn btn-primary radius-8">Guardar Pago</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- Modal Nueva Nota -->
-<div class="modal fade" id="modalNuevaNota" tabindex="-1">
-    <div class="modal-dialog">
-        <form method="POST" enctype="multipart/form-data" class="modal-content radius-8">
-            <?php echo CSRF::campo(); ?>
-            <input type="hidden" name="crear_nota_feed" value="1">
-            <div class="modal-header"><h6 class="modal-title">Añadir Nueva Nota</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label">Título de la nota</label>
-                    <input type="text" name="titulo_nota" class="form-control" placeholder="Ej: Llamada con cliente" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Tipo</label>
-                    <div style="display:flex; gap:16px;">
-                        <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size: 0.875rem; font-weight: 600; color: #1e293b;">
-                            <input type="radio" name="tipo_nota" value="publica" checked style="accent-color: #2563eb;"> Pública (Visible al cliente)
-                        </label>
-                        <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size: 0.875rem; font-weight: 600; color: #dc2626;">
-                            <input type="radio" name="tipo_nota" value="interna" style="accent-color: #dc2626;"> Interna (Privada)
-                        </label>
-                    </div>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Descripción</label>
-                    <textarea name="contenido_nota" class="form-control" rows="4" placeholder="Escribe aquí el contenido..." required></textarea>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Adjuntar Archivo (Opcional)</label>
-                    <input type="file" name="documento_nota" class="form-control">
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary radius-8" data-bs-dismiss="modal">Cancelar</button>
-                <button type="submit" class="btn btn-primary radius-8">Guardar Nota</button>
             </div>
         </form>
     </div>
@@ -926,60 +899,21 @@ document.addEventListener('DOMContentLoaded', () => {
                           <input type="hidden" name="abogado_id" id="csModalHid" value="<?php echo $abSel; ?>">
                         </div>
                     </div>
-                    <div class="col-sm-6">&nbsp;</div>
-                    <div class="col-12"><label class="form-label">Descripción</label><textarea name="descripcion" class="form-control" rows="3"><?php echo e($caso['descripcion']); ?></textarea></div>
-                    <div class="col-12"><label class="form-label">Notas Internas</label><textarea name="notas_internas" class="form-control" rows="2"><?php echo e($caso['notas_internas']); ?></textarea></div>
-                </div>
-            </div>
-            <div class="modal-footer"><button type="button" class="btn btn-secondary radius-8" data-bs-dismiss="modal">Cancelar</button><button type="submit" class="btn btn-primary radius-8">Guardar</button></div>
-        </form>
-    </div>
-</div>
-
-<!-- Modal editar datos financieros -->
-<div class="modal fade" id="editarFinancieroModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <form method="POST" class="modal-content radius-8">
-            <?php echo CSRF::campo(); ?>
-            <input type="hidden" name="editar_financiero" value="1">
-            <div class="modal-header">
-                <h6 class="modal-title" style="display:flex;align-items:center;gap:8px">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                    Configurar Plan de Pago
-                </h6>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <?php $tpc = $caso['tipo_pago_cliente'] ?? 'pago_unico'; $freq = $caso['frecuencia_pago'] ?? 'mensual'; ?>
-                <div class="row gy-3">
-                    <div class="col-12">
-                        <label class="cv-label">Valor Total a Cobrar al Cliente (&euro;)</label>
-                        <input type="number" name="honorarios_totales" class="cv-input" id="finHonorarios"
+                    <div class="col-sm-6">
+                        <label class="form-label">Valor Total a Cobrar al Cliente (&euro;)</label>
+                        <input type="number" name="honorarios_totales" class="form-control"
                                step="0.01" min="0" value="<?php echo $caso['honorarios_totales']; ?>" required>
                     </div>
-                    <div class="col-12">
-                        <label class="cv-label">Tipo de Pago del Cliente</label>
-                        <div class="cs-w" id="csTipoPagoW">
-                          <div class="cs-btn hv" id="csTipoPagoBtn">
-                            <span class="cs-dot" id="csTipoPagoDot" style="background:<?php echo match($tpc){'cuotas'=>'#d97706','fechas_custom'=>'#7c3aed',default=>'#2563eb'}; ?>"></span>
-                            <span id="csTipoPagoLbl"><?php echo match($tpc){'cuotas'=>'Pago por Cuotas','fechas_custom'=>'Fechas Personalizadas',default=>'Pago Único'}; ?></span>
-                          </div>
-                          <svg class="cs-arr" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-                          <div class="cs-drop" id="csTipoPagoDrop">
-                            <div class="cs-item <?php echo $tpc==='pago_unico'?'sel':''; ?>" data-val="pago_unico" data-nom="Pago Único" data-dot="#2563eb">
-                              <span class="cs-dot" style="background:#2563eb"></span> Pago Único
-                            </div>
-                            <div class="cs-item <?php echo $tpc==='cuotas'?'sel':''; ?>" data-val="cuotas" data-nom="Pago por Cuotas" data-dot="#d97706">
-                              <span class="cs-dot" style="background:#d97706"></span> Pago por Cuotas
-                            </div>
-                            <div class="cs-item <?php echo $tpc==='fechas_custom'?'sel':''; ?>" data-val="fechas_custom" data-nom="Fechas Personalizadas" data-dot="#7c3aed">
-                              <span class="cs-dot" style="background:#7c3aed"></span> Fechas Personalizadas
-                            </div>
-                          </div>
-                          <input type="hidden" name="tipo_pago_cliente" id="csTipoPagoHid" value="<?php echo $tpc; ?>">
-                        </div>
+                    <?php $tpc = $caso['tipo_pago_cliente'] ?? 'pago_unico'; ?>
+                    <div class="col-sm-6">
+                        <label class="form-label">Tipo de Pago del Cliente</label>
+                        <select name="tipo_pago_cliente" class="form-select">
+                            <option value="pago_unico" <?php echo $tpc==='pago_unico'?'selected':''; ?>>Pago Único</option>
+                            <option value="cuotas" <?php echo $tpc==='cuotas'?'selected':''; ?>>Pago por Cuotas</option>
+                            <option value="fechas_custom" <?php echo $tpc==='fechas_custom'?'selected':''; ?>>Fechas Personalizadas</option>
+                        </select>
                     </div>
-
+                    
                     <!-- PAGO ÚNICO -->
                     <div class="col-12" id="wrapPagoUnico" style="<?php echo $tpc !== 'pago_unico' ? 'display:none' : ''; ?>">
                         <label class="cv-label">Fecha de Pago</label>
@@ -987,7 +921,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
 
                     <!-- CUOTAS -->
-                    <div id="wrapCuotas" style="<?php echo $tpc !== 'cuotas' ? 'display:none' : ''; ?>">
+                    <div class="col-12" id="wrapCuotas" style="<?php echo $tpc !== 'cuotas' ? 'display:none' : ''; ?>">
                         <div class="row gy-3">
                             <div class="col-sm-4">
                                 <label class="cv-label">Número de Cuotas</label>
@@ -1002,6 +936,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                   <input type="hidden" name="num_cuotas" id="csCuotasHid" value="3">
                                 </div>
                             </div>
+                            <?php $freq = $caso['frecuencia_pago'] ?? 'mensual'; ?>
                             <div class="col-sm-4">
                                 <label class="cv-label">Frecuencia</label>
                                 <div class="cs-w" id="csFreqW">
@@ -1035,15 +970,16 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                         <button type="button" onclick="addCustomRow()" class="cv-btn cv-btn-ghost" style="width:auto;padding:6px 14px;font-size:.8125rem;margin-top:4px">+ Añadir Fecha</button>
                     </div>
+                    <div class="col-12"><label class="form-label">Descripción</label><textarea name="descripcion" class="form-control" rows="3"><?php echo e($caso['descripcion']); ?></textarea></div>
+                    <div class="col-12"><label class="form-label">Notas Internas</label><textarea name="notas_internas" class="form-control" rows="2"><?php echo e($caso['notas_internas']); ?></textarea></div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary radius-8" data-bs-dismiss="modal">Cancelar</button>
-                <button type="submit" class="btn btn-primary radius-8">Guardar Plan de Pago</button>
-            </div>
+            <div class="modal-footer"><button type="button" class="btn btn-secondary radius-8" data-bs-dismiss="modal">Cancelar</button><button type="submit" class="btn btn-primary radius-8">Guardar</button></div>
         </form>
     </div>
 </div>
+
+
 
 
 <script>
