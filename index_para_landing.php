@@ -733,7 +733,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
 
         /* ============ FOOTER ============ */
         .footer { background: #ffffff; border-top: 1px solid var(--border); padding: 48px 80px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 24px; }
-        .footer-logo { height: 70px; }
+        .footer-logo { height: 38px; }
         .footer-copy { color: var(--gray); font-size: 0.875rem; }
         .footer-right { display: flex; align-items: center; gap: 20px; }
         .footer-portal { display: inline-flex; align-items: center; gap: 8px; background: #f8fafc; border: 1px solid var(--border); color: var(--navy); padding: 12px 24px; border-radius: 8px; font-size: 0.9375rem; font-weight: 600; transition: all .2s; } .footer-portal:hover { background: #f1f5f9; color: var(--blue2); }
@@ -830,7 +830,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
             <?php if ($formExito): ?>
                 <div class="form-alert form-alert-success">
                     <strong>✓ ¡Solicitud recibida!</strong><br>
-                    Nos pondremos en contacto contigo en menos de 24h. Recibirás también los datos de acceso a tu Portal del Cliente.
+                    Nos pondremos en contacto contigo pronto. Recibirás también los datos de acceso a tu Portal del Cliente.
                 </div>
             <?php else: ?>
                 <?php if (!empty($formError)): ?>
@@ -849,6 +849,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
                     <div class="form-row">
                         <input type="tel" name="telefono" class="inp" placeholder="Teléfono *" value="<?php echo esc($formData['telefono']); ?>" required>
                         <input type="email" name="email" class="inp" placeholder="Email *" value="<?php echo esc($formData['email']); ?>" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" name="dni_nif" class="inp" placeholder="DNI / NIE *" value="<?php echo esc($formData['dni_nif']); ?>" required>
                     </div>
                     <div class="form-group">
                         <input type="text" name="direccion" class="inp" placeholder="Provincia / Ciudad" value="<?php echo esc($formData['direccion']); ?>">

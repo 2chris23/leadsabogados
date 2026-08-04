@@ -174,7 +174,7 @@ $crmUrl = APP_URL . '/portal/crm';
         }
 
         .portal-visual-logo img {
-            width: 44px; height: 44px;
+            height: 54px; width: auto; max-width: 240px;
             filter: drop-shadow(0 2px 8px rgba(0,0,0,0.3));
             object-fit: contain;
         }
@@ -455,7 +455,7 @@ $crmUrl = APP_URL . '/portal/crm';
         <div class="portal-visual-content">
             <div class="portal-visual-logo">
                 <img src="../assets/images/logo.png?v=<?php echo time(); ?>" alt="Logo">
-                <span><?php echo e($nombreDespacho); ?></span>
+                
             </div>
 
             <div>
