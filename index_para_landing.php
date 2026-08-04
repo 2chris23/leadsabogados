@@ -307,7 +307,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
             background: var(--navy);
             min-height: 92vh;
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 42% 58%;
             position: relative;
             overflow: hidden;
         }
@@ -418,16 +418,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
             inset: 0;
             width: 100%;
             height: 100%;
-            background-size: auto 100%;
-            background-position: center top; background-repeat: no-repeat;
+            background-size: cover;
+            background-position: right top; /* Pushes image leftwards so she is not behind the form */
+            background-repeat: no-repeat;
+            mask-image: linear-gradient(to right, transparent 0%, black 30%);
+            -webkit-mask-image: linear-gradient(to right, transparent 0%, black 30%);
             z-index: 0;
         }
-        .hero-overlay {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(90deg, var(--navy) 0%, var(--navy) 15%, transparent 35%, transparent 65%, var(--navy) 85%, var(--navy) 100%);
-            z-index: 1;
-        }
+        
         .form-panel {
             background: #fff;
             border-radius: 20px;
@@ -462,7 +460,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
         }
         .form-panel h2 span { color: var(--blue2); font-style: italic; }
         .form-group { margin-bottom: 14px; }
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+        .form-row { display: grid; grid-template-columns: 42% 58%; gap: 12px; margin-bottom: 14px; }
         .inp {
             width: 100%;
             padding: 12px 14px;
@@ -583,7 +581,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
             max-width: 1200px; margin: 0 auto;
             padding: 100px 80px;
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 42% 58%;
             gap: 80px;
             align-items: center;
         }
@@ -796,8 +794,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
 
 <!-- HERO -->
 <section class="hero" id="contacto">
-    <div class="hero-img-bg" style="background-image: url('<?php echo $heroUrl; ?>');"></div>
-    <div class="hero-overlay"></div>
     <div class="hero-left">
         <div class="hero-eyebrow">
             <span class="hero-eyebrow-dot"></span>
@@ -823,7 +819,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
         
     </div>
 
-    <div class="hero-right">
+    <div class="hero-right" style="z-index: 2; position: relative;">
+        <div class="hero-img-bg" style="background-image: url('<?php echo $heroUrl; ?>');"></div>
         <div class="form-panel">
             <div class="form-panel-header">
                 <span class="form-panel-tag">Consulta gratuita</span>
@@ -974,6 +971,7 @@ window.addEventListener('scroll', () => {
 </script>
 </body>
 </html>
+
 
 
 
