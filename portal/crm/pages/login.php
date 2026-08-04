@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar Sesión — <?php echo e($nombreDespacho); ?></title>
-    <link rel="icon" type="image/png" href="<?php echo APP_URL; ?>/assets/images/logo.png?v=<?php echo $logoVersion; ?>">
+    <link rel="icon" type="image/png" href="<?php echo APP_URL; ?>/assets/images/favicon.png?v=<?php echo $logoVersion; ?>">
     <link rel="stylesheet" href="<?php echo APP_URL; ?>/assets/css/remixicon.css">
     <link rel="stylesheet" href="<?php echo APP_URL; ?>/assets/css/lib/bootstrap.min.css">
     <link rel="stylesheet" href="<?php echo APP_URL; ?>/assets/css/style.css">
@@ -140,7 +140,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .login-logo img {
-            height: 42px;
+            height: 64px;
             width: auto;
             object-fit: contain;
         }
@@ -338,8 +338,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Formulario -->
     <div class="login-form-side">
         <div class="login-logo">
-            <img src="<?php echo APP_URL; ?>/assets/images/logo.png?v=<?php echo time(); ?>" alt="Logo">
-            <span><?php echo e($nombreDespacho); ?></span>
+            <img src="<?php echo APP_URL; ?>/assets/images/logo.png?v=<?php echo time(); ?>" alt="Logo" style="max-height:64px;">
         </div>
 
         <h1 class="login-title">Iniciar Sesión</h1>

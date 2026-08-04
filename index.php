@@ -224,7 +224,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LA leadsabogados.com — Tu caso merece la mejor solución legal</title>
-    <link rel="icon" type="image/png" href="<?php echo $logoUrl; ?>">
+    <link rel="icon" type="image/png" href="/portal/crm/assets/images/favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -588,23 +588,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
                             <input type="tel" name="telefono" class="input-field" placeholder="Teléfono" value="<?php echo esc($formData['telefono']); ?>" required>
                             <input type="email" name="email" class="input-field" placeholder="Email" value="<?php echo esc($formData['email']); ?>" required>
                         </div>
-                        <div class="form-grid">
-                            <input type="text" name="direccion" class="input-field" placeholder="Provincia" value="<?php echo esc($formData['direccion']); ?>">
-                            <select name="tipo_problema" class="input-field" style="color:var(--text-light); background:#fff;">
-                                <option value="" disabled <?php if(empty($formData['tipo_problema'])) echo 'selected';?>>Especialidad</option>
-                                <option value="Civil" <?php if($formData['tipo_problema']==='Civil') echo 'selected';?>>Derecho Civil</option>
-                                <option value="Penal" <?php if($formData['tipo_problema']==='Penal') echo 'selected';?>>Derecho Penal</option>
-                                <option value="Laboral" <?php if($formData['tipo_problema']==='Laboral') echo 'selected';?>>Derecho Laboral</option>
-                                <option value="Familia" <?php if($formData['tipo_problema']==='Familia') echo 'selected';?>>Derecho de Familia</option>
-                                <option value="Otro" <?php if($formData['tipo_problema']==='Otro') echo 'selected';?>>Otro</option>
-                            </select>
-                        </div>
+                        <input type="text" name="direccion" class="input-field" placeholder="Provincia / Ciudad" value="<?php echo esc($formData['direccion']); ?>" style="width:100%;margin-bottom:16px;">
                         
                         <textarea name="descripcion" class="textarea-field" placeholder="Describe tu caso" required><?php echo esc($formData['descripcion']); ?></textarea>
                         
-                        <div class="checkbox-row">
-                            <input type="checkbox" id="privacidad" name="privacidad" required>
-                            <label for="privacidad">Acepto la <a href="#" style="color:var(--secondary); text-decoration:underline;">política de privacidad</a></label>
+                        <div style="margin-bottom:20px;">
+                            <label style="display:block;font-size:.875rem;color:#6b7280;margin-bottom:6px;">Adjuntar documentos <span style="font-size:.8rem;color:#9ca3af;">(opcional, máx. 10MB)</span></label>
+                            <input type="file" name="archivos[]" multiple accept="*/*" style="width:100%;padding:8px 12px;border:1px solid #d1d5db;border-radius:4px;font-size:.875rem;background:#f9fafb;">
                         </div>
 
                         <button type="submit" class="btn-submit">Quiero que revisen mi caso</button>
