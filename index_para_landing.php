@@ -419,13 +419,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
             width: 100%;
             height: 100%;
             background-size: auto 100%;
-            background-position: center top;
+            background-position: center top; background-repeat: no-repeat;
             z-index: 0;
         }
         .hero-overlay {
             position: absolute;
             inset: 0;
-            background: linear-gradient(90deg, var(--navy) 0%, rgba(11,29,58,0.6) 25%, transparent 50%, rgba(11,29,58,0.6) 75%, var(--navy) 100%);
+            background: linear-gradient(90deg, var(--navy) 0%, var(--navy) 15%, transparent 35%, transparent 65%, var(--navy) 85%, var(--navy) 100%);
             z-index: 1;
         }
         .form-panel {
@@ -974,6 +974,7 @@ window.addEventListener('scroll', () => {
 </script>
 </body>
 </html>
+
 
 
 
