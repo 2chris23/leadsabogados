@@ -45,7 +45,7 @@ function esc($s) { return htmlspecialchars($s ?? '', ENT_QUOTES, 'UTF-8'); }
 $db = Database::getInstance();
 $crmUrl = APP_URL;
 $logoUrl = '/portal/crm/assets/images/logo.png';
-$heroUrl = '/portal/crm/assets/images/hero_lawyer.jpg';
+$heroUrl = '/portal/crm/assets/images/hero_lawyer_left.jpg';
 $videoUrl = '/portal/crm/assets/images/family_video.jpg';
 
 // Migración: agregar columna password_plain y fecha_nacimiento si no existen
@@ -419,7 +419,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
             width: 100%;
             height: 100%;
             background-size: cover;
-            background-position: right top; /* Pushes image leftwards so she is not behind the form */
+            background-position: left center; /* Pushes image leftwards so she is not behind the form */
             background-repeat: no-repeat;
             mask-image: linear-gradient(to right, transparent 0%, black 30%);
             -webkit-mask-image: linear-gradient(to right, transparent 0%, black 30%);
@@ -971,6 +971,7 @@ window.addEventListener('scroll', () => {
 </script>
 </body>
 </html>
+
 
 
 
