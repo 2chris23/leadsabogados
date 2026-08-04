@@ -111,7 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
         if (empty($formError)) {
             $existe = $db->fetchOne("SELECT id FROM portal_cuentas WHERE email = ?", [$formData['email']]);
             if ($existe) {
-                $formError = 'Ya existe una cuenta con este correo. <a href="/portal/" style="color:#2e6edd;font-weight:700">Inicie sesión aquí</a>';
+                $formError = 'Ya existe una cuenta con este correo. <a href="https://app.leadsabogados.com/portal" style="color:#2e6edd;font-weight:700">Inicie sesión aquí</a>';
             }
         }
 
@@ -450,7 +450,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
             object-position: center top;
             width: 100%;
             height: 100%;
-            opacity: 0.18;
+            opacity: 0.18; -webkit-mask-image: linear-gradient(to right, transparent 0%, black 40%); mask-image: linear-gradient(to right, transparent 0%, black 40%);
         }
         .form-panel {
             background: #fff;
@@ -571,7 +571,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
             display: flex;
             align-items: center;
             gap: 20px;
-            padding: 36px 40px;
+            padding: 56px 40px;
             border-right: 1px solid var(--border);
             transition: background .2s;
         }
@@ -767,7 +767,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
             flex-wrap: wrap;
             gap: 24px;
         }
-        .footer-logo { height: 44px; }
+        .footer-logo { height: 56px; background: #fff; padding: 12px 16px; border-radius: 8px; }
         .footer-copy { color: rgba(255,255,255,0.4); font-size: 0.8125rem; }
         .footer-right { display: flex; align-items: center; gap: 20px; }
         .footer-portal {
@@ -816,11 +816,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
 <div class="topbar">
     <span>Consulta gratuita · Sin compromiso · Respuesta en 24h</span>
     <div class="topbar-right">
-        <a href="tel:900123456">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-            900 123 456
-        </a>
-        <a href="/portal/" style="color:rgba(255,255,255,0.8)">Acceso Portal Cliente &rarr;</a>
+        
+        <a href="https://app.leadsabogados.com/portal" style="color:rgba(255,255,255,0.8)">Acceso Portal Cliente &rarr;</a>
     </div>
 </div>
 
@@ -830,11 +827,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
     <div class="nav-menu">
         <a href="#contacto">Consulta gratis</a>
         <a href="#como-funciona">¿Cómo funciona?</a>
-        <a href="tel:900123456" style="display:flex;align-items:center;gap:6px">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-            900 123 456
-        </a>
-        <a href="/portal/" class="btn-portal">
+        
+        <a href="https://app.leadsabogados.com/portal" class="btn-portal">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
             <span>Mi Portal</span>
         </a>
@@ -866,12 +860,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
                 Sin compromiso — tú decides si continúas
             </div>
         </div>
-        <div class="hero-trust">
-            <div class="trust-avatars">
-                <div>JL</div><div>MR</div><div>AP</div><div>SF</div>
-            </div>
-            <span>Más de <strong>+500 clientes</strong> han confiado en nosotros</span>
-        </div>
+        
     </div>
 
     <div class="hero-right">
@@ -936,15 +925,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
     <div class="stats-inner">
         <div class="stat-item">
             <div class="stat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-            <div class="stat-text"><strong>&lt; 24h</strong><span>Tiempo de respuesta</span></div>
+            <div class="stat-text"><strong>Trato personal</strong><span>Atención a medida para tu caso</span></div>
         </div>
         <div class="stat-item">
             <div class="stat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
-            <div class="stat-text"><strong>+500</strong><span>Clientes atendidos</span></div>
+            <div class="stat-text"><strong>Abogados expertos</strong><span>Especialistas en cada área legal</span></div>
         </div>
         <div class="stat-item">
             <div class="stat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
-            <div class="stat-text"><strong>100%</strong><span>Confidencial y gratuito</span></div>
+            <div class="stat-text"><strong>100% Seguro</strong><span>Tu privacidad está garantizada</span></div>
         </div>
     </div>
 </section>
@@ -996,7 +985,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
         <h2>¿Ya tienes una cuenta? Accede a <span>tu portal</span></h2>
         <p>Consulta el estado de tu caso, documentos y comunicaciones con tu abogado desde cualquier dispositivo.</p>
         <div class="cta-band-btns">
-            <a href="/portal/" class="btn-white">
+            <a href="https://app.leadsabogados.com/portal" class="btn-white">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:6px"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                 Entrar al Portal del Cliente
             </a>
@@ -1010,7 +999,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
     <img src="<?php echo $logoUrl; ?>" alt="leadsabogados.com" class="footer-logo">
     <span class="footer-copy">© <?php echo date('Y'); ?> leadsabogados.com · Todos los derechos reservados</span>
     <div class="footer-right">
-        <a href="/portal/" class="footer-portal">
+        <a href="https://app.leadsabogados.com/portal" class="footer-portal">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
             Portal del Cliente
         </a>
@@ -1026,3 +1015,4 @@ window.addEventListener('scroll', () => {
 </script>
 </body>
 </html>
+
