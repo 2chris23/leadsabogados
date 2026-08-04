@@ -223,472 +223,806 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LA leadsabogados.com — Tu caso merece la mejor solución legal</title>
+    <title>leadsabogados.com — Asesoría Jurídica Profesional</title>
+    <meta name="description" content="Tu despacho de confianza. Cuéntanos tu caso y un abogado experto lo revisará de forma gratuita y sin compromiso.">
     <link rel="icon" type="image/png" href="/portal/crm/assets/images/favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #0a1f44;
-            --secondary: #1a4fba;
-            --accent: #2e6edd;
-            --text-main: #111827;
-            --text-light: #6b7280;
-            --bg-gray: #f3f4f6;
-            --bg-light: #f8fafc;
-            --white: #ffffff;
+            --navy:   #0b1d3a;
+            --navy2:  #122855;
+            --blue:   #1a56db;
+            --blue2:  #2563eb;
+            --accent: #3b82f6;
+            --gold:   #c9a84c;
+            --light:  #f0f4ff;
+            --gray:   #64748b;
+            --border: #e2e8f0;
+            --white:  #ffffff;
         }
-
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Inter', sans-serif; color: var(--text-main); background: var(--bg-gray); -webkit-font-smoothing: antialiased; }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Inter', sans-serif; color: #1e293b; background: #fff; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
         a { text-decoration: none; color: inherit; }
         img { max-width: 100%; height: auto; display: block; }
-        
-        /* Typography */
-        h1, h2, h3 { font-family: 'Playfair Display', serif; }
 
-        /* Navbar */
-        .navbar {
-            background: var(--white);
-            padding: 16px 40px;
+        /* ============ TOPBAR ============ */
+        .topbar {
+            background: var(--navy);
+            color: rgba(255,255,255,0.75);
+            font-size: 0.8125rem;
+            padding: 8px 40px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+        }
+        .topbar a { color: rgba(255,255,255,0.75); transition: color .2s; }
+        .topbar a:hover { color: #fff; }
+        .topbar-right { display: flex; align-items: center; gap: 24px; }
+
+        /* ============ NAVBAR ============ */
+        .navbar {
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+            padding: 0 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 80px;
             position: sticky;
             top: 0;
-            z-index: 50;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            z-index: 100;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.06);
         }
-        .nav-logo { height: 40px; }
-        .nav-right { display: flex; align-items: center; gap: 24px; }
-        .nav-phone { font-weight: 700; display: flex; align-items: center; gap: 8px; font-size: 1rem; }
-        .btn-dark {
-            background: var(--primary);
-            color: var(--white);
-            padding: 12px 24px;
-            border-radius: 4px;
+        .nav-logo { height: 52px; }
+        .nav-menu { display: flex; align-items: center; gap: 32px; }
+        .nav-menu a {
+            font-size: 0.9375rem;
+            font-weight: 500;
+            color: #374151;
+            transition: color .2s;
+            position: relative;
+            padding-bottom: 2px;
+        }
+        .nav-menu a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--blue2);
+            transition: width .25s;
+        }
+        .nav-menu a:hover { color: var(--blue2); }
+        .nav-menu a:hover::after { width: 100%; }
+        .btn-portal {
+            background: transparent;
+            border: 2px solid var(--navy);
+            color: var(--navy);
+            padding: 9px 20px;
+            border-radius: 6px;
             font-weight: 600;
             font-size: 0.875rem;
-            border: none;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .btn-dark:hover { background: #000; color: white; }
-
-        /* Hero Section */
-        .hero {
-            position: relative;
-            background: var(--bg-gray);
-            overflow: hidden;
-            display: flex;
+            transition: all .2s;
+            display: inline-flex;
             align-items: center;
+            gap: 6px;
         }
-        .hero-bg {
-            position: absolute;
-            right: 0;
-            top: 0;
-            width: 50%;
-            height: 100%;
-            object-fit: cover;
-            object-position: top center;
+        .btn-portal:hover { background: var(--navy); color: #fff; }
+        .btn-cta {
+            background: var(--blue2);
+            color: #fff;
+            padding: 10px 24px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.875rem;
+            transition: all .2s;
+            display: inline-block;
+            box-shadow: 0 4px 14px rgba(37,99,235,0.35);
         }
-        .hero-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            width: 100%;
-            padding: 80px 24px;
-            position: relative;
-            z-index: 10;
+        .btn-cta:hover { background: #1d4ed8; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(37,99,235,0.4); }
+
+        /* ============ HERO ============ */
+        .hero {
+            background: var(--navy);
+            min-height: 92vh;
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 40px;
-            align-items: center;
+            position: relative;
+            overflow: hidden;
         }
-        .hero-content {
-            padding-right: 40px;
+        .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 80% 100% at 70% 50%, rgba(26,86,219,0.25) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .hero-left {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 80px 60px 80px 80px;
+            position: relative;
+            z-index: 5;
+        }
+        .hero-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(59,130,246,0.15);
+            border: 1px solid rgba(59,130,246,0.3);
+            border-radius: 99px;
+            padding: 6px 14px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #93c5fd;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 24px;
+            width: fit-content;
+        }
+        .hero-eyebrow-dot {
+            width: 6px; height: 6px; border-radius: 50%; background: #3b82f6;
+            animation: pulse 1.8s infinite;
+        }
+        @keyframes pulse {
+            0%,100% { opacity:1; transform: scale(1); }
+            50% { opacity:.5; transform: scale(1.4); }
         }
         .hero-title {
-            font-size: 3.5rem;
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.5rem, 4vw, 3.75rem);
+            font-weight: 800;
+            color: #fff;
             line-height: 1.1;
-            font-weight: 700;
             margin-bottom: 24px;
-            color: var(--text-main);
+            letter-spacing: -0.02em;
         }
-        .hero-title span { color: var(--secondary); }
+        .hero-title em { font-style: italic; color: #93c5fd; }
         .hero-subtitle {
-            font-size: 1.125rem;
-            line-height: 1.6;
-            color: var(--text-light);
-            margin-bottom: 32px;
+            font-size: 1.0625rem;
+            color: rgba(255,255,255,0.65);
+            line-height: 1.7;
+            margin-bottom: 40px;
+            max-width: 440px;
         }
-        .hero-features { list-style: none; margin-bottom: 32px; }
-        .hero-features li {
+        .hero-badges {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-bottom: 48px;
+        }
+        .hero-badge {
             display: flex;
             align-items: center;
             gap: 12px;
-            margin-bottom: 12px;
+            font-size: 0.9375rem;
+            color: rgba(255,255,255,0.85);
             font-weight: 500;
         }
-        .hero-features svg { color: var(--secondary); flex-shrink: 0; }
-        
-        /* Form Card */
-        .form-card {
-            background: var(--white);
-            padding: 40px;
-            border-radius: 8px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
-            margin-left: 20px;
+        .badge-icon {
+            width: 36px; height: 36px; border-radius: 8px;
+            background: rgba(59,130,246,0.2);
+            border: 1px solid rgba(59,130,246,0.35);
+            display: flex; align-items: center; justify-content: center;
+            color: #93c5fd; flex-shrink: 0;
         }
-        .form-card h3 {
-            font-size: 1.75rem;
-            margin-bottom: 24px;
-            font-family: 'Playfair Display', serif;
+        .hero-divider {
+            width: 48px; height: 2px;
+            background: linear-gradient(90deg, #3b82f6, transparent);
+            margin-bottom: 32px;
         }
-        .form-card h3 span { color: var(--secondary); }
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
+        .hero-trust {
+            display: flex;
+            align-items: center;
             gap: 16px;
-            margin-bottom: 16px;
-        }
-        .input-field {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1px solid #d1d5db;
-            border-radius: 4px;
-            font-size: 0.9375rem;
-            font-family: 'Inter', sans-serif;
-        }
-        .input-field:focus { outline: none; border-color: var(--secondary); }
-        .textarea-field {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1px solid #d1d5db;
-            border-radius: 4px;
-            font-size: 0.9375rem;
-            min-height: 100px;
-            font-family: 'Inter', sans-serif;
-            margin-bottom: 16px;
-            resize: vertical;
-        }
-        .checkbox-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
             font-size: 0.8125rem;
-            color: var(--text-light);
-            margin-bottom: 24px;
+            color: rgba(255,255,255,0.45);
         }
-        .btn-submit {
-            width: 100%;
-            background: var(--primary);
-            color: var(--white);
-            padding: 16px;
-            border: none;
-            border-radius: 4px;
-            font-weight: 700;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: background 0.2s;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
+        .hero-trust strong { color: rgba(255,255,255,0.7); }
+        .trust-avatars { display: flex; }
+        .trust-avatars div {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            border: 2px solid var(--navy);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.6875rem; font-weight: 700; color: #fff;
+            margin-left: -8px;
         }
-        .btn-submit:hover { background: #000; }
+        .trust-avatars div:first-child { margin-left: 0; }
 
-        .alert { padding: 16px; border-radius: 4px; margin-bottom: 24px; font-weight: 500; font-size: 0.9375rem; }
-        .alert-success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
-        .alert-error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
-
-        /* Stats / Features Bar */
-        .features-bar {
-            background: var(--white);
-            border-top: 1px solid #e5e7eb;
-            border-bottom: 1px solid #e5e7eb;
-            padding: 40px 24px;
-        }
-        .features-grid {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 40px;
-            text-align: center;
-        }
-        .feature-item { display: flex; flex-direction: column; align-items: center; }
-        .feature-icon { width: 48px; height: 48px; margin-bottom: 16px; color: var(--secondary); display: flex; align-items: center; justify-content: center; border: 1px solid #e5e7eb; border-radius: 50%; }
-        .feature-title { font-weight: 700; margin-bottom: 8px; font-size: 1rem; }
-        .feature-desc { color: var(--text-light); font-size: 0.875rem; line-height: 1.5; }
-
-        /* Video Section */
-        .video-section {
+        /* Hero Right — Form Panel */
+        .hero-right {
             position: relative;
-            background: var(--primary);
-            color: var(--white);
-            padding: 100px 24px;
             display: flex;
             align-items: center;
-            overflow: hidden;
+            justify-content: center;
+            padding: 60px 60px 60px 20px;
+            z-index: 5;
         }
-        .video-bg {
-            position: absolute;
-            right: 0;
-            top: 0;
-            width: 55%;
-            height: 100%;
-            object-fit: cover;
-            opacity: 0.5;
-        }
-        .video-overlay {
+        .hero-img-bg {
             position: absolute;
             inset: 0;
-            background: linear-gradient(90deg, var(--primary) 40%, transparent 100%);
-        }
-        .video-content {
-            position: relative;
-            z-index: 10;
-            max-width: 1200px;
-            margin: 0 auto;
+            object-fit: cover;
+            object-position: center top;
             width: 100%;
+            height: 100%;
+            opacity: 0.18;
+        }
+        .form-panel {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.08);
+            padding: 44px 40px;
+            width: 100%;
+            max-width: 440px;
+            position: relative;
+            z-index: 2;
+        }
+        .form-panel-header {
+            margin-bottom: 28px;
+        }
+        .form-panel-tag {
+            display: inline-block;
+            background: #eff6ff;
+            color: var(--blue2);
+            font-size: 0.6875rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 4px 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        .form-panel h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.625rem;
+            font-weight: 700;
+            color: var(--navy);
+            line-height: 1.2;
+        }
+        .form-panel h2 span { color: var(--blue2); font-style: italic; }
+        .form-group { margin-bottom: 14px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+        .inp {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-family: 'Inter', sans-serif;
+            color: #1e293b;
+            background: #fafafa;
+            transition: all .2s;
+            outline: none;
+        }
+        .inp::placeholder { color: #9ca3af; }
+        .inp:focus { border-color: var(--blue2); background: #fff; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+        .inp-textarea {
+            min-height: 90px;
+            resize: vertical;
+        }
+        .upload-label {
+            display: block;
+            padding: 12px 14px;
+            border: 1.5px dashed #d1d5db;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            color: #6b7280;
+            font-size: 0.8125rem;
+            background: #fafafa;
+            transition: all .2s;
+        }
+        .upload-label:hover { border-color: var(--blue2); background: #eff6ff; color: var(--blue2); }
+        #archivos-input { display: none; }
+        .form-alert {
+            padding: 14px 16px;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 20px;
+        }
+        .form-alert-success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+        .form-alert-error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+        .btn-form-submit {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #1d4ed8, #2563eb);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all .25s;
+            letter-spacing: 0.02em;
+            box-shadow: 0 4px 16px rgba(37,99,235,0.4);
+            margin-top: 6px;
+        }
+        .btn-form-submit:hover { background: linear-gradient(135deg, #1e40af, #1d4ed8); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(37,99,235,0.45); }
+        .form-security {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #9ca3af;
+            margin-top: 12px;
             display: flex;
             align-items: center;
+            justify-content: center;
+            gap: 5px;
         }
-        .video-text { max-width: 500px; }
-        .video-text h2 { font-size: 2.5rem; margin-bottom: 24px; line-height: 1.2; font-family: 'Playfair Display', serif; }
-        .video-text h2 span { color: var(--accent); }
-        .video-text p { font-size: 1.125rem; color: #d1d5db; margin-bottom: 32px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 24px; }
-        .play-btn {
-            width: 64px; height: 64px; border-radius: 50%; border: 2px solid white; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); cursor: pointer; transition: transform 0.2s;
-            position: absolute; left: 60%; top: 50%; transform: translate(-50%, -50%);
+
+        /* ============ STATS ============ */
+        .stats-bar {
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+            padding: 0;
         }
-        .play-btn:hover { transform: translate(-50%, -50%) scale(1.1); }
-        .play-btn svg { fill: white; margin-left: 4px; }
-        
-        /* Process Steps */
-        .process-section {
-            background: var(--bg-light);
-            padding: 80px 24px;
-            text-align: center;
-        }
-        .process-title { font-size: 2rem; margin-bottom: 60px; }
-        .process-title span { color: var(--secondary); }
-        .process-grid {
-            max-width: 1000px;
+        .stats-inner {
+            max-width: 1200px;
             margin: 0 auto;
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 40px;
+        }
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 36px 40px;
+            border-right: 1px solid var(--border);
+            transition: background .2s;
+        }
+        .stat-item:last-child { border-right: none; }
+        .stat-icon {
+            width: 52px; height: 52px; border-radius: 12px;
+            background: var(--light);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--blue2);
+            flex-shrink: 0;
+        }
+        .stat-text strong { display: block; font-size: 1.375rem; font-weight: 800; color: var(--navy); margin-bottom: 2px; }
+        .stat-text span { font-size: 0.875rem; color: var(--gray); font-weight: 500; }
+
+        /* ============ VIDEO SECTION ============ */
+        .video-wrap {
+            position: relative;
+            min-height: 480px;
+            overflow: hidden;
+        }
+        .video-wrap video {
+            position: absolute; inset: 0;
+            width: 100%; height: 100%;
+            object-fit: cover; z-index: 1;
+        }
+        .video-wrap::after {
+            content: '';
+            position: absolute; inset: 0; z-index: 2;
+            background: linear-gradient(100deg, rgba(11,29,58,0.92) 38%, rgba(11,29,58,0.5) 70%, rgba(11,29,58,0.2) 100%);
+        }
+        .video-body {
+            position: relative; z-index: 3;
+            max-width: 1200px; margin: 0 auto;
+            padding: 100px 80px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+        }
+        .video-body h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 3vw, 3rem);
+            color: #fff;
+            line-height: 1.2;
+            margin-bottom: 20px;
+        }
+        .video-body h2 span { color: #93c5fd; font-style: italic; }
+        .video-body p { color: rgba(255,255,255,0.7); font-size: 1.0625rem; line-height: 1.7; margin-bottom: 32px; }
+        .btn-light {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border: 1.5px solid rgba(255,255,255,0.25);
+            color: #fff;
+            padding: 12px 28px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9375rem;
+            transition: all .2s;
+        }
+        .btn-light:hover { background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.5); }
+
+        /* ============ STEPS ============ */
+        .steps-section {
+            background: #f8fafc;
+            padding: 100px 40px;
+            text-align: center;
+        }
+        .section-eyebrow {
+            display: inline-block;
+            color: var(--blue2);
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            margin-bottom: 14px;
+        }
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.75rem, 3vw, 2.5rem);
+            font-weight: 800;
+            color: var(--navy);
+            margin-bottom: 64px;
+            line-height: 1.2;
+        }
+        .section-title span { color: var(--blue2); font-style: italic; }
+        .steps-grid {
+            max-width: 900px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
             position: relative;
         }
-        .process-step { position: relative; z-index: 2; background: var(--bg-light); padding: 0 20px; }
-        .step-number { font-size: 3rem; font-family: 'Playfair Display', serif; color: #e5e7eb; font-weight: 700; margin-bottom: -15px; position: relative; z-index: 1; }
-        .step-icon { width: 64px; height: 64px; margin: 0 auto 16px; background: var(--white); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--secondary); box-shadow: 0 4px 6px rgba(0,0,0,0.05); position: relative; z-index: 2; border: 1px solid #e5e7eb; }
-        .step-title { font-weight: 700; margin-bottom: 8px; }
-        .step-desc { font-size: 0.875rem; color: var(--text-light); }
-        .process-line {
-            position: absolute; top: 60px; left: 15%; right: 15%; height: 1px; border-top: 1px dashed #cbd5e1; z-index: 0;
+        .steps-grid::before {
+            content: '';
+            position: absolute;
+            top: 36px;
+            left: 18%;
+            right: 18%;
+            height: 1px;
+            border-top: 2px dashed #cbd5e1;
         }
-
-        /* Bottom CTA */
-        .bottom-cta {
-            display: flex;
-            align-items: center;
-            background: var(--white);
+        .step {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 36px 24px;
+            position: relative;
+            z-index: 2;
+            transition: all .25s;
         }
-        .cta-img { width: 50%; object-fit: cover; height: 500px; }
-        .cta-content { padding: 60px 80px; width: 50%; }
-        .cta-content h2 { font-size: 2.5rem; margin-bottom: 24px; line-height: 1.2; }
-        .cta-content h2 span { color: var(--secondary); }
-        .cta-content p { color: var(--text-light); margin-bottom: 32px; font-size: 1.125rem; }
+        .step:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.08); border-color: #bfdbfe; }
+        .step-num {
+            width: 48px; height: 48px; border-radius: 12px;
+            background: linear-gradient(135deg, var(--blue2), #1d4ed8);
+            color: #fff;
+            font-weight: 800;
+            font-size: 1.125rem;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 20px;
+            box-shadow: 0 8px 16px rgba(37,99,235,0.35);
+        }
+        .step h4 { font-size: 1rem; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
+        .step p { font-size: 0.875rem; color: var(--gray); line-height: 1.6; }
 
-        /* Footer */
+        /* ============ CTA BAND ============ */
+        .cta-band {
+            background: linear-gradient(135deg, var(--navy) 0%, var(--navy2) 100%);
+            padding: 80px 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .cta-band::before {
+            content: '';
+            position: absolute;
+            top: -60px; right: -60px;
+            width: 320px; height: 320px;
+            border-radius: 50%;
+            background: rgba(59,130,246,0.08);
+        }
+        .cta-band::after {
+            content: '';
+            position: absolute;
+            bottom: -80px; left: -60px;
+            width: 400px; height: 400px;
+            border-radius: 50%;
+            background: rgba(59,130,246,0.06);
+        }
+        .cta-band-inner { position: relative; z-index: 2; max-width: 680px; margin: 0 auto; }
+        .cta-band h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 3.5vw, 3rem);
+            color: #fff;
+            margin-bottom: 16px;
+            line-height: 1.2;
+        }
+        .cta-band h2 span { color: #93c5fd; font-style: italic; }
+        .cta-band p { color: rgba(255,255,255,0.65); font-size: 1.125rem; margin-bottom: 40px; line-height: 1.6; }
+        .cta-band-btns { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+        .btn-white {
+            background: #fff;
+            color: var(--navy);
+            padding: 14px 32px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.9375rem;
+            transition: all .2s;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+        }
+        .btn-white:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.25); }
+        .btn-outline-white {
+            border: 2px solid rgba(255,255,255,0.35);
+            color: #fff;
+            padding: 14px 32px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9375rem;
+            transition: all .2s;
+        }
+        .btn-outline-white:hover { border-color: #fff; background: rgba(255,255,255,0.1); }
+
+        /* ============ FOOTER ============ */
         .footer {
-            background: var(--white);
-            border-top: 1px solid #e5e7eb;
-            padding: 40px;
+            background: #0b1d3a;
+            padding: 48px 80px;
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 24px;
         }
-        .footer-logo { height: 32px; }
-        .footer-links { display: flex; gap: 24px; font-size: 0.875rem; color: var(--text-light); }
-        .footer-copy { text-align: center; color: var(--text-light); font-size: 0.75rem; width: 100%; display: block; margin-top: 24px; }
+        .footer-logo { height: 44px; }
+        .footer-copy { color: rgba(255,255,255,0.4); font-size: 0.8125rem; }
+        .footer-right { display: flex; align-items: center; gap: 20px; }
+        .footer-portal {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: rgba(255,255,255,0.8);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            transition: all .2s;
+        }
+        .footer-portal:hover { background: rgba(255,255,255,0.15); color: #fff; }
 
-        /* Responsive */
+        /* ============ RESPONSIVE ============ */
         @media (max-width: 1024px) {
-            .hero-container, .bottom-cta { grid-template-columns: 1fr; flex-direction: column; }
-            .hero-bg, .video-bg { width: 100%; height: 50%; top: auto; bottom: 0; }
-            .cta-img, .cta-content { width: 100%; }
-            .play-btn { left: 50%; top: 75%; }
-            .process-grid, .features-grid { grid-template-columns: 1fr; gap: 40px; }
-            .process-line { display: none; }
+            .hero { grid-template-columns: 1fr; min-height: auto; }
+            .hero-left { padding: 60px 32px 40px; }
+            .hero-right { padding: 20px 32px 60px; }
+            .video-body { grid-template-columns: 1fr; padding: 60px 32px; gap: 40px; }
+            .steps-grid { grid-template-columns: 1fr; }
+            .steps-grid::before { display: none; }
+            .stats-inner { grid-template-columns: 1fr; }
+            .stat-item { border-right: none; border-bottom: 1px solid var(--border); padding: 24px 32px; }
+            .stat-item:last-child { border-bottom: none; }
+            .footer { padding: 40px 32px; flex-direction: column; text-align: center; }
         }
         @media (max-width: 768px) {
-            .navbar { padding: 16px; }
-            .nav-phone { display: none; }
-            .hero-title { font-size: 2.5rem; }
-            .form-card { margin-left: 0; padding: 24px; }
-            .form-grid { grid-template-columns: 1fr; }
-            .footer { flex-direction: column; gap: 20px; }
+            .topbar { display: none; }
+            .navbar { padding: 0 20px; height: 68px; }
+            .nav-logo { height: 40px; }
+            .nav-menu { gap: 12px; }
+            .hero-left { padding: 48px 20px 32px; }
+            .hero-right { padding: 0 20px 48px; }
+            .form-panel { padding: 28px 20px; }
+            .form-row { grid-template-columns: 1fr; }
+            .cta-band { padding: 60px 20px; }
+            .btn-portal span { display: none; }
         }
     </style>
 </head>
 <body>
 
-    <!-- NAVBAR -->
-    <nav class="navbar">
-        <a href="/">
-            <img src="<?php echo $logoUrl; ?>" alt="LA leadsabogados" class="nav-logo">
+<!-- TOP ANNOUNCEMENT BAR -->
+<div class="topbar">
+    <span>Consulta gratuita · Sin compromiso · Respuesta en 24h</span>
+    <div class="topbar-right">
+        <a href="tel:900123456">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            900 123 456
         </a>
-        <div class="nav-right">
-            <a href="tel:900123456" class="nav-phone">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                900 123 456
-            </a>
-            <a href="#contacto" class="btn-dark">Te llamamos</a>
+        <a href="/portal/" style="color:rgba(255,255,255,0.8)">Acceso Portal Cliente &rarr;</a>
+    </div>
+</div>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="top">
+    <a href="/"><img src="<?php echo $logoUrl; ?>" alt="leadsabogados.com" class="nav-logo"></a>
+    <div class="nav-menu">
+        <a href="#contacto">Consulta gratis</a>
+        <a href="#como-funciona">¿Cómo funciona?</a>
+        <a href="tel:900123456" style="display:flex;align-items:center;gap:6px">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            900 123 456
+        </a>
+        <a href="/portal/" class="btn-portal">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <span>Mi Portal</span>
+        </a>
+        <a href="#contacto" class="btn-cta">Te llamamos</a>
+    </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="contacto">
+    <div class="hero-left">
+        <div class="hero-eyebrow">
+            <span class="hero-eyebrow-dot"></span>
+            Consulta 100% gratuita y confidencial
         </div>
-    </nav>
-
-    <!-- HERO SECTION -->
-    <section class="hero">
-        <img src="<?php echo $heroUrl; ?>" alt="Abogada" class="hero-bg">
-        <div class="hero-container">
-            <div class="hero-content">
-                <h1 class="hero-title">Tu caso merece la mejor <span>solución legal</span></h1>
-                <p class="hero-subtitle">Cuéntanos qué ha ocurrido y un abogado experto revisará tu caso de forma gratuita y sin compromiso.</p>
-                <ul class="hero-features">
-                    <li><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zm-1.177-7.86l-2.765-2.765 1.414-1.414 1.351 1.351 4.316-4.316 1.414 1.414-5.73 5.73z"/></svg> Respuesta en menos de 24h</li>
-                    <li><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zm-1.177-7.86l-2.765-2.765 1.414-1.414 1.351 1.351 4.316-4.316 1.414 1.414-5.73 5.73z"/></svg> Confidencialidad 100% garantizada</li>
-                    <li><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zm-1.177-7.86l-2.765-2.765 1.414-1.414 1.351 1.351 4.316-4.316 1.414 1.414-5.73 5.73z"/></svg> Sin compromiso alguno</li>
-                </ul>
+        <h1 class="hero-title">Tu caso merece<br>la mejor <em>solución legal</em></h1>
+        <p class="hero-subtitle">Cuéntanos qué ha ocurrido y un abogado especialista revisará tu situación de forma gratuita, rápida y sin ningún compromiso.</p>
+        <div class="hero-divider"></div>
+        <div class="hero-badges">
+            <div class="hero-badge">
+                <div class="badge-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+                Respuesta garantizada en menos de 24 horas
             </div>
-            
-            <div class="form-card" id="contacto">
-                <h3>Cuéntanos <span>tu caso</span></h3>
-                
-                <?php if ($formExito): ?>
-                    <div class="alert alert-success">
-                        ¡Gracias por contactarnos! Hemos recibido su consulta y nos pondremos en contacto con usted en breve.<br><br>
-                        Le hemos enviado un correo con los datos de acceso al Portal del Cliente para que pueda hacer seguimiento de su caso.
-                    </div>
-                <?php else: ?>
-                    <?php if (!empty($formError)): ?>
-                        <div class="alert alert-error"><?php echo $formError; ?></div>
-                    <?php endif; ?>
+            <div class="hero-badge">
+                <div class="badge-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+                Confidencialidad absoluta en tu caso
+            </div>
+            <div class="hero-badge">
+                <div class="badge-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+                Sin compromiso — tú decides si continúas
+            </div>
+        </div>
+        <div class="hero-trust">
+            <div class="trust-avatars">
+                <div>JL</div><div>MR</div><div>AP</div><div>SF</div>
+            </div>
+            <span>Más de <strong>+500 clientes</strong> han confiado en nosotros</span>
+        </div>
+    </div>
 
-                    <form action="index.php" method="POST" enctype="multipart/form-data">
-                        <input type="hidden" name="consulta_submit" value="1">
-                        <input type="hidden" name="_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
-                        <input type="text" name="website_url" style="display:none" tabindex="-1" autocomplete="off">
-                        
-                        <div class="form-grid">
-                            <input type="text" name="nombre" class="input-field" placeholder="Nombre" value="<?php echo esc($formData['nombre']); ?>" required>
-                            <input type="text" name="apellidos" class="input-field" placeholder="Apellidos" value="<?php echo esc($formData['apellidos']); ?>" required>
-                        </div>
-                        <div class="form-grid">
-                            <input type="tel" name="telefono" class="input-field" placeholder="Teléfono" value="<?php echo esc($formData['telefono']); ?>" required>
-                            <input type="email" name="email" class="input-field" placeholder="Email" value="<?php echo esc($formData['email']); ?>" required>
-                        </div>
-                        <input type="text" name="direccion" class="input-field" placeholder="Provincia / Ciudad" value="<?php echo esc($formData['direccion']); ?>" style="width:100%;margin-bottom:16px;">
-                        
-                        <textarea name="descripcion" class="textarea-field" placeholder="Describe tu caso" required><?php echo esc($formData['descripcion']); ?></textarea>
-                        
-                        <div style="margin-bottom:20px;">
-                            <label style="display:block;font-size:.875rem;color:#6b7280;margin-bottom:6px;">Adjuntar documentos <span style="font-size:.8rem;color:#9ca3af;">(opcional, máx. 10MB)</span></label>
-                            <input type="file" name="archivos[]" multiple accept="*/*" style="width:100%;padding:8px 12px;border:1px solid #d1d5db;border-radius:4px;font-size:.875rem;background:#f9fafb;">
-                        </div>
+    <div class="hero-right">
+        <img src="<?php echo $heroUrl; ?>" alt="Abogada" class="hero-img-bg">
+        <div class="form-panel">
+            <div class="form-panel-header">
+                <span class="form-panel-tag">Consulta gratuita</span>
+                <h2>Cuéntanos <span>tu caso</span></h2>
+            </div>
 
-                        <button type="submit" class="btn-submit">Quiero que revisen mi caso</button>
-                    </form>
+            <?php if ($formExito): ?>
+                <div class="form-alert form-alert-success">
+                    <strong>✓ ¡Solicitud recibida!</strong><br>
+                    Nos pondremos en contacto contigo en menos de 24h. Recibirás también los datos de acceso a tu Portal del Cliente.
+                </div>
+            <?php else: ?>
+                <?php if (!empty($formError)): ?>
+                    <div class="form-alert form-alert-error"><?php echo $formError; ?></div>
                 <?php endif; ?>
-            </div>
-        </div>
-    </section>
 
-    <!-- STATS / FEATURES BAR -->
-    <section class="features-bar">
-        <div class="features-grid">
-            <div class="feature-item">
-                <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-                <h4 class="feature-title">Respuesta rápida</h4>
-                <p class="feature-desc">Un abogado se pondrá en contacto contigo en menos de 24 horas.</p>
-            </div>
-            <div class="feature-item">
-                <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
-                <h4 class="feature-title">Confidencial y seguro</h4>
-                <p class="feature-desc">Tratamos tu caso con la máxima confidencialidad y protección de datos.</p>
-            </div>
-            <div class="feature-item">
-                <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
-                <h4 class="feature-title">Sin compromiso</h4>
-                <p class="feature-desc">Estudiamos tu caso gratis y tú decides sin ningún tipo de obligación.</p>
-            </div>
-        </div>
-    </section>
+                <form action="index.php" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="consulta_submit" value="1">
+                    <input type="hidden" name="_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
+                    <input type="text" name="website_url" style="display:none" tabindex="-1" autocomplete="off">
 
-    <!-- VIDEO SECTION -->
-    <section class="video-section" style="padding:0;overflow:hidden;position:relative;min-height:420px;">
-        <div class="video-overlay" style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(10,31,68,0.85) 35%,rgba(10,31,68,0.3) 100%);z-index:2;"></div>
-        <video autoplay muted loop playsinline
-               style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1;"
-               id="promo-video">
-            <source src="/portal/crm/assets/images/promo.mp4" type="video/mp4">
-        </video>
-        <div class="video-content" style="position:relative;z-index:3;max-width:1200px;margin:0 auto;width:100%;padding:100px 40px;">
-            <div class="video-text" style="max-width:520px;color:#fff;">
-                <h2 style="font-size:2.5rem;margin-bottom:24px;line-height:1.2;font-family:'Playfair Display',serif;">Estamos aquí para proteger <span style="color:#4d8ef7;">lo que más te importa</span></h2>
-                <p style="font-size:1.125rem;color:#d1d5db;border-top:1px solid rgba(255,255,255,0.2);padding-top:24px;">Déjanos ayudarte a encontrar la mejor solución legal para tu caso.</p>
-            </div>
+                    <div class="form-row">
+                        <input type="text" name="nombre" class="inp" placeholder="Nombre *" value="<?php echo esc($formData['nombre']); ?>" required>
+                        <input type="text" name="apellidos" class="inp" placeholder="Apellidos *" value="<?php echo esc($formData['apellidos']); ?>" required>
+                    </div>
+                    <div class="form-row">
+                        <input type="tel" name="telefono" class="inp" placeholder="Teléfono *" value="<?php echo esc($formData['telefono']); ?>" required>
+                        <input type="email" name="email" class="inp" placeholder="Email *" value="<?php echo esc($formData['email']); ?>" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" name="direccion" class="inp" placeholder="Provincia / Ciudad" value="<?php echo esc($formData['direccion']); ?>">
+                    </div>
+                    <div class="form-group">
+                        <textarea name="descripcion" class="inp inp-textarea" placeholder="Describe brevemente tu caso *" required><?php echo esc($formData['descripcion']); ?></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="upload-label" for="archivos-input">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:6px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                            Adjuntar documentos <span style="opacity:.6;">(opcional · máx. 10MB)</span>
+                        </label>
+                        <input type="file" name="archivos[]" id="archivos-input" multiple accept="*/*" onchange="this.previousElementSibling.textContent = this.files.length + ' archivo(s) seleccionado(s)'">
+                    </div>
+                    <button type="submit" class="btn-form-submit">
+                        Quiero que revisen mi caso &rarr;
+                    </button>
+                    <div class="form-security">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        Información 100% segura y confidencial
+                    </div>
+                </form>
+            <?php endif; ?>
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- HOW IT WORKS -->
-    <section class="process-section">
-        <h2 class="process-title">¿Cómo <span>funciona?</span></h2>
-        <div class="process-grid">
-            <div class="process-line"></div>
-            <div class="process-step">
-                <div class="step-number">01</div>
-                <div class="step-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></div>
-                <h4 class="step-title">Cuéntanos tu caso</h4>
-                <p class="step-desc">Completa el formulario con los detalles de tu situación.</p>
-            </div>
-            <div class="process-step">
-                <div class="step-number">02</div>
-                <div class="step-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
-                <h4 class="step-title">Un abogado lo revisa</h4>
-                <p class="step-desc">Un especialista analiza tu caso y te dará la mejor solución.</p>
-            </div>
-            <div class="process-step">
-                <div class="step-number">03</div>
-                <div class="step-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
-                <h4 class="step-title">Hablamos contigo</h4>
-                <p class="step-desc">Nos pondremos en contacto contigo para informarte sin compromiso.</p>
-            </div>
+<!-- STATS BAR -->
+<section class="stats-bar">
+    <div class="stats-inner">
+        <div class="stat-item">
+            <div class="stat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+            <div class="stat-text"><strong>&lt; 24h</strong><span>Tiempo de respuesta</span></div>
         </div>
-    </section>
-
-    <!-- BOTTOM CTA -->
-    <section class="bottom-cta">
-        <img src="<?php echo $videoUrl; ?>" alt="Familia feliz" class="cta-img">
-        <div class="cta-content">
-            <h2>Estamos aquí para proteger <span>lo que más te importa</span></h2>
-            <p>Déjanos ayudarte a encontrar la mejor solución legal para tu caso.</p>
-            <a href="#contacto" class="btn-dark" style="display:inline-block">Hablar con un abogado</a>
+        <div class="stat-item">
+            <div class="stat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+            <div class="stat-text"><strong>+500</strong><span>Clientes atendidos</span></div>
         </div>
-    </section>
+        <div class="stat-item">
+            <div class="stat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+            <div class="stat-text"><strong>100%</strong><span>Confidencial y gratuito</span></div>
+        </div>
+    </div>
+</section>
 
-    <!-- FOOTER -->
-    <footer class="footer">
+<!-- VIDEO SECTION -->
+<section class="video-wrap">
+    <video autoplay muted loop playsinline>
+        <source src="/portal/crm/assets/images/promo.mp4" type="video/mp4">
+    </video>
+    <div class="video-body">
         <div>
-            <img src="<?php echo $logoUrl; ?>" alt="LA leadsabogados" class="footer-logo">
+            <h2>Estamos aquí para proteger <span>lo que más te importa</span></h2>
+            <p>Cada caso es único. Nuestros abogados analizan tu situación con detalle y te ofrecen la mejor estrategia legal posible.</p>
+            <a href="#contacto" class="btn-light">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                Hablar con un abogado
+            </a>
         </div>
-        <div class="footer-links">
-            <a href="#">Política de privacidad</a>
-            <a href="#">Aviso legal</a>
-            <a href="#">Política de cookies</a>
-        </div>
-        <span class="footer-copy">© leadsabogados.com - Todos los derechos reservados</span>
-    </footer>
+        <div></div>
+    </div>
+</section>
 
+<!-- HOW IT WORKS -->
+<section class="steps-section" id="como-funciona">
+    <span class="section-eyebrow">Proceso simple y rápido</span>
+    <h2 class="section-title">¿Cómo <span>funciona?</span></h2>
+    <div class="steps-grid">
+        <div class="step">
+            <div class="step-num">01</div>
+            <h4>Cuéntanos tu caso</h4>
+            <p>Rellena el formulario en menos de 2 minutos con los detalles de tu situación.</p>
+        </div>
+        <div class="step">
+            <div class="step-num">02</div>
+            <h4>Un abogado lo revisa</h4>
+            <p>Un especialista analiza tu caso en profundidad y prepara la mejor estrategia.</p>
+        </div>
+        <div class="step">
+            <div class="step-num">03</div>
+            <h4>Hablamos contigo</h4>
+            <p>Nos ponemos en contacto contigo en menos de 24h con una solución clara.</p>
+        </div>
+    </div>
+</section>
+
+<!-- CTA BAND -->
+<section class="cta-band">
+    <div class="cta-band-inner">
+        <h2>¿Ya tienes una cuenta? Accede a <span>tu portal</span></h2>
+        <p>Consulta el estado de tu caso, documentos y comunicaciones con tu abogado desde cualquier dispositivo.</p>
+        <div class="cta-band-btns">
+            <a href="/portal/" class="btn-white">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:6px"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                Entrar al Portal del Cliente
+            </a>
+            <a href="#contacto" class="btn-outline-white">Primera consulta gratis &rarr;</a>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+    <img src="<?php echo $logoUrl; ?>" alt="leadsabogados.com" class="footer-logo">
+    <span class="footer-copy">© <?php echo date('Y'); ?> leadsabogados.com · Todos los derechos reservados</span>
+    <div class="footer-right">
+        <a href="/portal/" class="footer-portal">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Portal del Cliente
+        </a>
+    </div>
+</footer>
+
+<script>
+// Sticky navbar shadow on scroll
+window.addEventListener('scroll', () => {
+    document.querySelector('.navbar').style.boxShadow =
+        window.scrollY > 10 ? '0 4px 24px rgba(0,0,0,0.10)' : '0 2px 20px rgba(0,0,0,0.06)';
+});
+</script>
 </body>
 </html>
