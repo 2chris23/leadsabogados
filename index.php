@@ -43,18 +43,14 @@ $csrfToken = $_SESSION['landing_csrf'];
 function esc($s) { return htmlspecialchars($s ?? '', ENT_QUOTES, 'UTF-8'); }
 
 $db = Database::getInstance();
-$crmUrl = APP_URL; // Usar el APP_URL definido en config.php (https://leadsabogados.com/portal/crm o similar)
+$crmUrl = APP_URL;
 $logoUrl = '/portal/crm/assets/images/logo.png';
-$heroUrl = '/portal/crm/assets/images/hero-abogados.png';
+$heroUrl = '/portal/crm/assets/images/hero_lawyer.jpg';
+$videoUrl = '/portal/crm/assets/images/family_video.jpg';
 
 // Migración: agregar columna password_plain y fecha_nacimiento si no existen
-try {
-    $db->query("ALTER TABLE portal_cuentas ADD COLUMN password_plain VARCHAR(100) DEFAULT NULL");
-} catch (Throwable $e) {} 
-try {
-    $db->query("ALTER TABLE portal_cuentas ADD COLUMN fecha_nacimiento DATE DEFAULT NULL");
-} catch (Throwable $e) {} 
-
+try { $db->query("ALTER TABLE portal_cuentas ADD COLUMN password_plain VARCHAR(100) DEFAULT NULL"); } catch (Throwable $e) {} 
+try { $db->query("ALTER TABLE portal_cuentas ADD COLUMN fecha_nacimiento DATE DEFAULT NULL"); } catch (Throwable $e) {} 
 
 // --- Procesar formulario ---
 $formExito = false;
@@ -91,17 +87,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
             'apellidos'       => trim($_POST['apellidos'] ?? ''),
             'email'           => trim($_POST['email'] ?? ''),
             'telefono'        => trim($_POST['telefono'] ?? ''),
-            'dni_nif'         => trim($_POST['dni_nif'] ?? ''),
             'direccion'       => trim($_POST['direccion'] ?? ''),
-            'fecha_nacimiento'=> trim($_POST['fecha_nacimiento'] ?? ''),
             'tipo_problema'   => trim($_POST['tipo_problema'] ?? '') ?: 'Otro',
-            'descripcion'     => trim($_POST['descripcion'] ?? '')
+            'descripcion'     => trim($_POST['descripcion'] ?? ''),
+            'dni_nif'         => 'No provisto',
+            'fecha_nacimiento'=> null
         ];
 
         $autoPassword = substr(str_shuffle('ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$'), 0, 10);
 
-        if (empty($formData['nombre']) || empty($formData['apellidos']) || empty($formData['dni_nif']) || empty($formData['direccion']) || empty($formData['fecha_nacimiento'])) {
-            $formError = 'Nombre, apellidos, DNI/NIF, dirección y fecha de nacimiento son obligatorios.';
+        if (empty($formData['nombre']) || empty($formData['apellidos']) || empty($formData['email'])) {
+            $formError = 'Nombre, apellidos y email son obligatorios.';
         } elseif (!filter_var($formData['email'], FILTER_VALIDATE_EMAIL)) {
             $formError = 'El correo electrónico no es válido.';
         }
@@ -115,7 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
         if (empty($formError)) {
             $existe = $db->fetchOne("SELECT id FROM portal_cuentas WHERE email = ?", [$formData['email']]);
             if ($existe) {
-                $formError = 'Ya existe una cuenta con este correo. <a href="https://leadsabogados.com/portal/" style="color:#2e6edd;font-weight:700">Inicie sesión aquí</a>';
+                $formError = 'Ya existe una cuenta con este correo. <a href="/portal/" style="color:#2e6edd;font-weight:700">Inicie sesión aquí</a>';
             }
         }
 
@@ -131,7 +127,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
                     'telefono'      => $formData['telefono'] ?: null,
                     'dni_nif'       => $formData['dni_nif'],
                     'direccion'     => $formData['direccion'],
-                    'fecha_nacimiento'=> $formData['fecha_nacimiento'] ?: null,
+                    'fecha_nacimiento'=> $formData['fecha_nacimiento'],
                     'password_hash' => password_hash($autoPassword, PASSWORD_DEFAULT),
                     'password_plain'=> $autoPassword,
                     'ip_registro'   => $_SERVER['REMOTE_ADDR'] ?? '',
@@ -227,456 +223,481 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Despacho de Abogados — Asesoría Jurídica Integral</title>
-    <meta name="description" content="Despacho de abogados especializado en derecho civil, penal, laboral y mercantil. Consulte su caso desde nuestro portal seguro.">
+    <title>LA leadsabogados.com — Tu caso merece la mejor solución legal</title>
     <link rel="icon" type="image/png" href="<?php echo $logoUrl; ?>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Inter', sans-serif; color: #1a1a2e; background: #fff; overflow-x: hidden; }
-        a { text-decoration: none; color: inherit; }
-        img { max-width: 100%; height: auto; }
-
         :root {
-            --primary: #2e6edd;
-            --primary-dark: #1e52ab;
-            --primary-light: #e8f0fe;
-            --dark: #0f172a;
-            --text: #1a1a2e;
-            --muted: #64748b;
-            --border: #e2e8f0;
+            --primary: #0a1f44;
+            --secondary: #1a4fba;
+            --accent: #2e6edd;
+            --text-main: #111827;
+            --text-light: #6b7280;
+            --bg-gray: #f3f4f6;
+            --bg-light: #f8fafc;
+            --white: #ffffff;
         }
 
-        /* --- NAV --- */
-        .nav {
-            position: fixed; top: 0; width: 100%; z-index: 100;
-            background: rgba(255,255,255,0.95);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(226,232,240,0.6);
-            transition: all 0.3s;
-        }
-        .nav-inner {
-            max-width: 1200px; margin: 0 auto;
-            padding: 0 24px; height: 72px;
-            display: flex; align-items: center; justify-content: space-between;
-        }
-        .nav-logo { display: flex; align-items: center; gap: 10px; }
-        .nav-logo img { height: 36px; }
-        .nav-logo span { font-weight: 800; font-size: 1.125rem; color: var(--primary); letter-spacing: -0.02em; }
-        .nav-links { display: flex; align-items: center; gap: 32px; }
-        .nav-links a { font-size: 0.875rem; font-weight: 600; color: var(--muted); transition: color 0.2s; }
-        .nav-links a:hover { color: var(--primary); }
-        .nav-cta {
-            padding: 10px 24px; background: var(--primary); color: #fff !important;
-            border-radius: 12px; font-weight: 700; font-size: 0.875rem;
-            transition: all 0.2s; border: none; cursor: pointer;
-            display: inline-block;
-        }
-        .nav-cta:hover { background: var(--primary-dark); color: #fff !important; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(46,110,221,0.25); }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; color: var(--text-main); background: var(--bg-gray); -webkit-font-smoothing: antialiased; }
+        a { text-decoration: none; color: inherit; }
+        img { max-width: 100%; height: auto; display: block; }
+        
+        /* Typography */
+        h1, h2, h3 { font-family: 'Playfair Display', serif; }
 
-        @media (max-width: 768px) {
-            .nav-links { display: none; }
-            .nav-inner { padding: 0 16px; }
+        /* Navbar */
+        .navbar {
+            background: var(--white);
+            padding: 16px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
+        .nav-logo { height: 40px; }
+        .nav-right { display: flex; align-items: center; gap: 24px; }
+        .nav-phone { font-weight: 700; display: flex; align-items: center; gap: 8px; font-size: 1rem; }
+        .btn-dark {
+            background: var(--primary);
+            color: var(--white);
+            padding: 12px 24px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-dark:hover { background: #000; color: white; }
 
-        /* --- HERO --- */
+        /* Hero Section */
         .hero {
-            padding: 140px 24px 80px;
-            background: linear-gradient(180deg, #f8fafc 0%, #fff 100%);
             position: relative;
+            background: var(--bg-gray);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
         }
-        .hero-inner {
-            max-width: 1200px; margin: 0 auto;
-            display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center;
+        .hero-bg {
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 50%;
+            height: 100%;
+            object-fit: cover;
+            object-position: top center;
         }
-        @media (max-width: 768px) { .hero-inner { grid-template-columns: 1fr; gap: 40px; } }
-
-        .hero-badge {
-            display: inline-flex; align-items: center; gap: 8px;
-            background: var(--primary-light); color: var(--primary);
-            padding: 8px 16px; border-radius: 99px;
-            font-size: 0.75rem; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 0.06em;
+        .hero-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 80px 24px;
+            position: relative;
+            z-index: 10;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: center;
+        }
+        .hero-content {
+            padding-right: 40px;
+        }
+        .hero-title {
+            font-size: 3.5rem;
+            line-height: 1.1;
+            font-weight: 700;
             margin-bottom: 24px;
+            color: var(--text-main);
         }
-        .hero h1 {
-            font-size: 3.25rem; font-weight: 900; line-height: 1.1;
-            letter-spacing: -0.03em; color: var(--dark);
-            margin-bottom: 20px;
+        .hero-title span { color: var(--secondary); }
+        .hero-subtitle {
+            font-size: 1.125rem;
+            line-height: 1.6;
+            color: var(--text-light);
+            margin-bottom: 32px;
         }
-        .hero h1 span { color: var(--primary); }
-        @media (max-width: 768px) { .hero h1 { font-size: 2.25rem; } }
-
-        .hero-text {
-            font-size: 1.0625rem; color: var(--muted); line-height: 1.7;
-            margin-bottom: 36px; max-width: 520px;
+        .hero-features { list-style: none; margin-bottom: 32px; }
+        .hero-features li {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            font-weight: 500;
         }
-        .hero-btns { display: flex; gap: 12px; flex-wrap: wrap; }
-        .btn-hero {
-            padding: 16px 32px; border-radius: 14px; font-weight: 700;
-            font-size: 0.9375rem; transition: all 0.25s; cursor: pointer;
-            border: 2px solid transparent;
+        .hero-features svg { color: var(--secondary); flex-shrink: 0; }
+        
+        /* Form Card */
+        .form-card {
+            background: var(--white);
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+            margin-left: 20px;
         }
-        .btn-hero-primary { background: var(--primary); color: #fff; }
-        .btn-hero-primary:hover { background: var(--primary-dark); box-shadow: 0 12px 32px rgba(46,110,221,0.3); transform: translateY(-2px); }
-        .btn-hero-outline { background: transparent; color: var(--primary); border-color: var(--primary); }
-        .btn-hero-outline:hover { background: var(--primary); color: #fff; }
-
-        .hero-img {
-            position: relative; border-radius: 24px; overflow: hidden;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.1);
+        .form-card h3 {
+            font-size: 1.75rem;
+            margin-bottom: 24px;
+            font-family: 'Playfair Display', serif;
         }
-        .hero-img img { width: 100%; height: 400px; object-fit: cover; display: block; }
-        .hero-stats {
-            position: absolute; bottom: 0; left: 0; right: 0;
-            background: rgba(15,23,42,0.85); backdrop-filter: blur(8px);
-            padding: 20px 28px; display: flex; justify-content: space-around;
-        }
-        .hero-stat { text-align: center; color: #fff; }
-        .hero-stat strong { display: block; font-size: 1.5rem; font-weight: 800; }
-        .hero-stat span { font-size: 0.75rem; color: rgba(255,255,255,0.6); font-weight: 500; }
-
-        /* --- SECTION COMMON --- */
-        .section { padding: 80px 24px; }
-        .section-dark { background: var(--dark); color: #fff; }
-        .section-gray { background: #f8fafc; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        .section-header { text-align: center; margin-bottom: 56px; }
-        .section-tag {
-            display: inline-block; background: var(--primary-light); color: var(--primary);
-            padding: 6px 16px; border-radius: 99px; font-size: 0.75rem;
-            font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+        .form-card h3 span { color: var(--secondary); }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
             margin-bottom: 16px;
         }
-        .section-header h2 { font-size: 2.25rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 12px; }
-        .section-header p { color: var(--muted); font-size: 1rem; max-width: 560px; margin: 0 auto; line-height: 1.6; }
-
-        /* --- PRACTICE AREAS --- */
-        .practice-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; }
-        .practice-card {
-            background: #fff; border: 1px solid var(--border); border-radius: 20px;
-            padding: 32px; transition: all 0.3s; position: relative; overflow: hidden;
+        .input-field {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 0.9375rem;
+            font-family: 'Inter', sans-serif;
         }
-        .practice-card:hover { border-color: var(--primary); box-shadow: 0 12px 32px rgba(46,110,221,0.1); transform: translateY(-4px); }
-        .practice-icon {
-            width: 56px; height: 56px; border-radius: 14px;
-            background: var(--primary-light); color: var(--primary);
-            display: flex; align-items: center; justify-content: center;
-            margin-bottom: 20px; font-size: 1.5rem;
+        .input-field:focus { outline: none; border-color: var(--secondary); }
+        .textarea-field {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 0.9375rem;
+            min-height: 100px;
+            font-family: 'Inter', sans-serif;
+            margin-bottom: 16px;
+            resize: vertical;
         }
-        .practice-card h3 { font-size: 1.125rem; font-weight: 700; margin-bottom: 10px; }
-        .practice-card p { font-size: 0.875rem; color: var(--muted); line-height: 1.6; }
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8125rem;
+            color: var(--text-light);
+            margin-bottom: 24px;
+        }
+        .btn-submit {
+            width: 100%;
+            background: var(--primary);
+            color: var(--white);
+            padding: 16px;
+            border: none;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .btn-submit:hover { background: #000; }
 
-        /* --- CTA --- */
-        .cta-section {
-            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+        .alert { padding: 16px; border-radius: 4px; margin-bottom: 24px; font-weight: 500; font-size: 0.9375rem; }
+        .alert-success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .alert-error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+
+        /* Stats / Features Bar */
+        .features-bar {
+            background: var(--white);
+            border-top: 1px solid #e5e7eb;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 40px 24px;
+        }
+        .features-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+            text-align: center;
+        }
+        .feature-item { display: flex; flex-direction: column; align-items: center; }
+        .feature-icon { width: 48px; height: 48px; margin-bottom: 16px; color: var(--secondary); display: flex; align-items: center; justify-content: center; border: 1px solid #e5e7eb; border-radius: 50%; }
+        .feature-title { font-weight: 700; margin-bottom: 8px; font-size: 1rem; }
+        .feature-desc { color: var(--text-light); font-size: 0.875rem; line-height: 1.5; }
+
+        /* Video Section */
+        .video-section {
+            position: relative;
+            background: var(--primary);
+            color: var(--white);
+            padding: 100px 24px;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+        }
+        .video-bg {
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 55%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.5;
+        }
+        .video-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, var(--primary) 40%, transparent 100%);
+        }
+        .video-content {
+            position: relative;
+            z-index: 10;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            display: flex;
+            align-items: center;
+        }
+        .video-text { max-width: 500px; }
+        .video-text h2 { font-size: 2.5rem; margin-bottom: 24px; line-height: 1.2; font-family: 'Playfair Display', serif; }
+        .video-text h2 span { color: var(--accent); }
+        .video-text p { font-size: 1.125rem; color: #d1d5db; margin-bottom: 32px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 24px; }
+        .play-btn {
+            width: 64px; height: 64px; border-radius: 50%; border: 2px solid white; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); cursor: pointer; transition: transform 0.2s;
+            position: absolute; left: 60%; top: 50%; transform: translate(-50%, -50%);
+        }
+        .play-btn:hover { transform: translate(-50%, -50%) scale(1.1); }
+        .play-btn svg { fill: white; margin-left: 4px; }
+        
+        /* Process Steps */
+        .process-section {
+            background: var(--bg-light);
             padding: 80px 24px;
             text-align: center;
-            color: #fff;
         }
-        .cta-section h2 { font-size: 2.5rem; font-weight: 900; margin-bottom: 16px; letter-spacing: -0.02em; }
-        @media (max-width: 768px) { .cta-section h2 { font-size: 1.75rem; } }
-        .cta-section p { font-size: 1.0625rem; color: rgba(255,255,255,0.8); margin-bottom: 36px; max-width: 560px; margin-left: auto; margin-right: auto; }
-        .cta-btn {
-            display: inline-flex; align-items: center; gap: 10px;
-            padding: 18px 40px; background: #fff; color: var(--primary);
-            border-radius: 14px; font-weight: 800; font-size: 1rem;
-            transition: all 0.25s; border: none; cursor: pointer;
+        .process-title { font-size: 2rem; margin-bottom: 60px; }
+        .process-title span { color: var(--secondary); }
+        .process-grid {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+            position: relative;
         }
-        .cta-btn:hover { transform: translateY(-2px); box-shadow: 0 16px 40px rgba(0,0,0,0.2); }
-
-        /* --- FOOTER --- */
-        .footer { background: var(--dark); color: rgba(255,255,255,0.7); padding: 60px 24px 30px; }
-        .footer-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 40px; }
-        @media (max-width: 768px) { .footer-inner { grid-template-columns: 1fr; } }
-        .footer h4 { color: #fff; font-size: 0.875rem; font-weight: 700; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.06em; }
-        .footer p { font-size: 0.875rem; line-height: 1.7; }
-        .footer-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
-        .footer-logo img { height: 32px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
-        .footer-logo span { font-weight: 800; color: #fff; font-size: 1rem; }
-        .footer a { color: rgba(255,255,255,0.6); font-size: 0.875rem; display: block; margin-bottom: 8px; transition: color 0.2s; }
-        .footer a:hover { color: #fff; }
-        .footer-bottom { max-width: 1200px; margin: 0 auto; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 24px; margin-top: 40px; text-align: center; font-size: 0.8125rem; }
-        /* --- CONSULTATION FORM --- */
-        .consult-section { padding: 80px 24px; background: linear-gradient(180deg, #f0f4ff 0%, #f8fafc 100%); }
-        .consult-wrap { max-width: 780px; margin: 0 auto; }
-        .consult-card { background: #fff; border-radius: 24px; padding: 48px; box-shadow: 0 8px 40px rgba(46,110,221,.08); border: 1px solid rgba(46,110,221,.1); }
-        @media (max-width: 768px) { .consult-card { padding: 28px 20px; } }
-
-        .cf-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-        @media (max-width: 560px) { .cf-row { grid-template-columns: 1fr; } }
-        .cf-group { margin-bottom: 18px; }
-        .cf-group label { display: block; font-size: .8125rem; font-weight: 600; color: #374151; margin-bottom: 6px; }
-        .cf-group label .req { color: #dc2626; }
-        .cf-input-wrap { position: relative; }
-        .cf-input-wrap > svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8; pointer-events: none; flex-shrink: 0; }
-        .cf-input-wrap input, .cf-input-wrap textarea {
-            width: 100%; padding: 13px 44px 13px 44px; border: 2px solid #e2e8f0; border-radius: 14px;
-            font-size: .9375rem; font-weight: 500; color: #1a1a2e; background: #f8fafc;
-            transition: all .2s; outline: none; font-family: 'Inter', sans-serif;
+        .process-step { position: relative; z-index: 2; background: var(--bg-light); padding: 0 20px; }
+        .step-number { font-size: 3rem; font-family: 'Playfair Display', serif; color: #e5e7eb; font-weight: 700; margin-bottom: -15px; position: relative; z-index: 1; }
+        .step-icon { width: 64px; height: 64px; margin: 0 auto 16px; background: var(--white); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--secondary); box-shadow: 0 4px 6px rgba(0,0,0,0.05); position: relative; z-index: 2; border: 1px solid #e5e7eb; }
+        .step-title { font-weight: 700; margin-bottom: 8px; }
+        .step-desc { font-size: 0.875rem; color: var(--text-light); }
+        .process-line {
+            position: absolute; top: 60px; left: 15%; right: 15%; height: 1px; border-top: 1px dashed #cbd5e1; z-index: 0;
         }
-        .cf-input-wrap input:focus, .cf-input-wrap textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(46,110,221,.1); background: #fff; }
-        .cf-submit {
-            width: 100%; padding: 16px; background: var(--primary); color: #fff; border: none;
-            border-radius: 14px; font-size: 1rem; font-weight: 700; cursor: pointer;
-            transition: all .25s; font-family: 'Inter', sans-serif; margin-top: 8px;
-            display: flex; align-items: center; justify-content: center; gap: 10px;
+
+        /* Bottom CTA */
+        .bottom-cta {
+            display: flex;
+            align-items: center;
+            background: var(--white);
         }
-        .cf-submit:hover { background: var(--primary-dark); box-shadow: 0 12px 32px rgba(46,110,221,.25); transform: translateY(-2px); }
+        .cta-img { width: 50%; object-fit: cover; height: 500px; }
+        .cta-content { padding: 60px 80px; width: 50%; }
+        .cta-content h2 { font-size: 2.5rem; margin-bottom: 24px; line-height: 1.2; }
+        .cta-content h2 span { color: var(--secondary); }
+        .cta-content p { color: var(--text-light); margin-bottom: 32px; font-size: 1.125rem; }
 
-        .cf-error { padding: 14px 18px; border-radius: 14px; background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; font-size: .875rem; font-weight: 500; margin-bottom: 20px; line-height: 1.5; }
-        .cf-success { text-align: center; padding: 48px 24px; }
-        .cf-success-icon { width: 80px; height: 80px; border-radius: 50%; background: #f0fdf4; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; }
-        .cf-success h3 { font-size: 1.5rem; font-weight: 800; color: var(--dark); margin-bottom: 12px; }
-        .cf-success p { color: var(--muted); font-size: .9375rem; line-height: 1.6; margin-bottom: 24px; max-width: 420px; margin-left: auto; margin-right: auto; }
-        .cf-success a { display: inline-flex; align-items: center; gap: 8px; padding: 14px 32px; background: var(--primary); color: #fff; border-radius: 14px; font-weight: 700; font-size: .9375rem; transition: all .2s; }
-
-        .ohnohoney { position: absolute; left: -9999px; opacity: 0; height: 0; width: 0; overflow: hidden; }
-
-        .cf-drop-zone {
-            border: 2px dashed #c7d7f0; border-radius: 16px;
-            padding: 28px 20px; text-align: center; cursor: pointer;
-            transition: all .25s; background: #f8fafc; position: relative;
+        /* Footer */
+        .footer {
+            background: var(--white);
+            border-top: 1px solid #e5e7eb;
+            padding: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        .cf-drop-zone:hover, .cf-drop-zone.drag-over { border-color: var(--primary); background: #eff5ff; }
-        .cf-dz-icon { width: 48px; height: 48px; background: var(--primary-light); border-radius: 14px; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; color: var(--primary); }
-        .cf-dz-title { font-size: .875rem; font-weight: 700; color: #1a1a2e; margin-bottom: 4px; }
-        .cf-dz-hint { font-size: .75rem; color: #94a3b8; }
-        .cf-dz-input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
-        .cf-file-list { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
-        .cf-file-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; background: #fff; border: 1.5px solid #e2e8f0; border-radius: 12px; }
-        .cf-file-name { font-size: .8125rem; font-weight: 600; color: #1a1a2e; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .footer-logo { height: 32px; }
+        .footer-links { display: flex; gap: 24px; font-size: 0.875rem; color: var(--text-light); }
+        .footer-copy { text-align: center; color: var(--text-light); font-size: 0.75rem; width: 100%; display: block; margin-top: 24px; }
 
-        .cf-radio-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; }
-        .cf-radio-item { position: relative; }
-        .cf-radio-item input { position: absolute; opacity: 0; }
-        .cf-radio-item label {
-            display: block; padding: 12px; text-align: center; border: 2px solid #e2e8f0;
-            border-radius: 12px; font-size: .875rem; font-weight: 600; color: #64748b;
-            cursor: pointer; transition: all .2s; background: #fff;
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .hero-container, .bottom-cta { grid-template-columns: 1fr; flex-direction: column; }
+            .hero-bg, .video-bg { width: 100%; height: 50%; top: auto; bottom: 0; }
+            .cta-img, .cta-content { width: 100%; }
+            .play-btn { left: 50%; top: 75%; }
+            .process-grid, .features-grid { grid-template-columns: 1fr; gap: 40px; }
+            .process-line { display: none; }
         }
-        .cf-radio-item input:checked + label { border-color: var(--primary); background: var(--primary-light); color: var(--primary); }
-        .cf-radio-item input:focus-visible + label { box-shadow: 0 0 0 3px rgba(46,110,221,.2); }
-        
-        .cf-section-title { font-size: .875rem; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 0.05em; text-align: center; margin: 32px 0 24px; display: flex; align-items: center; }
-        .cf-section-title::before, .cf-section-title::after { content: ''; flex: 1; height: 1px; background: #e2e8f0; }
-        .cf-section-title::before { margin-right: 16px; }
-        .cf-section-title::after { margin-left: 16px; }
+        @media (max-width: 768px) {
+            .navbar { padding: 16px; }
+            .nav-phone { display: none; }
+            .hero-title { font-size: 2.5rem; }
+            .form-card { margin-left: 0; padding: 24px; }
+            .form-grid { grid-template-columns: 1fr; }
+            .footer { flex-direction: column; gap: 20px; }
+        }
     </style>
 </head>
 <body>
 
-<nav class="nav">
-    <div class="nav-inner">
-        <a href="#" class="nav-logo"><img src="<?php echo $logoUrl; ?>" alt="Logo"><span>CRM Abogados</span></a>
-        <div class="nav-links">
-            <a href="#servicios">Servicios</a>
-            <a href="#consulta">Consulta Gratis</a>
-            <a href="https://leadsabogados.com/portal/" class="nav-cta">Portal del Cliente</a>
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <a href="/">
+            <img src="<?php echo $logoUrl; ?>" alt="LA leadsabogados" class="nav-logo">
+        </a>
+        <div class="nav-right">
+            <a href="tel:900123456" class="nav-phone">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                900 123 456
+            </a>
+            <a href="#contacto" class="btn-dark">Te llamamos</a>
         </div>
-    </div>
-</nav>
+    </nav>
 
-<section class="hero">
-    <div class="hero-inner">
-        <div>
-            <div class="hero-badge">Despacho de Confianza</div>
-            <h1>Soluciones legales <span>creativas</span> para su tranquilidad</h1>
-            <p class="hero-text">Más de 15 años defendiendo los derechos de nuestros clientes con profesionalismo, ética y resultados comprobados. Acceda a su caso desde nuestro portal seguro.</p>
-            <div class="hero-btns">
-                <a href="#consulta" class="btn-hero btn-hero-primary">Consulta Gratuita</a>
-                <a href="https://leadsabogados.com/portal/" class="btn-hero btn-hero-outline">Ya Soy Cliente</a>
+    <!-- HERO SECTION -->
+    <section class="hero">
+        <img src="<?php echo $heroUrl; ?>" alt="Abogada" class="hero-bg">
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1 class="hero-title">Tu caso merece la mejor <span>solución legal</span></h1>
+                <p class="hero-subtitle">Cuéntanos qué ha ocurrido y un abogado experto revisará tu caso de forma gratuita y sin compromiso.</p>
+                <ul class="hero-features">
+                    <li><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zm-1.177-7.86l-2.765-2.765 1.414-1.414 1.351 1.351 4.316-4.316 1.414 1.414-5.73 5.73z"/></svg> Respuesta en menos de 24h</li>
+                    <li><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zm-1.177-7.86l-2.765-2.765 1.414-1.414 1.351 1.351 4.316-4.316 1.414 1.414-5.73 5.73z"/></svg> Confidencialidad 100% garantizada</li>
+                    <li><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zm-1.177-7.86l-2.765-2.765 1.414-1.414 1.351 1.351 4.316-4.316 1.414 1.414-5.73 5.73z"/></svg> Sin compromiso alguno</li>
+                </ul>
             </div>
-        </div>
-        <div class="hero-img">
-            <img src="<?php echo $heroUrl; ?>" alt="Justicia">
-            <div class="hero-stats">
-                <div class="hero-stat"><strong>500+</strong><span>Casos Ganados</span></div>
-                <div class="hero-stat"><strong>15</strong><span>Años Experiencia</span></div>
-                <div class="hero-stat"><strong>98%</strong><span>Satisfechos</span></div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<section class="consult-section" id="consulta">
-    <div class="container">
-        <div class="section-header">
-            <span class="section-tag">Primera Consulta Gratuita</span>
-            <h2>Envíe Su Caso</h2>
-            <p>Cree su cuenta y describa su situación legal. Nuestro equipo revisará su caso y le asignará un abogado especializado.</p>
-        </div>
-        <div class="consult-wrap">
-            <div class="consult-card">
-
+            
+            <div class="form-card" id="contacto">
+                <h3>Cuéntanos <span>tu caso</span></h3>
+                
                 <?php if ($formExito): ?>
-                <div class="cf-success">
-                    <div class="cf-success-icon">✓</div>
-                    <h3>Solicitud Enviada</h3>
-                    <p>Su consulta ha sido registrada y nuestro equipo la revisará a la brevedad posible.</p>
-                    <a href="https://leadsabogados.com/portal/">Acceder a Mi Portal</a>
-                </div>
+                    <div class="alert alert-success">
+                        ¡Gracias por contactarnos! Hemos recibido su consulta y nos pondremos en contacto con usted en breve.<br><br>
+                        Le hemos enviado un correo con los datos de acceso al Portal del Cliente para que pueda hacer seguimiento de su caso.
+                    </div>
                 <?php else: ?>
+                    <?php if (!empty($formError)): ?>
+                        <div class="alert alert-error"><?php echo $formError; ?></div>
+                    <?php endif; ?>
 
-                <?php if ($formError): ?>
-                <div class="cf-error"><?php echo $formError; ?></div>
+                    <form action="index.php" method="POST" enctype="multipart/form-data">
+                        <input type="hidden" name="consulta_submit" value="1">
+                        <input type="hidden" name="_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
+                        <input type="text" name="website_url" style="display:none" tabindex="-1" autocomplete="off">
+                        
+                        <div class="form-grid">
+                            <input type="text" name="nombre" class="input-field" placeholder="Nombre" value="<?php echo esc($formData['nombre']); ?>" required>
+                            <input type="text" name="apellidos" class="input-field" placeholder="Apellidos" value="<?php echo esc($formData['apellidos']); ?>" required>
+                        </div>
+                        <div class="form-grid">
+                            <input type="tel" name="telefono" class="input-field" placeholder="Teléfono" value="<?php echo esc($formData['telefono']); ?>" required>
+                            <input type="email" name="email" class="input-field" placeholder="Email" value="<?php echo esc($formData['email']); ?>" required>
+                        </div>
+                        <div class="form-grid">
+                            <input type="text" name="direccion" class="input-field" placeholder="Provincia" value="<?php echo esc($formData['direccion']); ?>">
+                            <select name="tipo_problema" class="input-field" style="color:var(--text-light); background:#fff;">
+                                <option value="" disabled <?php if(empty($formData['tipo_problema'])) echo 'selected';?>>Especialidad</option>
+                                <option value="Civil" <?php if($formData['tipo_problema']==='Civil') echo 'selected';?>>Derecho Civil</option>
+                                <option value="Penal" <?php if($formData['tipo_problema']==='Penal') echo 'selected';?>>Derecho Penal</option>
+                                <option value="Laboral" <?php if($formData['tipo_problema']==='Laboral') echo 'selected';?>>Derecho Laboral</option>
+                                <option value="Familia" <?php if($formData['tipo_problema']==='Familia') echo 'selected';?>>Derecho de Familia</option>
+                                <option value="Otro" <?php if($formData['tipo_problema']==='Otro') echo 'selected';?>>Otro</option>
+                            </select>
+                        </div>
+                        
+                        <textarea name="descripcion" class="textarea-field" placeholder="Describe tu caso" required><?php echo esc($formData['descripcion']); ?></textarea>
+                        
+                        <div class="checkbox-row">
+                            <input type="checkbox" id="privacidad" name="privacidad" required>
+                            <label for="privacidad">Acepto la <a href="#" style="color:var(--secondary); text-decoration:underline;">política de privacidad</a></label>
+                        </div>
+
+                        <button type="submit" class="btn-submit">Quiero que revisen mi caso</button>
+                    </form>
                 <?php endif; ?>
-
-                <form method="POST" action="#consulta" id="formConsulta" autocomplete="off" enctype="multipart/form-data">
-                    <input type="hidden" name="_token" value="<?php echo esc($csrfToken); ?>">
-                    <input type="hidden" name="consulta_submit" value="1">
-                    <div class="ohnohoney"><label>Website</label><input type="text" name="website_url" tabindex="-1" autocomplete="off"></div>
-
-                    <div class="cf-section-title">DATOS PERSONALES</div>
-
-                    <div class="cf-row">
-                        <div class="cf-group">
-                            <label>Nombre <span class="req">*</span></label>
-                            <div class="cf-input-wrap">
-                                <input type="text" name="nombre" placeholder="Su nombre" value="<?php echo esc($formData['nombre']); ?>" required>
-                            </div>
-                        </div>
-                        <div class="cf-group">
-                            <label>Apellidos <span class="req">*</span></label>
-                            <div class="cf-input-wrap">
-                                <input type="text" name="apellidos" placeholder="Sus apellidos" value="<?php echo esc($formData['apellidos']); ?>" required>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="cf-row">
-                        <div class="cf-group">
-                            <label>Correo Electrónico <span class="req">*</span></label>
-                            <div class="cf-input-wrap">
-                                <input type="email" name="email" placeholder="correo@ejemplo.com" value="<?php echo esc($formData['email']); ?>" required>
-                            </div>
-                        </div>
-                        <div class="cf-group">
-                            <label>Teléfono <span style="color:#94a3b8;font-weight:400">(opcional)</span></label>
-                            <div class="cf-input-wrap">
-                                <input type="tel" name="telefono" placeholder="+34 600 000 000" value="<?php echo esc($formData['telefono']); ?>">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="cf-row">
-                        <div class="cf-group">
-                            <label>DNI / NIF <span class="req">*</span></label>
-                            <div class="cf-input-wrap">
-                                <input type="text" name="dni_nif" placeholder="12345678A" value="<?php echo esc($formData['dni_nif']); ?>" required minlength="5">
-                            </div>
-                        </div>
-                        <div class="cf-group">
-                            <label>Dirección <span class="req">*</span></label>
-                            <div class="cf-input-wrap">
-                                <input type="text" name="direccion" placeholder="Ciudad" value="<?php echo esc($formData['direccion']); ?>" required minlength="5">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="cf-row">
-                        <div class="cf-group">
-                            <label>Fecha de Nacimiento <span class="req">*</span></label>
-                            <div class="cf-input-wrap">
-                                <input type="date" name="fecha_nacimiento" value="<?php echo esc($formData['fecha_nacimiento']); ?>" required>
-                            </div>
-                        </div>
-                        <div class="cf-group">
-                        </div>
-                    </div>
-
-
-
-                    <div class="cf-section-title">DESCRIBA SU SITUACIÓN LEGAL</div>
-
-                    <div class="cf-group">
-                        <label>Describa su situación legal <span class="req">*</span></label>
-                        <div class="cf-input-wrap">
-                            <textarea name="descripcion" rows="5" placeholder="Explique con detalle su situación legal. Cuanta más información nos proporcione, mejor podremos ayudarle (mín. 20 caracteres)..." required minlength="20"><?php echo esc($formData['descripcion']); ?></textarea>
-                        </div>
-                    </div>
-
-                    <div class="cf-section-title">DOCUMENTACIÓN ADICIONAL</div>
-
-                    <div class="cf-group">
-                        <label>Documentos Adjuntos <span style="color:#94a3b8;font-weight:400">(opcional — máx. 10 MB)</span></label>
-                        <div class="cf-drop-zone" id="cfDropZone">
-                            <input type="file" name="archivos[]" id="cfFileInput" class="cf-dz-input" multiple accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.zip,.rar,.txt">
-                            <div class="cf-dz-title">Arrastre archivos aquí o haga clic para seleccionar</div>
-                        </div>
-                        <div class="cf-file-list" id="cfFileList"></div>
-                    </div>
-
-                    <button type="submit" class="cf-submit">Enviar Solicitud</button>
-
-                    <p style="text-align:center;margin-top:16px;font-size:.8125rem;color:#94a3b8">
-                        ¿Ya tiene cuenta? <a href="https://leadsabogados.com/portal/index.php?page=login" style="color:var(--primary);font-weight:700">Inicie sesión aquí</a>
-                    </p>
-                </form>
-                <?php endif; ?>
-
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<section class="section section-gray" id="servicios">
-    <div class="container">
-        <div class="section-header">
-            <span class="section-tag">Áreas de Práctica</span>
-            <h2>Especialidades Jurídicas</h2>
-            <p>Ofrecemos asesoramiento integral en las principales ramas del derecho, adaptándonos a sus necesidades.</p>
+    <!-- STATS / FEATURES BAR -->
+    <section class="features-bar">
+        <div class="features-grid">
+            <div class="feature-item">
+                <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+                <h4 class="feature-title">Respuesta rápida</h4>
+                <p class="feature-desc">Un abogado se pondrá en contacto contigo en menos de 24 horas.</p>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+                <h4 class="feature-title">Confidencial y seguro</h4>
+                <p class="feature-desc">Tratamos tu caso con la máxima confidencialidad y protección de datos.</p>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+                <h4 class="feature-title">Sin compromiso</h4>
+                <p class="feature-desc">Estudiamos tu caso gratis y tú decides sin ningún tipo de obligación.</p>
+            </div>
         </div>
-        <div class="practice-grid">
-            <div class="practice-card"><h3>Derecho Civil</h3><p>Contratos, herencias, reclamaciones de deuda, propiedad.</p></div>
-            <div class="practice-card"><h3>Derecho Penal</h3><p>Defensa penal, delitos económicos, violencia de género.</p></div>
-            <div class="practice-card"><h3>Derecho Laboral</h3><p>Despidos, reclamaciones salariales, acoso laboral.</p></div>
-            <div class="practice-card"><h3>Derecho Mercantil</h3><p>Constitución de sociedades, contratos, propiedad intelectual.</p></div>
+    </section>
+
+    <!-- VIDEO SECTION -->
+    <section class="video-section">
+        <div class="video-overlay"></div>
+        <img src="<?php echo $videoUrl; ?>" alt="Video" class="video-bg">
+        <div class="play-btn">
+            <svg width="24" height="24" viewBox="0 0 24 24"><path d="M5 3l14 9-14 9z"/></svg>
         </div>
-    </div>
-</section>
+        <div class="video-content">
+            <div class="video-text">
+                <h2>Estamos aquí para proteger <span>lo que más te importa</span></h2>
+                <p>Déjanos ayudarte a encontrar la mejor solución legal para tu caso.</p>
+            </div>
+        </div>
+    </section>
 
-<section class="cta-section" id="contacto">
-    <div class="container">
-        <h2>¿Ya es cliente del despacho?</h2>
-        <p>Acceda a nuestro portal seguro para consultar el estado de su caso, revisar pagos y subir documentos.</p>
-        <a href="https://leadsabogados.com/portal/" class="cta-btn">Acceder al Portal del Cliente</a>
-    </div>
-</section>
+    <!-- HOW IT WORKS -->
+    <section class="process-section">
+        <h2 class="process-title">¿Cómo <span>funciona?</span></h2>
+        <div class="process-grid">
+            <div class="process-line"></div>
+            <div class="process-step">
+                <div class="step-number">01</div>
+                <div class="step-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></div>
+                <h4 class="step-title">Cuéntanos tu caso</h4>
+                <p class="step-desc">Completa el formulario con los detalles de tu situación.</p>
+            </div>
+            <div class="process-step">
+                <div class="step-number">02</div>
+                <div class="step-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+                <h4 class="step-title">Un abogado lo revisa</h4>
+                <p class="step-desc">Un especialista analiza tu caso y te dará la mejor solución.</p>
+            </div>
+            <div class="process-step">
+                <div class="step-number">03</div>
+                <div class="step-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
+                <h4 class="step-title">Hablamos contigo</h4>
+                <p class="step-desc">Nos pondremos en contacto contigo para informarte sin compromiso.</p>
+            </div>
+        </div>
+    </section>
 
-<footer class="footer">
-    <div class="footer-inner">
+    <!-- BOTTOM CTA -->
+    <section class="bottom-cta">
+        <img src="<?php echo $videoUrl; ?>" alt="Familia feliz" class="cta-img">
+        <div class="cta-content">
+            <h2>Estamos aquí para proteger <span>lo que más te importa</span></h2>
+            <p>Déjanos ayudarte a encontrar la mejor solución legal para tu caso.</p>
+            <a href="#contacto" class="btn-dark" style="display:inline-block">Hablar con un abogado</a>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
         <div>
-            <div class="footer-logo"><img src="<?php echo $logoUrl; ?>" alt="Logo"><span>CRM Abogados</span></div>
-            <p>Despacho de abogados comprometido con la excelencia jurídica y la defensa de sus derechos.</p>
+            <img src="<?php echo $logoUrl; ?>" alt="LA leadsabogados" class="footer-logo">
         </div>
-        <div>
-            <h4>Servicios</h4>
-            <a href="#servicios">Derecho Civil</a>
-            <a href="#servicios">Derecho Penal</a>
-    </div>
-    <div class="footer-bottom">
-        <p>&copy; <?php echo date('Y'); ?> CRM Abogados. Todos los derechos reservados.</p>
-    </div>
-</footer>
+        <div class="footer-links">
+            <a href="#">Política de privacidad</a>
+            <a href="#">Aviso legal</a>
+            <a href="#">Política de cookies</a>
+        </div>
+        <span class="footer-copy">© leadsabogados.com - Todos los derechos reservados</span>
+    </footer>
 
-<script>
-document.querySelectorAll('a[href^="#"]').forEach(a => {
-    a.addEventListener('click', e => {
-        e.preventDefault();
-        const t = document.querySelector(a.getAttribute('href'));
-        if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
-});
-const dz = document.getElementById('cfDropZone'), fi = document.getElementById('cfFileInput'), fl = document.getElementById('cfFileList');
-if(fi) {
-    fi.addEventListener('change', function() {
-        fl.innerHTML = '';
-        Array.from(this.files).forEach(f => {
-            const div = document.createElement('div'); div.className = 'cf-file-item';
-            div.innerHTML = '<div class="cf-file-name">'+f.name+' ('+Math.round(f.size/1024)+' KB)</div>';
-            fl.appendChild(div);
-        });
-    });
-}
-</script>
 </body>
 </html>
