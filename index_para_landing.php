@@ -626,16 +626,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
     </section>
 
     <!-- VIDEO SECTION -->
-    <section class="video-section">
-        <div class="video-overlay"></div>
-        <img src="<?php echo $videoUrl; ?>" alt="Video" class="video-bg">
-        <div class="play-btn">
-            <svg width="24" height="24" viewBox="0 0 24 24"><path d="M5 3l14 9-14 9z"/></svg>
-        </div>
-        <div class="video-content">
-            <div class="video-text">
-                <h2>Estamos aquí para proteger <span>lo que más te importa</span></h2>
-                <p>Déjanos ayudarte a encontrar la mejor solución legal para tu caso.</p>
+    <section class="video-section" style="padding:0;overflow:hidden;position:relative;min-height:420px;">
+        <div class="video-overlay" style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(10,31,68,0.85) 35%,rgba(10,31,68,0.3) 100%);z-index:2;"></div>
+        <video autoplay muted loop playsinline
+               style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1;"
+               id="promo-video">
+            <source src="/portal/crm/assets/images/promo.mp4" type="video/mp4">
+        </video>
+        <div class="video-content" style="position:relative;z-index:3;max-width:1200px;margin:0 auto;width:100%;padding:100px 40px;">
+            <div class="video-text" style="max-width:520px;color:#fff;">
+                <h2 style="font-size:2.5rem;margin-bottom:24px;line-height:1.2;font-family:'Playfair Display',serif;">Estamos aquí para proteger <span style="color:#4d8ef7;">lo que más te importa</span></h2>
+                <p style="font-size:1.125rem;color:#d1d5db;border-top:1px solid rgba(255,255,255,0.2);padding-top:24px;">Déjanos ayudarte a encontrar la mejor solución legal para tu caso.</p>
             </div>
         </div>
     </section>
