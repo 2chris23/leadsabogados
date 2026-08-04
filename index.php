@@ -417,14 +417,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
             position: relative;
             display: flex;
             align-items: center;
-            justify-content: flex-end; padding: 60px 80px 60px 20px;
+            justify-content: flex-start; padding: 60px 20px 60px 40px;
             z-index: 5;
         }
         .hero-img-bg {
             position: absolute;
             inset: 0;
             object-fit: cover;
-            object-position: 25% center;
+            object-position: 100% center;
             width: 100%;
             height: 100%;
             opacity: 0.85; -webkit-mask-image: linear-gradient(to right, transparent 0%, black 55%); mask-image: linear-gradient(to right, transparent 0%, black 55%); mix-blend-mode: luminosity;
@@ -974,6 +974,7 @@ window.addEventListener('scroll', () => {
 </script>
 </body>
 </html>
+
 
 
 
