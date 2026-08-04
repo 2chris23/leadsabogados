@@ -419,7 +419,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
             width: 100%;
             height: 100%;
             background-size: cover;
-            background-position: center center;
+            background-position: center 10%;
             z-index: 0;
         }
         .hero-overlay {
@@ -974,6 +974,7 @@ window.addEventListener('scroll', () => {
 </script>
 </body>
 </html>
+
 
 
 
