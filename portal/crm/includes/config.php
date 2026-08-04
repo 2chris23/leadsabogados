@@ -128,3 +128,4 @@ register_shutdown_function(function() {
 if (session_status() === PHP_SESSION_NONE) {
     session_name('crm_abogados');
 }
+
