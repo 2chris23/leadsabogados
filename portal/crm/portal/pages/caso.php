@@ -63,16 +63,28 @@ $historial = $db->fetchAll(
     "SELECT * FROM audit_log WHERE tabla_afectada = 'casos' AND registro_id = ? ORDER BY created_at DESC LIMIT 15", [$casoId]
 );
 
-// Notas públicas del caso (feed)
+// Notas públicas del caso con sus documentos adjuntos
 try {
     $notasPublicas = $db->fetchAll(
         "SELECT cn.*, ui.nombre as autor_nombre, ui.apellidos as autor_apellidos
-         FROM caso_notas cn
+         FROM notas_caso cn
          LEFT JOIN usuarios_internos ui ON cn.created_by = ui.id
          WHERE cn.caso_id = ? AND cn.tipo = 'publica'
          ORDER BY cn.created_at DESC",
         [$casoId]
     );
+    // Para cada nota, obtener su documento adjunto si tiene
+    foreach ($notasPublicas as &$nota) {
+        if (!empty($nota['documento_id'])) {
+            $docNota = $db->fetchOne("SELECT * FROM documentos WHERE id = ?", [$nota['documento_id']]);
+            $nota['_adjunto'] = $docNota ?: null;
+        } else {
+            // Buscar documentos vinculados por nota_id en tabla documentos
+            $docNota = $db->fetchOne("SELECT * FROM documentos WHERE nota_id = ?", [$nota['id']]);
+            $nota['_adjunto'] = $docNota ?: null;
+        }
+    }
+    unset($nota);
 } catch (\Throwable $e) {
     $notasPublicas = [];
 }
@@ -96,7 +108,7 @@ $stepsOrden = array_keys($estadoCaso);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <?php echo portalPwaHead(); ?>
     <title><?php echo e($caso['referencia']); ?> — Mi Portal</title>
-    <link rel="icon" type="image/png" href="../assets/images/logo.png?v=2">
+    <link rel="icon" type="image/png" href="../assets/images/favicon.png?v=2">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -412,14 +424,38 @@ $stepsOrden = array_keys($estadoCaso);
                     $np = $item['data'];
                     $autor = trim(($np['autor_nombre'] ?? '') . ' ' . ($np['autor_apellidos'] ?? '')) ?: 'Sistema';
             ?>
-            <div style="padding:14px 0;border-bottom:1px solid #f8fafc;display:flex;gap:12px;align-items:flex-start">
-                <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#9333ea,#7c3aed);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.875rem;flex-shrink:0">
+            <div style="padding:14px 0;border-bottom:1px solid #f1f5f9;display:flex;gap:12px;align-items:flex-start">
+                <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.875rem;flex-shrink:0">
                     <?php echo strtoupper(substr($np['autor_nombre'] ?? 'S', 0, 1)); ?>
                 </div>
                 <div style="flex:1;min-width:0">
-                    <div style="font-size:.9375rem;font-weight:700;color:#0f172a"><?php echo e($np['titulo'] ?? 'Nota'); ?></div>
-                    <div style="font-size:.75rem;color:#64748b;margin-bottom:6px">Por <strong><?php echo e($autor); ?></strong> &bull; <?php echo date('d M Y, H:i', $item['date']); ?></div>
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px">
+                        <span style="font-size:.9375rem;font-weight:700;color:#0f172a"><?php echo e($np['titulo'] ?? 'Nota'); ?></span>
+                        <span style="padding:2px 8px;border-radius:6px;font-size:.6875rem;font-weight:700;background:#dcfce7;color:#166534">P&Uacute;BLICA</span>
+                    </div>
+                    <div style="font-size:.75rem;color:#64748b;margin-bottom:8px">Por <strong><?php echo e($autor); ?></strong> &bull; <?php echo date('d M Y', $item['date']); ?> a las <?php echo date('H:i', $item['date']); ?></div>
                     <div style="font-size:.875rem;color:#374151;line-height:1.6;white-space:pre-wrap"><?php echo e($np['contenido']); ?></div>
+                    <?php if (!empty($np['_adjunto'])):
+                        $adj = $np['_adjunto'];
+                        $adjName = $adj['nombre_original'] ?? $adj['nombre_archivo'] ?? 'Archivo';
+                        $adjExt  = strtoupper(pathinfo($adjName, PATHINFO_EXTENSION));
+                        $extClrs=['PDF'=>['#fef2f2','#dc2626'],'DOC'=>['#e8f0fe','#2e6edd'],'DOCX'=>['#e8f0fe','#2e6edd'],'XLS'=>['#ecfdf5','#059669'],'XLSX'=>['#ecfdf5','#059669'],'JPG'=>['#fff7ed','#ea580c'],'PNG'=>['#fff7ed','#ea580c'],'ZIP'=>['#f5f3ff','#7c3aed']];
+                        [$adjBg,$adjClr] = $extClrs[$adjExt] ?? ['#f1f5f9','#64748b'];
+                        $adjSize = isset($adj['tamano_bytes']) ? round($adj['tamano_bytes']/1024, 1).' KB' : '';
+                        $adjUrl = portalUrl() . '/index.php?page=descargar-doc&doc=' . (int)$adj['id'];
+                    ?>
+                    <div style="margin-top:10px;display:inline-flex;align-items:center;gap:8px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:8px 12px;">
+                        <div style="background:<?php echo $adjBg;?>;color:<?php echo $adjClr;?>;width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.625rem;flex-shrink:0"><?php echo $adjExt ?: 'DOC';?></div>
+                        <div>
+                            <div style="font-size:.8125rem;font-weight:600;color:#0f172a"><?php echo e($adjName); ?></div>
+                            <?php if($adjSize): ?><div style="font-size:.6875rem;color:#94a3b8"><?php echo $adjSize; ?></div><?php endif; ?>
+                        </div>
+                        <a href="<?php echo $adjUrl; ?>" target="_blank" style="margin-left:4px;padding:4px 10px;border-radius:6px;background:#2563eb;color:#fff;font-weight:600;font-size:.75rem;display:inline-flex;align-items:center;gap:4px">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            Descargar
+                        </a>
+                    </div>
+                    <?php endif; ?>
                 </div>
             </div>
             <?php else: 

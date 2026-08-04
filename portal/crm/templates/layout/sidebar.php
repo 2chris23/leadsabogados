@@ -29,9 +29,9 @@ foreach ($menuItems as $item) {
     </button>
     <div>
         <a href="<?php echo APP_URL; ?>/index.php?page=dashboard" class="sidebar-logo">
-            <img src="<?php echo APP_URL; ?>/assets/images/logo.png?v=<?php echo $logoVersion; ?>" alt="<?php echo e($nombreDespacho); ?>" class="light-logo" style="max-height:40px;">
-            <img src="<?php echo APP_URL; ?>/assets/images/logo.png?v=<?php echo $logoVersion; ?>" alt="<?php echo e($nombreDespacho); ?>" class="dark-logo" style="max-height:40px;">
-            <img src="<?php echo APP_URL; ?>/assets/images/logo.png?v=<?php echo $logoVersion; ?>" alt="<?php echo e($nombreDespacho); ?>" class="logo-icon" style="max-height:36px;">
+            <img src="<?php echo APP_URL; ?>/assets/images/logo.png?v=<?php echo $logoVersion; ?>" alt="<?php echo e($nombreDespacho); ?>" class="light-logo" style="max-height:60px;">
+            <img src="<?php echo APP_URL; ?>/assets/images/logo.png?v=<?php echo $logoVersion; ?>" alt="<?php echo e($nombreDespacho); ?>" class="dark-logo" style="max-height:60px;">
+            <img src="<?php echo APP_URL; ?>/assets/images/favicon.png?v=<?php echo $logoVersion; ?>" alt="<?php echo e($nombreDespacho); ?>" class="logo-icon" style="max-height:48px;">
         </a>
     </div>
     <div class="sidebar-menu-area" style="display:flex;flex-direction:column;height:calc(100vh - 80px)">

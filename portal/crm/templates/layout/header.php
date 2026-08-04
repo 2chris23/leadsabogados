@@ -33,7 +33,7 @@ $logoVersion = @filemtime(CRM_ROOT . '/assets/images/logo.png') ?: time();
     }
     </script>
     <title><?php echo e($tituloPagina ?? 'Dashboard'); ?> — <?php echo e($nombreDespacho); ?></title>
-    <link rel="icon" type="image/png" href="<?php echo APP_URL; ?>/assets/images/logo.png?v=<?php echo $logoVersion; ?>" sizes="16x16">
+    <link rel="icon" type="image/png" href="<?php echo APP_URL; ?>/assets/images/favicon.png?v=<?php echo $logoVersion; ?>" sizes="32x32">
     
     <!-- RemixIcon -->
     <link rel="stylesheet" href="<?php echo APP_URL; ?>/assets/css/remixicon.css">
