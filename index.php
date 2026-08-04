@@ -283,7 +283,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
             color: #374151;
             transition: color .2s;
             position: relative;
-            padding-bottom: 2px;
+            padding-bottom: 0;
         }
         .nav-menu a::after {
             content: '';
@@ -297,7 +297,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
         }
         .nav-menu a:hover { color: var(--blue2); }
         .nav-menu a:hover::after { width: 100%; }
-        .btn-portal { background: transparent; border: none; color: #475569; padding: 10px 16px; font-weight: 600; font-size: 0.9375rem; transition: all .2s; display: inline-flex; align-items: center; gap: 6px; } .btn-portal:hover { color: var(--blue2); }
+        .btn-portal { background: transparent; border: none; color: #475569; padding: 0 16px; font-weight: 600; font-size: 0.9375rem; transition: all .2s; display: inline-flex; align-items: center; gap: 6px; height: 100%; } .btn-portal:hover { color: var(--blue2); }
         .btn-portal:hover { background: var(--navy); color: #fff; }
         .btn-cta { background: var(--navy); color: #fff; padding: 12px 28px; border-radius: 99px; font-weight: 700; font-size: 0.9375rem; transition: all .2s; display: inline-block; box-shadow: 0 4px 14px rgba(11,29,58,0.25); } .btn-cta:hover { background: #1a365d; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(11,29,58,0.3); }
         .btn-cta:hover { background: #1d4ed8; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(37,99,235,0.4); }
@@ -424,7 +424,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
             position: absolute;
             inset: 0;
             object-fit: cover;
-            object-position: 80% center;
+            object-position: 25% center;
             width: 100%;
             height: 100%;
             opacity: 0.85; -webkit-mask-image: linear-gradient(to right, transparent 0%, black 55%); mask-image: linear-gradient(to right, transparent 0%, black 55%); mix-blend-mode: luminosity;
@@ -974,6 +974,7 @@ window.addEventListener('scroll', () => {
 </script>
 </body>
 </html>
+
 
 
 
