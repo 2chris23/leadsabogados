@@ -297,31 +297,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
         }
         .nav-menu a:hover { color: var(--blue2); }
         .nav-menu a:hover::after { width: 100%; }
-        .btn-portal {
-            background: transparent;
-            border: 2px solid var(--navy);
-            color: var(--navy);
-            padding: 9px 20px;
-            border-radius: 6px;
-            font-weight: 600;
-            font-size: 0.875rem;
-            transition: all .2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
+        .btn-portal { background: transparent; border: none; color: #475569; padding: 10px 16px; font-weight: 600; font-size: 0.9375rem; transition: all .2s; display: inline-flex; align-items: center; gap: 6px; } .btn-portal:hover { color: var(--blue2); }
         .btn-portal:hover { background: var(--navy); color: #fff; }
-        .btn-cta {
-            background: var(--blue2);
-            color: #fff;
-            padding: 10px 24px;
-            border-radius: 6px;
-            font-weight: 700;
-            font-size: 0.875rem;
-            transition: all .2s;
-            display: inline-block;
-            box-shadow: 0 4px 14px rgba(37,99,235,0.35);
-        }
+        .btn-cta { background: var(--navy); color: #fff; padding: 12px 28px; border-radius: 99px; font-weight: 700; font-size: 0.9375rem; transition: all .2s; display: inline-block; box-shadow: 0 4px 14px rgba(11,29,58,0.25); } .btn-cta:hover { background: #1a365d; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(11,29,58,0.3); }
         .btn-cta:hover { background: #1d4ed8; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(37,99,235,0.4); }
 
         /* ============ HERO ============ */
@@ -439,15 +417,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
             position: relative;
             display: flex;
             align-items: center;
-            justify-content: center;
-            padding: 60px 60px 60px 20px;
+            justify-content: flex-end; padding: 60px 80px 60px 20px;
             z-index: 5;
         }
         .hero-img-bg {
             position: absolute;
             inset: 0;
             object-fit: cover;
-            object-position: center top;
+            object-position: 80% center;
             width: 100%;
             height: 100%;
             opacity: 0.18; -webkit-mask-image: linear-gradient(to right, transparent 0%, black 40%); mask-image: linear-gradient(to right, transparent 0%, black 40%);
@@ -571,7 +548,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
             display: flex;
             align-items: center;
             gap: 20px;
-            padding: 56px 40px;
+            padding: 76px 40px;
             border-right: 1px solid var(--border);
             transition: background .2s;
         }
@@ -758,29 +735,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
         .btn-outline-white:hover { border-color: #fff; background: rgba(255,255,255,0.1); }
 
         /* ============ FOOTER ============ */
-        .footer {
-            background: #0b1d3a;
-            padding: 48px 80px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 24px;
-        }
-        .footer-logo { height: 56px; background: #fff; padding: 12px 16px; border-radius: 8px; }
-        .footer-copy { color: rgba(255,255,255,0.4); font-size: 0.8125rem; }
+        .footer { background: #ffffff; border-top: 1px solid var(--border); padding: 48px 80px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 24px; }
+        .footer-logo { height: 70px; }
+        .footer-copy { color: var(--gray); font-size: 0.875rem; }
         .footer-right { display: flex; align-items: center; gap: 20px; }
-        .footer-portal {
-            display: inline-flex; align-items: center; gap: 8px;
-            background: rgba(255,255,255,0.08);
-            border: 1px solid rgba(255,255,255,0.15);
-            color: rgba(255,255,255,0.8);
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-size: 0.875rem;
-            font-weight: 600;
-            transition: all .2s;
-        }
+        .footer-portal { display: inline-flex; align-items: center; gap: 8px; background: #f8fafc; border: 1px solid var(--border); color: var(--navy); padding: 12px 24px; border-radius: 8px; font-size: 0.9375rem; font-weight: 600; transition: all .2s; } .footer-portal:hover { background: #f1f5f9; color: var(--blue2); }
         .footer-portal:hover { background: rgba(255,255,255,0.15); color: #fff; }
 
         /* ============ RESPONSIVE ============ */
@@ -794,7 +753,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
             .stats-inner { grid-template-columns: 1fr; }
             .stat-item { border-right: none; border-bottom: 1px solid var(--border); padding: 24px 32px; }
             .stat-item:last-child { border-bottom: none; }
-            .footer { padding: 40px 32px; flex-direction: column; text-align: center; }
+            .footer { background: #ffffff; border-top: 1px solid var(--border); padding: 48px 80px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 24px; }
         }
         @media (max-width: 768px) {
             .topbar { display: none; }
@@ -1015,5 +974,6 @@ window.addEventListener('scroll', () => {
 </script>
 </body>
 </html>
+
 
 
