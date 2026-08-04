@@ -311,14 +311,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
             position: relative;
             overflow: hidden;
         }
-        .hero::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(ellipse 80% 100% at 70% 50%, rgba(26,86,219,0.25) 0%, transparent 70%);
-            pointer-events: none;
-        }
-        .hero-left {
+        
+        .hero-left { position: relative; z-index: 2;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -413,21 +407,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
         .trust-avatars div:first-child { margin-left: 0; }
 
         /* Hero Right — Form Panel */
-        .hero-right {
-            position: relative;
+        .hero-right { position: relative; z-index: 2;
             display: flex;
             align-items: center;
-            justify-content: flex-start; padding: 60px 20px 60px 40px;
+            justify-content: flex-end; padding: 60px 80px 60px 20px;
             z-index: 5;
         }
         .hero-img-bg {
             position: absolute;
             inset: 0;
-            object-fit: cover;
-            object-position: 100% center;
             width: 100%;
             height: 100%;
-            opacity: 0.85; -webkit-mask-image: linear-gradient(to right, transparent 0%, black 55%); mask-image: linear-gradient(to right, transparent 0%, black 55%); mix-blend-mode: luminosity;
+            background-size: cover;
+            background-position: center center;
+            z-index: 0;
+        }
+        .hero-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, var(--navy) 0%, rgba(11,29,58,0.85) 40%, transparent 100%);
+            z-index: 1;
         }
         .form-panel {
             background: #fff;
@@ -745,7 +744,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
         /* ============ RESPONSIVE ============ */
         @media (max-width: 1024px) {
             .hero { grid-template-columns: 1fr; min-height: auto; }
-            .hero-left { padding: 60px 32px 40px; }
+            .hero-left { position: relative; z-index: 2; padding: 60px 32px 40px; }
             .hero-right { padding: 20px 32px 60px; }
             .video-body { grid-template-columns: 1fr; padding: 60px 32px; gap: 40px; }
             .steps-grid { grid-template-columns: 1fr; }
@@ -760,7 +759,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
             .navbar { padding: 0 20px; height: 68px; }
             .nav-logo { height: 40px; }
             .nav-menu { gap: 12px; }
-            .hero-left { padding: 48px 20px 32px; }
+            .hero-left { position: relative; z-index: 2; padding: 48px 20px 32px; }
             .hero-right { padding: 0 20px 48px; }
             .form-panel { padding: 28px 20px; }
             .form-row { grid-template-columns: 1fr; }
@@ -797,6 +796,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
 
 <!-- HERO -->
 <section class="hero" id="contacto">
+    <div class="hero-img-bg" style="background-image: url('<?php echo $heroUrl; ?>');"></div>
+    <div class="hero-overlay"></div>
     <div class="hero-left">
         <div class="hero-eyebrow">
             <span class="hero-eyebrow-dot"></span>
@@ -823,7 +824,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
     </div>
 
     <div class="hero-right">
-        <img src="<?php echo $heroUrl; ?>" alt="Abogada" class="hero-img-bg">
         <div class="form-panel">
             <div class="form-panel-header">
                 <span class="form-panel-tag">Consulta gratuita</span>
@@ -974,6 +974,7 @@ window.addEventListener('scroll', () => {
 </script>
 </body>
 </html>
+
 
 
 
