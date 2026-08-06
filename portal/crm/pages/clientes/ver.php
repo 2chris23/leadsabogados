@@ -105,7 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['enviar_recovery'])) {
             'reset_expires' => $expires
         ], 'id = ?', [$cuentaPortal['id']]);
         
-        $resetLink = str_replace('/crm', '/portal', APP_URL) . '/index.php?page=reset-password&token=' . $token;
+        $resetLink = str_replace('/crm', '/portal', APP_URL) . '/index.php?page=autologin&token=' . $token;
         
         // Sanitizar teléfono
         $telefonoLimpio = preg_replace('/[^0-9]/', '', $cliente['telefono'] ?? '');
