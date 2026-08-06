@@ -458,7 +458,7 @@ $crmUrl = APP_URL . '/portal/crm';
 <div class="portal-login">
     <!-- Visual -->
     <div class="portal-visual">
-        <img src="../assets/images/steptodown.com552020.jpg?v=<?php echo time(); ?>" alt="Justicia">
+        <img src="../assets/images/login_bg.png?v=<?php echo time(); ?>" alt="Fondo Login">
         <div class="portal-visual-content">
 
             <div>
