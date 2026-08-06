@@ -45,7 +45,7 @@ function esc($s) { return htmlspecialchars($s ?? '', ENT_QUOTES, 'UTF-8'); }
 $db = Database::getInstance();
 $crmUrl = APP_URL;
 $logoUrl = '/portal/crm/assets/images/logo.png';
-$heroUrl = '/portal/crm/assets/images/hero_lawyer_new.jpg';
+$heroUrl = '/portal/crm/assets/images/hero_lawyer_clean.jpg';
 $videoUrl = '/portal/crm/assets/images/family_video.jpg';
 
 // Migración: agregar columna password_plain y fecha_nacimiento si no existen
