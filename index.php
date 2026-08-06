@@ -413,7 +413,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
             width: 100%;
             height: 100%;
             background-size: cover;
-            background-position: center center;
+            background-position: center top;
             background-repeat: no-repeat;
             mask-image: linear-gradient(to right, transparent 0%, transparent 20%, black 50%);
             -webkit-mask-image: linear-gradient(to right, transparent 0%, transparent 20%, black 50%);
