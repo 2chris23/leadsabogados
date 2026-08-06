@@ -182,7 +182,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
                         'apellidos'     => $solicitud['apellidos'],
                         'email'         => $solicitud['email'],
                         'telefono'      => $solicitud['telefono'] ?: null,
-                        'dni_nif'       => 'No provisto',
+                        'dni_nif'       => $solicitud['dni_nif'] ?: 'No provisto',
                         'direccion'     => '',
                         'password_hash' => password_hash($autoPassword, PASSWORD_DEFAULT),
                         'password_plain'=> $autoPassword,
