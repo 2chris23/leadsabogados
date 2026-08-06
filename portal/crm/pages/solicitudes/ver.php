@@ -429,11 +429,24 @@ $miAsignacion = reset($misAsignaciones);
             <div class="sv-body-premium">
                 <?php 
                 $usr = $auth->getUsuario();
-                $abogadoParams = $db->fetchOne("SELECT tipo_pago_predeterminado, tarifa_hitos_senal, tarifa_hitos_intermedio, tarifa_hitos_final FROM usuarios_internos WHERE id = ?", [$usr['id']]);
+                $abogadoParams = $db->fetchOne("SELECT tipo_pago_predeterminado, tarifa_es_variable, tarifa_hitos_senal, tarifa_hitos_intermedio, tarifa_hitos_final, tarifa_exito_default FROM usuarios_internos WHERE id = ?", [$usr['id']]);
                 $tipoPago = $abogadoParams['tipo_pago_predeterminado'] ?? 'mensual';
+                $esVariable = !empty($abogadoParams['tarifa_es_variable']);
                 $esMensual = ($tipoPago === 'mensual');
                 $esHitos = ($tipoPago === 'hitos');
-                $ha = (float)($solicitud['honorarios_abogado'] ?? 0);
+                
+                // If it is NOT variable, the lawyer gets their default fixed price for the respective plan.
+                // If it IS variable, the lawyer gets what the admin proposed.
+                if (!$esVariable) {
+                    if ($esHitos) {
+                        $ha = (float)($abogadoParams['tarifa_hitos_senal'] ?? 0) + (float)($abogadoParams['tarifa_hitos_intermedio'] ?? 0) + (float)($abogadoParams['tarifa_hitos_final'] ?? 0);
+                    } elseif ($tipoPago === 'exito') {
+                        $ha = (float)($abogadoParams['tarifa_exito_default'] ?? 0);
+                    }
+                } else {
+                    $ha = (float)($solicitud['honorarios_abogado'] ?? 0);
+                }
+                
                 $bo = (float)($solicitud['bonificacion'] ?? 0);
                 ?>
                 <div style="background:#f8fafc;padding:12px;border-radius:8px;border:1px solid #e2e8f0;margin-bottom:12px;text-align:center;">
@@ -441,14 +454,20 @@ $miAsignacion = reset($misAsignaciones);
                         <div style="font-size:0.75rem;font-weight:700;color:#64748b;text-transform:uppercase;">Esquema de Pago</div>
                         <div style="font-size:0.95rem;font-weight:800;color:#0f172a;margin-bottom:8px;">Plan Mensual</div>
                     <?php elseif($esHitos): 
+                        // The hitos are displayed exactly as configured, the total $ha is already forced above if not variable.
                         $tS = (float)($abogadoParams['tarifa_hitos_senal'] ?? 0);
                         $tI = (float)($abogadoParams['tarifa_hitos_intermedio'] ?? 0);
                         $tF = (float)($abogadoParams['tarifa_hitos_final'] ?? 0);
-                        $tTotal = $tS + $tI + $tF;
                         
-                        // User requested: ALWAYS show the exact configured hitos, no scaling.
-                        // For the total to add up perfectly, we must force $ha to equal $tTotal.
-                        $ha = $tTotal;
+                        // If it IS variable, maybe $ha != sum of hitos, we scale them visually just in case they were given a custom amount.
+                        // But if not variable, it perfectly matches $tTotal.
+                        $tTotal = $tS + $tI + $tF;
+                        if ($esVariable && $ha > 0 && $tTotal > 0 && abs($ha - $tTotal) > 0.01) {
+                            $mult = $ha / $tTotal;
+                            $tS = round($tS * $mult, 2);
+                            $tI = round($tI * $mult, 2);
+                            $tF = $ha - $tS - $tI;
+                        }
                     ?>
                         <div style="font-size:0.75rem;font-weight:800;color:#64748b;text-transform:uppercase;margin-bottom:8px;">Pago por Hitos</div>
                         <div style="text-align:left;font-size:0.8rem;color:#334155;">
