@@ -36,9 +36,9 @@ $pagos = $db->fetchAll("SELECT * FROM pagos WHERE caso_id = ? AND (tipo_pago IS 
 $totalPagado = array_sum(array_column($pagos, 'cantidad'));
 $saldo = $caso['honorarios_totales'] - $totalPagado;
 
-// Documentos del caso
+// Documentos subidos independientemente (que no están adjuntos a notas)
 $documentos = $db->fetchAll(
-    "SELECT * FROM documentos WHERE caso_id = ? ORDER BY created_at DESC", [$casoId]
+    "SELECT * FROM documentos WHERE caso_id = ? AND (nota_id IS NULL OR nota_id = 0) ORDER BY created_at DESC", [$casoId]
 );
 // Documentos del portal
 $docPortal = $db->fetchAll(
