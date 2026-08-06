@@ -415,8 +415,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
             background-size: cover;
             background-position: center center;
             background-repeat: no-repeat;
-            mask-image: linear-gradient(to right, transparent 0%, black 30%);
-            -webkit-mask-image: linear-gradient(to right, transparent 0%, black 30%);
+            mask-image: linear-gradient(to right, transparent 0%, transparent 20%, black 50%);
+            -webkit-mask-image: linear-gradient(to right, transparent 0%, transparent 20%, black 50%);
             z-index: 1;
         }
         
@@ -786,6 +786,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
 
 <!-- HERO -->
 <section class="hero" id="contacto">
+    <div class="hero-img-bg" style="background-image: url('<?php echo $heroUrl; ?>');"></div>
     <div class="hero-left">
         <div class="hero-eyebrow">
             <span class="hero-eyebrow-dot"></span>
@@ -809,7 +810,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
     </div>
 
     <div class="hero-right" style="z-index: 2; position: relative;">
-        <div class="hero-img-bg" style="background-image: url('<?php echo $heroUrl; ?>');"></div>
         <div class="form-panel">
             <div class="form-panel-header">
                 
