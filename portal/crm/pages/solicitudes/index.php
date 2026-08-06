@@ -170,9 +170,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
                     $logMsg = "Solicitud aceptada. Cliente #$clienteId creado.";
                 }
 
-                // Vincular cuenta del portal con el cliente CRM
+                // Vincular o CREAR cuenta del portal
                 if (!empty($solicitud['portal_cuenta_id'])) {
                     $db->update('portal_cuentas', ['cliente_id' => $clienteId, 'es_cliente' => 1], 'id = ?', [$solicitud['portal_cuenta_id']]);
+                } else {
+                    $autoPassword = substr(str_shuffle('ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$'), 0, 10);
+                    $portalId = $db->insert('portal_cuentas', [
+                        'cliente_id'    => $clienteId,
+                        'es_cliente'    => 1,
+                        'nombre'        => $solicitud['nombre'],
+                        'apellidos'     => $solicitud['apellidos'],
+                        'email'         => $solicitud['email'],
+                        'telefono'      => $solicitud['telefono'] ?: null,
+                        'dni_nif'       => 'No provisto',
+                        'direccion'     => '',
+                        'password_hash' => password_hash($autoPassword, PASSWORD_DEFAULT),
+                        'password_plain'=> $autoPassword,
+                        'ip_registro'   => $solicitud['ip_solicitante'] ?? ''
+                    ]);
+                    $db->update('solicitudes', ['portal_cuenta_id' => $portalId], 'id = ?', [$solicitudId]);
                 }
 
                 // Re-leer abogado_id actualizado (puede haber sido asignado antes de aceptar)

@@ -120,19 +120,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
                 $pdo = $db->getConnection();
                 $pdo->beginTransaction();
 
-                $portalId = $db->insert('portal_cuentas', [
-                    'nombre'        => $formData['nombre'],
-                    'apellidos'     => $formData['apellidos'],
-                    'email'         => $formData['email'],
-                    'telefono'      => $formData['telefono'] ?: null,
-                    'dni_nif'       => $formData['dni_nif'],
-                    'direccion'     => $formData['direccion'],
-                    'fecha_nacimiento'=> $formData['fecha_nacimiento'],
-                    'password_hash' => password_hash($autoPassword, PASSWORD_DEFAULT),
-                    'password_plain'=> $autoPassword,
-                    'ip_registro'   => $_SERVER['REMOTE_ADDR'] ?? '',
-                ]);
-
                 $solId = $db->insert('solicitudes', [
                     'nombre'           => $formData['nombre'],
                     'apellidos'        => $formData['apellidos'],
@@ -141,7 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
                     'tipo_problema'    => $formData['tipo_problema'],
                     'descripcion'      => $formData['descripcion'],
                     'estado'           => 'pendiente',
-                    'portal_cuenta_id' => $portalId,
+                    
                     'ip_solicitante'   => $_SERVER['REMOTE_ADDR'] ?? '',
                 ]);
 
