@@ -95,7 +95,7 @@ $selTipo = $_POST['tipo_problema'] ?? '';
         /* ─── Topbar ─── */
         .topbar {
             background: #fff; border-bottom: 1px solid #e2e8f0;
-            padding: 0 32px; height: 64px;
+            padding: 0 32px; height: 80px;
             display: flex; align-items: center; gap: 16px;
             position: sticky; top: 0; z-index: 100;
         }
@@ -255,7 +255,7 @@ $selTipo = $_POST['tipo_problema'] ?? '';
 <div class="main">
     <div class="card">
         <h1>Enviar Consulta</h1>
-        <p class="sub">Describa su situación legal. Nuestro equipo le asignará un abogado especializado.</p>
+        <p class="sub">Gestione sus consultas legales y siga el estado de sus casos en tiempo real.</p>
 
         <?php if ($error): ?>
         <div class="err"><?php echo e($error); ?></div>

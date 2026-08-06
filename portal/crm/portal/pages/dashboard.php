@@ -75,9 +75,9 @@ $tiposConsulta = ['Civil','Penal','Laboral','Mercantil','Inmobiliario','Familia'
         body { font-family: 'Inter', sans-serif; background: #f1f5f9; color: #1a1a2e; min-height: 100vh; }
 
         /* ─── Topbar ─── */
-        .topbar { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 0 32px; height: 64px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+        .topbar { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 0 32px; height: 80px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
         .topbar-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
-        .topbar-logo img { height: 36px; object-fit: contain; }
+        .topbar-logo img { height: 60px; object-fit: contain; }
         .topbar-logo span { font-weight: 700; color: #2e6edd; font-size: .9375rem; }
         .topbar-right { display: flex; align-items: center; gap: 16px; }
         .topbar-avatar { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #2e6edd, #6ba3ff); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: .875rem; }
@@ -260,10 +260,10 @@ $tiposConsulta = ['Civil','Penal','Laboral','Mercantil','Inmobiliario','Familia'
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
                 </div>
                 <h3>Aún no tiene solicitudes</h3>
-                <p>Envíe su primera consulta legal y nuestro equipo le asignará un abogado especializado.</p>
+                <p>Gestione sus consultas legales y siga el estado de sus casos en tiempo real.</p>
                 <a href="index.php?page=nueva-solicitud" class="btn btn-primary">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                    Crear Primera Solicitud
+                    Nueva Solicitud
                 </a>
             </div>
         </div>
