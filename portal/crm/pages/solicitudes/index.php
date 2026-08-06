@@ -165,7 +165,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
                         'nombre'       => $solicitud['nombre'],
                         'apellidos'    => $solicitud['apellidos'],
                         'email'        => $solicitud['email'],
-                        'telefono'     => $solicitud['telefono']
+                        'telefono'     => $solicitud['telefono'],
+                        'dni_nif'      => $solicitud['dni_nif'] ?? null,
+                        'fecha_nacimiento' => $solicitud['fecha_nacimiento'] ?? null
                     ]);
                     $logMsg = "Solicitud aceptada. Cliente #$clienteId creado.";
                 }
