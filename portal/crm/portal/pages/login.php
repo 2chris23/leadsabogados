@@ -169,7 +169,7 @@ $crmUrl = APP_URL . '/portal/crm';
             inset: 0;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            justify-content: flex-end;
             padding: 40px;
         }
 
