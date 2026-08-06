@@ -303,9 +303,9 @@ $miAsignacion = reset($misAsignaciones);
                         let bonoEur = parseFloat(document.getElementById('bonoEur').value) || 0;
                         let despEur = Math.max(0, val - honEur - bonoEur);
                         
-                        let pctHon = val > 0 ? (honEur / val) * 100 : 0;
-                        let pctBono = val > 0 ? (bonoEur / val) * 100 : 0;
-                        let pctDesp = val > 0 ? (despEur / val) * 100 : (val === 0 ? 100 : 0);
+                        let pctHon = parseFloat(document.getElementById('honPct').value) || 0;
+                        let pctBono = parseFloat(document.getElementById('bonoPct').value) || 0;
+                        let pctDesp = val > 0 ? (despEur / val) * 100 : (100 - pctHon - pctBono);
 
                         document.getElementById('barHon').style.width = pctHon + '%';
                         document.getElementById('barBono').style.width = pctBono + '%';
