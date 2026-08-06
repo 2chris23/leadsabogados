@@ -252,16 +252,7 @@ if ($esAbogado) {
                 <div class="d-flex align-items-end justify-content-between">
                     <div>
                         <h4 class="fw-semibold mb-4"><?php echo $totalSolicitudesMes; ?></h4>
-                        <p class="text-sm mb-0">
-                            <?php if ($varSol): ?>
-                            <span class="<?php echo $varSol['up'] ? 'text-success-main' : 'text-danger-main'; ?> fw-semibold">
-                                <?php echo $varSol['up'] ? '+' : '-'; ?><?php echo $varSol['val']; ?>%
-                            </span>
-                            <span class="text-secondary-light"> vs mes anterior</span>
-                            <?php else: ?>
-                            <span class="text-secondary-light fst-italic">Sin mes anterior</span>
-                            <?php endif; ?>
-                        </p>
+                        <p class="text-sm mb-0"></p>
                     </div>
                 </div>
             </div>
@@ -283,16 +274,7 @@ if ($esAbogado) {
                 <div class="d-flex align-items-end justify-content-between">
                     <div>
                         <h4 class="fw-semibold mb-4"><?php echo $totalCasosActivos; ?></h4>
-                        <p class="text-sm mb-0">
-                            <?php if ($varCasos): ?>
-                            <span class="<?php echo $varCasos['up'] ? 'text-success-main' : 'text-danger-main'; ?> fw-semibold">
-                                <?php echo $varCasos['up'] ? '+' : '-'; ?><?php echo $varCasos['val']; ?>%
-                            </span>
-                            <span class="text-secondary-light"> vs mes anterior</span>
-                            <?php else: ?>
-                            <span class="text-secondary-light fst-italic">Sin mes anterior</span>
-                            <?php endif; ?>
-                        </p>
+                        <p class="text-sm mb-0"></p>
                     </div>
                 </div>
             </div>
@@ -314,16 +296,7 @@ if ($esAbogado) {
                 <div class="d-flex align-items-end justify-content-between">
                     <div>
                         <h4 class="fw-semibold mb-4">€<?php echo number_format($totalCobradoMes, 2, ',', '.'); ?></h4>
-                        <p class="text-sm mb-0">
-                            <?php if ($varPagos): ?>
-                            <span class="<?php echo $varPagos['up'] ? 'text-success-main' : 'text-danger-main'; ?> fw-semibold">
-                                <?php echo $varPagos['up'] ? '+' : '-'; ?><?php echo $varPagos['val']; ?>%
-                            </span>
-                            <span class="text-secondary-light"> vs mes anterior</span>
-                            <?php else: ?>
-                            <span class="text-secondary-light fst-italic">Sin mes anterior</span>
-                            <?php endif; ?>
-                        </p>
+                        <p class="text-sm mb-0"></p>
                     </div>
                 </div>
             </div>
@@ -345,13 +318,7 @@ if ($esAbogado) {
                 <div class="d-flex align-items-end justify-content-between">
                     <div>
                         <h4 class="fw-semibold mb-4"><?php echo $solicitudesPendientes; ?></h4>
-                        <p class="text-sm mb-0">
-                            <?php if ($solicitudesPendientes > 0): ?>
-                            <a href="<?php echo APP_URL; ?>/index.php?page=solicitudes" class="text-primary-600 fw-semibold text-sm">Ver solicitudes →</a>
-                            <?php else: ?>
-                            <span class="text-success-main fw-semibold">✓ Al día</span>
-                            <?php endif; ?>
-                        </p>
+                        <p class="text-sm mb-0"></p>
                     </div>
                 </div>
             </div>
