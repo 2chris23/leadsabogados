@@ -24,6 +24,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $apellidos = trim($_POST['apellidos'] ?? '');
     $email = trim($_POST['email'] ?? '');
     $telefono = trim($_POST['telefono'] ?? '');
+    $dni_nif = trim($_POST['dni_nif'] ?? '');
+    $fecha_nacimiento = trim($_POST['fecha_nacimiento'] ?? '') ?: null;
+    $direccion = trim($_POST['direccion'] ?? '');
     $tipo_problema = trim($_POST['tipo_problema'] ?? '');
     $descripcion = trim($_POST['descripcion'] ?? '');
     
@@ -40,6 +43,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'apellidos' => $apellidos,
                 'email' => $email,
                 'telefono' => $telefono,
+                'dni_nif' => $dni_nif,
+                'fecha_nacimiento' => $fecha_nacimiento,
+                'direccion' => $direccion,
                 'tipo_problema' => $tipo_problema,
                 'descripcion' => $descripcion
             ], 'id = ?', [$id]);
@@ -94,6 +100,18 @@ include CRM_ROOT . '/templates/layout/header.php';
                         <div class="col-sm-6">
                             <label class="form-label fw-semibold">Teléfono</label>
                             <input type="text" name="telefono" class="form-control radius-8" value="<?php echo e($_POST['telefono'] ?? $solicitud['telefono']); ?>">
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label fw-semibold">DNI / NIF</label>
+                            <input type="text" name="dni_nif" class="form-control radius-8" value="<?php echo e($_POST['dni_nif'] ?? $solicitud['dni_nif'] ?? ''); ?>">
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label fw-semibold">Fecha de Nacimiento</label>
+                            <input type="date" name="fecha_nacimiento" class="form-control radius-8" value="<?php echo e($_POST['fecha_nacimiento'] ?? $solicitud['fecha_nacimiento'] ?? ''); ?>">
+                        </div>
+                        <div class="col-sm-12">
+                            <label class="form-label fw-semibold">Dirección</label>
+                            <input type="text" name="direccion" class="form-control radius-8" value="<?php echo e($_POST['direccion'] ?? $solicitud['direccion'] ?? ''); ?>">
                         </div>
                         <div class="col-sm-12">
                             <label class="form-label fw-semibold">Tipo de Consulta <span class="text-danger">*</span></label>
