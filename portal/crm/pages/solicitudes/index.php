@@ -6,10 +6,45 @@ $tituloPagina = 'Solicitudes';
 $db = Database::getInstance();
 
 // ── Procesar acciones POST antes de cualquier output ──
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     CSRF::verificarOAbortar();
 
-    $solicitudId = (int)($_POST['solicitud_id'] ?? 0);
+    if (isset($_POST['editar_solicitud_quick']) && $auth->esAdmin()) {
+        $id = (int)$_POST['solicitud_id'];
+        $nombre = trim($_POST['nombre'] ?? '');
+        $apellidos = trim($_POST['apellidos'] ?? '');
+        $email = trim($_POST['email'] ?? '');
+        $telefono = trim($_POST['telefono'] ?? '');
+        $dni_nif = trim($_POST['dni_nif'] ?? '');
+        $fecha_nacimiento = trim($_POST['fecha_nacimiento'] ?? '') ?: null;
+        $provincia = trim($_POST['provincia'] ?? '');
+        $ciudad = trim($_POST['ciudad'] ?? '');
+        $descripcion = trim($_POST['descripcion'] ?? '');
+
+        try {
+            $db->update('solicitudes', [
+                'nombre' => $nombre,
+                'apellidos' => $apellidos,
+                'email' => $email,
+                'telefono' => $telefono,
+                'dni_nif' => $dni_nif,
+                'fecha_nacimiento' => $fecha_nacimiento,
+                'provincia' => $provincia,
+                'ciudad'    => $ciudad,
+                'descripcion' => $descripcion
+            ], 'id = ?', [$id]);
+            
+            AuditLog::registrar('editar', 'solicitudes', $id, "Solicitud actualizada rápidamente.");
+            setFlash('exito', 'Solicitud actualizada correctamente');
+        } catch (Exception $e) {
+            setFlash('error', 'Error al actualizar: ' . $e->getMessage());
+        }
+        header('Location: ' . APP_URL . '/index.php?page=solicitudes');
+        exit;
+    }
+
+    if (isset($_POST['accion'])) {
+        $solicitudId = (int)($_POST['solicitud_id'] ?? 0);
     $accion      = $_POST['accion'];
     $motivo      = trim($_POST['motivo'] ?? '');
     $usuarioAct  = $auth->getUsuario();
@@ -292,7 +327,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
 
         header('Location: ' . APP_URL . '/index.php?page=solicitudes');
         exit;
-    }
+    } // End if isset accion
 }
 
 include CRM_ROOT . '/templates/layout/header.php';
@@ -436,11 +471,22 @@ $solicitudes = $db->fetchAll(
                                 </form>
                                 <?php endif; ?>
                                 <?php if ($auth->esAdmin()): ?>
-                                <a href="<?php echo APP_URL; ?>/index.php?page=solicitudes/editar&id=<?php echo $sol['id']; ?>"
-                                    class="bg-warning-focus text-warning-main w-32-px h-32-px d-flex justify-content-center align-items-center rounded-circle"
-                                    title="Editar">
+                                <button type="button" 
+                                    class="bg-warning-focus text-warning-main w-32-px h-32-px d-flex justify-content-center align-items-center rounded-circle border-0"
+                                    title="Editar"
+                                    data-id="<?php echo $sol['id']; ?>"
+                                    data-nombre="<?php echo htmlspecialchars($sol['nombre'] ?? '', ENT_QUOTES); ?>"
+                                    data-apellidos="<?php echo htmlspecialchars($sol['apellidos'] ?? '', ENT_QUOTES); ?>"
+                                    data-email="<?php echo htmlspecialchars($sol['email'] ?? '', ENT_QUOTES); ?>"
+                                    data-telefono="<?php echo htmlspecialchars($sol['telefono'] ?? '', ENT_QUOTES); ?>"
+                                    data-dni="<?php echo htmlspecialchars($sol['dni_nif'] ?? '', ENT_QUOTES); ?>"
+                                    data-fecha="<?php echo htmlspecialchars($sol['fecha_nacimiento'] ?? '', ENT_QUOTES); ?>"
+                                    data-provincia="<?php echo htmlspecialchars($sol['provincia'] ?? '', ENT_QUOTES); ?>"
+                                    data-ciudad="<?php echo htmlspecialchars($sol['ciudad'] ?? '', ENT_QUOTES); ?>"
+                                    data-descripcion="<?php echo htmlspecialchars($sol['descripcion'] ?? '', ENT_QUOTES); ?>"
+                                    onclick="openQuickEditSol(this)">
                                     <iconify-icon icon="lucide:edit" class="icon"></iconify-icon>
-                                </a>
+                                </button>
                                 <?php endif; ?>
                                 <?php if ($auth->esAdmin() || $sol['estado'] === 'pendiente'): ?>
                                 <form method="POST" style="display:inline">
@@ -462,6 +508,72 @@ $solicitudes = $db->fetchAll(
         </div>
     </div>
 </div>
+
+<?php
+$provincias = ['Álava','Albacete','Alicante','Almería','Asturias','Ávila','Badajoz','Barcelona','Burgos','Cáceres','Cádiz','Cantabria','Castellón','Ciudad Real','Córdoba','A Coruña','Cuenca','Girona','Granada','Guadalajara','Gipuzkoa','Huelva','Huesca','Islas Baleares','Jaén','León','Lleida','Lugo','Madrid','Málaga','Murcia','Navarra','Ourense','Palencia','Las Palmas','Pontevedra','La Rioja','Salamanca','Segovia','Sevilla','Soria','Tarragona','Santa Cruz de Tenerife','Teruel','Toledo','Valencia','Valladolid','Vizcaya','Zamora','Zaragoza','Ceuta','Melilla'];
+?>
+<!-- Modal: Edición Rápida Solicitud -->
+<div class="modal fade" id="quickEditSolModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <form method="POST" class="modal-content radius-8">
+            <?php echo CSRF::campo(); ?>
+            <input type="hidden" name="editar_solicitud_quick" value="1">
+            <input type="hidden" name="solicitud_id" id="qeSolId">
+            <div class="modal-header">
+                <h6 class="modal-title d-flex align-items-center gap-2">
+                    <iconify-icon icon="solar:pen-new-square-linear"></iconify-icon> Editar Solicitud
+                </h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row gy-3">
+                    <div class="col-sm-6"><label class="form-label">Nombre <span class="text-danger">*</span></label><input type="text" name="nombre" id="qeSolNombre" class="form-control radius-8" required></div>
+                    <div class="col-sm-6"><label class="form-label">Apellidos <span class="text-danger">*</span></label><input type="text" name="apellidos" id="qeSolApellidos" class="form-control radius-8" required></div>
+                    <div class="col-sm-6"><label class="form-label">Email <span class="text-danger">*</span></label><input type="email" name="email" id="qeSolEmail" class="form-control radius-8" required></div>
+                    <div class="col-sm-6"><label class="form-label">Teléfono</label><input type="tel" name="telefono" id="qeSolTelefono" class="form-control radius-8" placeholder="+34 600 000 000"></div>
+                    <div class="col-sm-6"><label class="form-label">DNI / NIF</label><input type="text" name="dni_nif" id="qeSolDni" class="form-control radius-8"></div>
+                    <div class="col-sm-6"><label class="form-label">Fecha de Nacimiento</label><input type="date" name="fecha_nacimiento" id="qeSolFecha" class="form-control radius-8"></div>
+                    <div class="col-sm-6">
+                        <label class="form-label">Provincia</label>
+                        <select name="provincia" id="qeSolProvincia" class="form-control radius-8">
+                            <option value="">Seleccione...</option>
+                            <?php foreach($provincias as $p): ?>
+                                <option value="<?php echo htmlspecialchars($p); ?>"><?php echo htmlspecialchars($p); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="col-sm-6"><label class="form-label">Ciudad o Localidad</label><input type="text" name="ciudad" id="qeSolCiudad" class="form-control radius-8" placeholder="Ciudad"></div>
+                    <div class="col-12">
+                        <label class="form-label">Descripción del Caso</label>
+                        <textarea name="descripcion" id="qeSolDescripcion" class="form-control radius-8" rows="4"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary radius-8" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-primary radius-8 d-flex align-items-center gap-1">
+                    <iconify-icon icon="solar:floppy-disk-linear"></iconify-icon> Guardar Cambios
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openQuickEditSol(btn) {
+    document.getElementById('qeSolId').value         = btn.dataset.id || '';
+    document.getElementById('qeSolNombre').value     = btn.dataset.nombre || '';
+    document.getElementById('qeSolApellidos').value  = btn.dataset.apellidos || '';
+    document.getElementById('qeSolEmail').value      = btn.dataset.email || '';
+    document.getElementById('qeSolTelefono').value   = btn.dataset.telefono || '';
+    document.getElementById('qeSolDni').value        = btn.dataset.dni || '';
+    document.getElementById('qeSolFecha').value      = btn.dataset.fecha || '';
+    document.getElementById('qeSolProvincia').value  = btn.dataset.provincia || '';
+    document.getElementById('qeSolCiudad').value     = btn.dataset.ciudad || '';
+    document.getElementById('qeSolDescripcion').value= btn.dataset.descripcion || '';
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('quickEditSolModal')).show();
+}
+</script>
 
 <?php
 include CRM_ROOT . '/templates/layout/footer.php';
