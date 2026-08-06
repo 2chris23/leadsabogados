@@ -759,7 +759,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
             .hero-img-bg {
                 mask-image: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.05) 15%, black 40%);
                 -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.05) 15%, black 40%);
-                background-position: center 20%;
+                background-position: center top;
             }
             .video-body { grid-template-columns: 1fr; padding: 60px 32px; gap: 40px; }
             .steps-grid { grid-template-columns: 1fr; }
@@ -771,12 +771,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
         }
         @media (max-width: 768px) {
             .topbar { display: none; }
-            .navbar { padding: 0 16px; height: auto; min-height: 70px; }
-            .nav-logo { width: 220px; height: auto; max-width: 60%; }
-            .nav-menu { gap: 8px; }
-            .btn-portal { font-size: 0.8rem; padding: 0 8px; }
-            /* .btn-portal span { display: none; } eliminamos esto para que se vea el texto */
-            .hero-left { position: relative; z-index: 2; padding: 48px 20px 180px; text-align: center; }
+            .navbar { padding: 0 12px; height: auto; min-height: 70px; }
+            .nav-logo { width: auto; height: 60px; max-width: none; }
+            .nav-menu { gap: 4px; }
+            .btn-portal { font-size: 0.75rem; padding: 0 6px; white-space: nowrap; }
+            .hero-left { position: relative; z-index: 2; padding: 48px 20px 420px; text-align: center; }
             .hero-subtitle { margin-left: auto; margin-right: auto; }
             .hero-right { padding: 0 20px 48px; justify-content: center; }
             .form-panel { padding: 28px 20px; width: 100%; max-width: 500px; margin: 0 auto; }
