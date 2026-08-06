@@ -14,7 +14,7 @@ try {
 $crmUrl = APP_URL . '/portal/crm';
 
 try {
-    $db->query("ALTER TABLE portal_cuentas ADD COLUMN dni_nif VARCHAR(50) DEFAULT NULL, ADD COLUMN direccion TEXT DEFAULT NULL");
+        $db->query("ALTER TABLE portal_cuentas ADD COLUMN dni_nif VARCHAR(50) DEFAULT NULL, ADD COLUMN provincia VARCHAR(100) DEFAULT NULL, ADD COLUMN ciudad VARCHAR(255) DEFAULT NULL");
 } catch(Exception $e) {}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -23,11 +23,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email     = trim($_POST['email'] ?? '');
     $telefono  = trim($_POST['telefono'] ?? '');
     $dni_nif   = trim($_POST['dni_nif'] ?? '');
-    $direccion = trim($_POST['direccion'] ?? '');
+    $provincia = trim($_POST['provincia'] ?? '');
+    $ciudad    = trim($_POST['ciudad'] ?? '');
     $password  = $_POST['password'] ?? '';
     $password2 = $_POST['password2'] ?? '';
 
-    if (empty($nombre) || empty($apellidos) || empty($email) || empty($password) || empty($dni_nif) || empty($direccion)) {
+    if (empty($nombre) || empty($apellidos) || empty($email) || empty($password) || empty($dni_nif) || empty($provincia) || empty($ciudad)) {
         $error = 'Nombre, apellidos, DNI/NIF, dirección, correo y contraseña son obligatorios.';
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $error = 'El correo electrónico no es válido.';
@@ -46,7 +47,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'email'         => $email,
                 'telefono'      => $telefono ?: null,
                 'dni_nif'       => $dni_nif,
-                'direccion'     => $direccion,
+                'provincia'     => $provincia,
+                'ciudad'        => $ciudad,
                 'password_hash' => password_hash($password, PASSWORD_DEFAULT),
                 'ip_registro'   => $_SERVER['REMOTE_ADDR'] ?? '',
             ]);
@@ -179,7 +181,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
                 <div class="row2">
                     <div class="fld"><label>DNI / NIF <span class="r">*</span></label><div class="fi"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><input type="text" name="dni_nif" placeholder="12345678A" value="<?php echo e($_POST['dni_nif'] ?? ''); ?>" required minlength="5"></div></div>
-                    <div class="fld"><label>Dirección <span class="r">*</span></label><div class="fi"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><input type="text" name="direccion" placeholder="Calle Ejemplo, Ciudad" value="<?php echo e($_POST['direccion'] ?? ''); ?>" required minlength="5"></div></div>
+                    <div class="fld">
+                        <label>Provincia <span class="r">*</span></label>
+                        <div class="fi" style="padding-left:12px;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);pointer-events:none;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                            <?php $provincias = require CRM_ROOT . '/includes/provincias.php'; ?>
+                            <select name="provincia" required style="width:100%; height:46px; border:none; background:transparent; padding-left:28px; outline:none; font-family:inherit; color:#334155;">
+                                <option value="" disabled <?php echo empty($_POST['provincia']) ? 'selected' : ''; ?>>Seleccione provincia...</option>
+                                <?php foreach($provincias as $p): ?>
+                                    <option value="<?php echo htmlspecialchars($p); ?>" <?php echo (($_POST['provincia'] ?? '') === $p) ? 'selected' : ''; ?>><?php echo htmlspecialchars($p); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="fld">
+                        <label>Ciudad o Localidad <span class="r">*</span></label>
+                        <div class="fi">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                            <input type="text" name="ciudad" placeholder="Ciudad" value="<?php echo e($_POST['ciudad'] ?? ''); ?>" required minlength="3">
+                        </div>
+                    </div>
                 </div>
                 <div class="row2">
                     <div class="fld"><label>Contraseña <span class="r">*</span></label><div class="fi"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><input type="password" name="password" id="pw1" placeholder="Mín. 8 caracteres" class="pw" minlength="8" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Debe contener al menos 8 caracteres, incluyendo una mayúscula, una minúscula y un número" required><span class="eye" onclick="toggleVis('pw1')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></span></div></div>

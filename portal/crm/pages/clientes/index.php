@@ -36,7 +36,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['crear_cliente'])) {
                     'email'        => $email,
                     'telefono'     => trim($_POST['telefono'] ?? '') ?: null,
                     'dni_nif'      => trim($_POST['dni_nif'] ?? '') ?: null,
-                    'direccion'    => trim($_POST['direccion'] ?? '') ?: null,
+                    'provincia'    => trim($_POST['provincia'] ?? '') ?: null,
+                    'ciudad'       => trim($_POST['ciudad'] ?? '') ?: null,
                     'notas'        => trim($_POST['notas'] ?? '') ?: null,
                     'solicitud_id' => null,
                 ]);
@@ -59,7 +60,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['crear_cliente'])) {
                             'password_hash' => $hash,
                             'telefono'      => trim($_POST['telefono'] ?? '') ?: null,
                             'dni_nif'       => trim($_POST['dni_nif'] ?? '') ?: null,
-                            'direccion'     => trim($_POST['direccion'] ?? '') ?: null,
+                            'provincia'     => trim($_POST['provincia'] ?? '') ?: null,
+                            'ciudad'        => trim($_POST['ciudad'] ?? '') ?: null,
                             'es_cliente'    => 1,
                             'cliente_id'    => $newId,
                             'activo'        => 1
@@ -107,7 +109,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_cliente_quick'
             'email'     => trim($_POST['email']),
             'telefono'  => trim($_POST['telefono']) ?: null,
             'dni_nif'   => trim($_POST['dni_nif']) ?: null,
-            'direccion' => trim($_POST['direccion']) ?: null,
+            'provincia' => trim($_POST['provincia']) ?: null,
+            'ciudad'    => trim($_POST['ciudad']) ?: null,
         ], 'id = ?', [$eid]);
         AuditLog::registrar('editar', 'clientes', $eid, 'Cliente editado desde listado (quick edit)');
         setFlash('exito', 'Cliente actualizado correctamente.');
@@ -247,7 +250,7 @@ if ($auth->esAbogado()) {
                                 <button type="button"
                                     class="bg-warning-focus text-warning-main w-32-px h-32-px d-flex justify-content-center align-items-center rounded-circle border-0"
                                     title="Editar rápido"
-                                    onclick="openQuickEdit(<?php echo $cl['id']; ?>, '<?php echo e($cl['nombre']); ?>', '<?php echo e($cl['apellidos']); ?>', '<?php echo e($cl['email']); ?>', '<?php echo e($cl['telefono'] ?? ''); ?>', '<?php echo e($cl['dni_nif'] ?? ''); ?>', '<?php echo e($cl['direccion'] ?? ''); ?>')">
+                                    onclick="openQuickEdit(<?php echo $cl['id']; ?>, '<?php echo e($cl['nombre']); ?>', '<?php echo e($cl['apellidos']); ?>', '<?php echo e($cl['email']); ?>', '<?php echo e($cl['telefono'] ?? ''); ?>', '<?php echo e($cl['dni_nif'] ?? ''); ?>', '<?php echo e($cl['provincia'] ?? ''); ?>', '<?php echo e($cl['ciudad'] ?? ''); ?>')">
                                     <iconify-icon icon="solar:pen-new-square-linear"></iconify-icon>
                                 </button>
                                 <button type="button"
@@ -291,7 +294,17 @@ if ($auth->esAbogado()) {
                     </div>
                     <div class="col-sm-6"><label class="form-label">Teléfono</label><input type="tel" name="telefono" class="form-control radius-8" placeholder="+34 600 000 000"></div>
                     <div class="col-sm-6"><label class="form-label">DNI / NIF</label><input type="text" name="dni_nif" class="form-control radius-8" placeholder="12345678A"></div>
-                    <div class="col-12"><label class="form-label">Dirección</label><input type="text" name="direccion" class="form-control radius-8" placeholder="Calle Ejemplo, Ciudad"></div>
+                    <div class="col-sm-6">
+                        <label class="form-label">Provincia</label>
+                        <?php $provincias = require CRM_ROOT . '/includes/provincias.php'; ?>
+                        <select name="provincia" class="form-control radius-8">
+                            <option value="">Seleccione...</option>
+                            <?php foreach($provincias as $p): ?>
+                                <option value="<?php echo htmlspecialchars($p); ?>"><?php echo htmlspecialchars($p); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="col-sm-6"><label class="form-label">Ciudad o Localidad</label><input type="text" name="ciudad" class="form-control radius-8" placeholder="Ciudad"></div>
                     <div class="col-12"><label class="form-label">Notas internas</label><textarea name="notas" class="form-control radius-8" rows="2" placeholder="Información adicional..."></textarea></div>
                 </div>
             </div>
@@ -325,7 +338,16 @@ if ($auth->esAbogado()) {
                     <div class="col-sm-6"><label class="form-label">Email <span class="text-danger">*</span></label><input type="email" name="email" id="qeEmail" class="form-control radius-8" required></div>
                     <div class="col-sm-6"><label class="form-label">Teléfono</label><input type="tel" name="telefono" id="qeTelefono" class="form-control radius-8" placeholder="+34 600 000 000"></div>
                     <div class="col-sm-6"><label class="form-label">DNI / NIF</label><input type="text" name="dni_nif" id="qeDniNif" class="form-control radius-8"></div>
-                    <div class="col-sm-6"><label class="form-label">Dirección</label><input type="text" name="direccion" id="qeDireccion" class="form-control radius-8"></div>
+                    <div class="col-sm-6">
+                        <label class="form-label">Provincia</label>
+                        <select name="provincia" id="qeProvincia" class="form-control radius-8">
+                            <option value="">Seleccione...</option>
+                            <?php foreach($provincias as $p): ?>
+                                <option value="<?php echo htmlspecialchars($p); ?>"><?php echo htmlspecialchars($p); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="col-sm-6"><label class="form-label">Ciudad o Localidad</label><input type="text" name="ciudad" id="qeCiudad" class="form-control radius-8" placeholder="Ciudad"></div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -339,14 +361,15 @@ if ($auth->esAbogado()) {
 </div>
 
 <script>
-function openQuickEdit(id, nombre, apellidos, email, telefono, dni, direccion) {
+function openQuickEdit(id, nombre, apellidos, email, telefono, dni, provincia, ciudad) {
     document.getElementById('qeClienteId').value  = id;
     document.getElementById('qeNombre').value     = nombre;
     document.getElementById('qeApellidos').value  = apellidos;
     document.getElementById('qeEmail').value      = email;
     document.getElementById('qeTelefono').value   = telefono;
     document.getElementById('qeDniNif').value     = dni;
-    document.getElementById('qeDireccion').value  = direccion;
+    document.getElementById('qeProvincia').value  = provincia;
+    document.getElementById('qeCiudad').value     = ciudad;
     bootstrap.Modal.getOrCreateInstance(document.getElementById('quickEditClienteModal')).show();
 }
 function confirmDelete(id, nombre) {

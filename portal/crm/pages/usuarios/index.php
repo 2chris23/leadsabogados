@@ -71,7 +71,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_portal_cuenta'])
     $email    = trim($_POST['edit_email'] ?? '');
     $telefono = trim($_POST['edit_telefono'] ?? '');
     $dni_nif  = trim($_POST['edit_dni_nif'] ?? '');
-    $direccion= trim($_POST['edit_direccion'] ?? '');
+    $provincia= trim($_POST['edit_provincia'] ?? '');
+    $ciudad   = trim($_POST['edit_ciudad'] ?? '');
     $activo   = isset($_POST['edit_activo']) ? 1 : 0;
 
     if ($nombre && $apellidos && filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -86,7 +87,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_portal_cuenta'])
                 'email'     => $email,
                 'telefono'  => $telefono ?: null,
                 'dni_nif'   => $dni_nif ?: null,
-                'direccion' => $direccion ?: null,
+                'provincia' => $provincia ?: null,
+                'ciudad'    => $ciudad ?: null,
                 'activo'    => $activo,
             ], 'id = ?', [$portalId]);
             AuditLog::registrar('editar', 'portal_cuentas', $portalId, 'Cuenta de cliente editada por admin');
@@ -374,7 +376,7 @@ $totalAbogados = count(array_filter($usuarios, fn($u) => $u['rol'] === 'abogado'
                             <td class="text-sm"><?php echo date('d/m/Y', strtotime($pc['created_at'])); ?></td>
                             <td class="text-center">
                                 <div style="display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap">
-                                    <button type="button" class="usr-btn usr-btn-edit" onclick="openEditModal(<?php echo $pc['id']; ?>, '<?php echo e($pc['nombre']); ?>', '<?php echo e($pc['apellidos']); ?>', '<?php echo e($pc['email']); ?>', '<?php echo e($pc['telefono'] ?? ''); ?>', '<?php echo e($pc['dni_nif'] ?? ''); ?>', '<?php echo e($pc['direccion'] ?? ''); ?>', <?php echo $pc['activo'] ? 1 : 0; ?>)">
+                                    <button type="button" class="usr-btn usr-btn-edit" onclick="openEditModal(<?php echo $pc['id']; ?>, '<?php echo e($pc['nombre']); ?>', '<?php echo e($pc['apellidos']); ?>', '<?php echo e($pc['email']); ?>', '<?php echo e($pc['telefono'] ?? ''); ?>', '<?php echo e($pc['dni_nif'] ?? ''); ?>', '<?php echo e($pc['provincia'] ?? ''); ?>', '<?php echo e($pc['ciudad'] ?? ''); ?>', <?php echo $pc['activo'] ? 1 : 0; ?>)">
                                         <iconify-icon icon="solar:pen-linear"></iconify-icon> Editar
                                     </button>
                                     <button type="button" class="usr-btn usr-btn-edit" style="background:#fef2f2;color:#dc2626;border-color:#fecaca" onclick="openResetModal(<?php echo $pc['id']; ?>, '<?php echo e($pc['email']); ?>')">
@@ -459,9 +461,19 @@ $totalAbogados = count(array_filter($usuarios, fn($u) => $u['rol'] === 'abogado'
                         <label class="form-label fw-semibold text-sm">DNI / NIF</label>
                         <input type="text" name="edit_dni_nif" id="editDniNif" class="form-control radius-12" style="height:44px" placeholder="12345678A">
                     </div>
-                    <div class="col-6">
-                        <label class="form-label fw-semibold text-sm">Dirección</label>
-                        <input type="text" name="edit_direccion" id="editDireccion" class="form-control radius-12" style="height:44px" placeholder="Calle Ejemplo">
+                    <div class="col-sm-6">
+                        <label class="form-label text-neutral-800 fw-semibold">Provincia</label>
+                        <?php $provincias = require CRM_ROOT . '/includes/provincias.php'; ?>
+                        <select name="edit_provincia" id="editProvincia" class="form-control radius-12" style="height:44px">
+                            <option value="">Seleccione...</option>
+                            <?php foreach($provincias as $p): ?>
+                                <option value="<?php echo htmlspecialchars($p); ?>"><?php echo htmlspecialchars($p); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="form-label text-neutral-800 fw-semibold">Ciudad o Localidad</label>
+                        <input type="text" name="edit_ciudad" id="editCiudad" class="form-control radius-12" style="height:44px" placeholder="Ciudad">
                     </div>
                     <div class="col-12">
                         <div class="form-check form-switch">
@@ -517,14 +529,15 @@ function openResetModal(id, email) {
     document.getElementById('resetEmailDisplay').textContent = email;
     new bootstrap.Modal(document.getElementById('resetPasswordModal')).show();
 }
-function openEditModal(id, nombre, apellidos, email, telefono, dni, direccion, activo) {
+function openEditModal(id, nombre, apellidos, email, telefono, dni, provincia, ciudad, activo) {
     document.getElementById('editPortalId').value = id;
     document.getElementById('editNombre').value = nombre;
     document.getElementById('editApellidos').value = apellidos;
     document.getElementById('editEmail').value = email;
     document.getElementById('editTelefono').value = telefono;
     document.getElementById('editDniNif').value = dni;
-    document.getElementById('editDireccion').value = direccion;
+    document.getElementById('editProvincia').value = provincia;
+    document.getElementById('editCiudad').value = ciudad;
     document.getElementById('editActivo').checked = activo === 1;
     new bootstrap.Modal(document.getElementById('editPortalModal')).show();
 }

@@ -29,7 +29,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_cliente'])) {
         'apellidos' => trim($_POST['apellidos']),
         'email'     => trim($_POST['email']),
         'telefono'  => trim($_POST['telefono']),
-        'direccion' => trim($_POST['direccion']),
+        'provincia' => trim($_POST['provincia']),
+        'ciudad'    => trim($_POST['ciudad']),
         'dni_nif'   => trim($_POST['dni_nif']),
         'notas'     => trim($_POST['notas'])
     ], 'id = ?', [$id]);
@@ -71,9 +72,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['enviar_recovery'])) {
     
     // Si no existe cuenta en el portal, crearla automáticamente ahora
     if (!$cuentaPortal) {
-        // Asegurar columnas en caso de que falten
+        // Asegurar que portal_cuentas tenga dni_nif, provincia y ciudad
         try {
-            $db->query("ALTER TABLE portal_cuentas ADD COLUMN dni_nif VARCHAR(50) DEFAULT NULL, ADD COLUMN direccion TEXT DEFAULT NULL");
+            $db->query("ALTER TABLE portal_cuentas ADD COLUMN dni_nif VARCHAR(50) DEFAULT NULL, ADD COLUMN provincia VARCHAR(100) DEFAULT NULL, ADD COLUMN ciudad VARCHAR(255) DEFAULT NULL");
         } catch (\Throwable $e) {}
 
         // Generar una contraseña aleatoria temporal (se sobrescribirá al recuperar)
@@ -87,7 +88,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['enviar_recovery'])) {
             'password_hash' => $hash,
             'telefono'      => $cliente['telefono'] ?: null,
             'dni_nif'       => $cliente['dni_nif'] ?: null,
-            'direccion'     => $cliente['direccion'] ?: null,
+            'provincia'     => $cliente['provincia'] ?: null,
+            'ciudad'        => $cliente['ciudad'] ?: null,
             'es_cliente'    => 1,
             'cliente_id'    => $cliente['id'],
             'activo'        => 1
@@ -242,7 +244,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['eliminar_caso'])) {
         try { $db->delete('pagos', 'caso_id = ?', [$casoId]); } catch (\Throwable $e) {}
         
         // 3. Finalmente eliminar el caso
-        $db->delete('casos', 'id = ?', [$casoId]);
+        $db->delete('casos', 'caso_id = ?', [$casoId]);
         
         $db->commit();
         AuditLog::registrar('eliminar', 'casos', $casoId, 'Caso y registros asociados eliminados desde ficha de cliente');
@@ -368,10 +370,26 @@ include CRM_ROOT . '/templates/layout/header.php';
                         <div class="w-40-px h-40-px rounded-circle bg-white shadow-sm d-flex justify-content-center align-items-center text-primary-600 flex-shrink-0">
                             <iconify-icon icon="solar:map-point-outline" class="text-xl"></iconify-icon>
                         </div>
-                        <div>
-                            <span class="d-block text-xs text-secondary-light fw-medium text-uppercase tracking-wider mb-2">Dirección</span>
-                            <span class="d-block fw-semibold text-neutral-800"><?php echo e($cliente['direccion'] ?: 'No especificada'); ?></span>
-                        </div>
+                        <ul class="list-unstyled mb-0 d-flex flex-column gap-2">
+                            <li class="d-flex align-items-center gap-2">
+                                <span class="w-32-px h-32-px rounded-circle bg-warning-50 text-warning-main d-flex justify-content-center align-items-center flex-shrink-0">
+                                    <iconify-icon icon="solar:map-point-linear"></iconify-icon>
+                                </span>
+                                <div class="flex-grow-1">
+                                    <span class="d-block text-sm text-secondary-light">Provincia</span>
+                                    <span class="d-block fw-semibold text-neutral-800"><?php echo e($cliente['provincia'] ?: 'No especificada'); ?></span>
+                                </div>
+                            </li>
+                            <li class="d-flex align-items-center gap-2">
+                                <span class="w-32-px h-32-px rounded-circle bg-warning-50 text-warning-main d-flex justify-content-center align-items-center flex-shrink-0">
+                                    <iconify-icon icon="solar:city-linear"></iconify-icon>
+                                </span>
+                                <div class="flex-grow-1">
+                                    <span class="d-block text-sm text-secondary-light">Ciudad o Localidad</span>
+                                    <span class="d-block fw-semibold text-neutral-800"><?php echo e($cliente['ciudad'] ?: 'No especificada'); ?></span>
+                                </div>
+                            </li>
+                        </ul>
                     </div>
                     
                     <div class="d-flex align-items-start gap-12 p-16 radius-8 bg-neutral-50 border border-neutral-100 hover-bg-neutral-100 transition-2">
@@ -662,21 +680,33 @@ include CRM_ROOT . '/templates/layout/header.php';
                         </div>
                     </div>
                     <div class="col-sm-6">
-                        <label class="form-label fw-semibold text-neutral-800">Dirección</label>
+                        <label class="form-label fw-semibold text-neutral-800">Provincia</label>
                         <div class="input-group">
-                            <span class="input-group-text bg-neutral-50 border-end-0 text-secondary-light"><iconify-icon icon="solar:map-point-outline"></iconify-icon></span>
-                            <input type="text" name="direccion" class="form-control border-start-0 ps-0" value="<?php echo e($cliente['direccion']); ?>">
+                            <span class="input-group-text bg-neutral-50 border-end-0 text-secondary-light"><iconify-icon icon="solar:map-point-linear"></iconify-icon></span>
+                            <?php $provincias = require CRM_ROOT . '/includes/provincias.php'; ?>
+                            <select name="provincia" class="form-control border-start-0 ps-0">
+                                <option value="">Seleccione...</option>
+                                <?php $selectedProv = $cliente['provincia'] ?? 'Alicante'; ?>
+                                <?php foreach($provincias as $p): ?>
+                                    <option value="<?php echo htmlspecialchars($p); ?>" <?php echo ($selectedProv === $p) ? 'selected' : ''; ?>><?php echo htmlspecialchars($p); ?></option>
+                                <?php endforeach; ?>
+                            </select>
                         </div>
                     </div>
-                    <?php /* NOTAS INTERNAS - oculto temporalmente
-                    <div class="col-12">
+                    <div class="col-sm-6">
+                        <label class="form-label fw-semibold text-neutral-800">Ciudad o Localidad</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-neutral-50 border-end-0 text-secondary-light"><iconify-icon icon="solar:city-linear"></iconify-icon></span>
+                            <input type="text" name="ciudad" class="form-control border-start-0 ps-0" value="<?php echo e($cliente['ciudad']); ?>">
+                        </div>
+                    </div>
+                    <div class="col-sm-12">
                         <label class="form-label fw-semibold text-neutral-800 d-flex justify-content-between">
                             <span>Notas Internas</span>
                             <span class="text-xs text-secondary-light fw-normal">Solo visibles para administradores y abogados</span>
                         </label>
                         <textarea name="notas" class="form-control" rows="4" placeholder="Observaciones sobre el cliente..."><?php echo e($cliente['notas']); ?></textarea>
                     </div>
-                    */ ?>
                 </div>
             </div>
             <div class="modal-footer border-top border-neutral-100 p-24 d-flex justify-content-between bg-neutral-50 radius-bottom-12">

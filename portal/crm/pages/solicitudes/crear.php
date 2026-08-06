@@ -19,7 +19,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $telefono = trim($_POST['telefono'] ?? '');
     $dni_nif = trim($_POST['dni_nif'] ?? '');
     $fecha_nacimiento = trim($_POST['fecha_nacimiento'] ?? '') ?: null;
-    $direccion = trim($_POST['direccion'] ?? '');
+    $provincia = trim($_POST['provincia'] ?? '');
+    $ciudad = trim($_POST['ciudad'] ?? '');
     $tipo_problema = trim($_POST['tipo_problema'] ?? '') ?: 'Otro';
     $descripcion = trim($_POST['descripcion'] ?? '');
     
@@ -37,7 +38,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'telefono' => $telefono,
                 'dni_nif' => $dni_nif,
                 'fecha_nacimiento' => $fecha_nacimiento,
-                'direccion' => $direccion,
+                'provincia' => $provincia,
+                'ciudad'    => $ciudad,
                 'tipo_problema' => $tipo_problema,
                 'descripcion' => $descripcion,
                 'estado' => 'pendiente',
@@ -103,9 +105,19 @@ include CRM_ROOT . '/templates/layout/header.php';
                             <label class="form-label fw-semibold">Fecha de Nacimiento</label>
                             <input type="date" name="fecha_nacimiento" class="form-control radius-8" value="<?php echo e($_POST['fecha_nacimiento'] ?? ''); ?>">
                         </div>
-                        <div class="col-sm-12">
-                            <label class="form-label fw-semibold">Dirección</label>
-                            <input type="text" name="direccion" class="form-control radius-8" value="<?php echo e($_POST['direccion'] ?? ''); ?>">
+                        <div class="col-sm-6">
+                            <label class="form-label">Provincia</label>
+                            <?php $provincias = require CRM_ROOT . '/includes/provincias.php'; ?>
+                            <select name="provincia" class="form-control radius-8">
+                                <option value="">Seleccione una provincia...</option>
+                                <?php foreach($provincias as $p): ?>
+                                    <option value="<?php echo htmlspecialchars($p); ?>" <?php echo (($_POST['provincia'] ?? 'Alicante') === $p) ? 'selected' : ''; ?>><?php echo htmlspecialchars($p); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label">Ciudad o Localidad</label>
+                            <input type="text" name="ciudad" class="form-control radius-8" value="<?php echo e($_POST['ciudad'] ?? ''); ?>">
                         </div>
                         <div class="col-sm-12">
                             <label class="form-label fw-semibold">Descripción del Caso</label>

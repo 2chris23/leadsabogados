@@ -204,7 +204,7 @@ $tiposConsulta = ['Civil','Penal','Laboral','Mercantil','Inmobiliario','Familia'
 
     <!-- Quick Actions -->
     <div class="actions">
-        <?php if (empty($cuenta['dni_nif']) || empty($cuenta['direccion'])): ?>
+        <?php if (empty($cuenta['dni_nif']) || empty($cuenta['provincia']) || empty($cuenta['ciudad'])): ?>
         <a href="index.php?page=perfil" class="action-card" style="border: 2px solid #f59e0b; background: #fffbeb;">
             <div class="action-icon" style="background: #fef3c7; color: #d97706;">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>

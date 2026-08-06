@@ -168,7 +168,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
                         'telefono'     => $solicitud['telefono'],
                         'dni_nif'      => $solicitud['dni_nif'] ?? null,
                         'fecha_nacimiento' => $solicitud['fecha_nacimiento'] ?? null,
-                        'direccion'    => $solicitud['direccion'] ?? null
+                        'provincia'    => $solicitud['provincia'] ?? null,
+                        'ciudad'       => $solicitud['ciudad'] ?? null
                     ]);
                     $logMsg = "Solicitud aceptada. Cliente #$clienteId creado.";
                 }
@@ -187,7 +188,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
                         'telefono'      => $solicitud['telefono'] ?: null,
                         'dni_nif'       => $solicitud['dni_nif'] ?: 'No provisto',
                         'fecha_nacimiento'=> $solicitud['fecha_nacimiento'] ?? null,
-                        'direccion'     => $solicitud['direccion'] ?? '',
+                        'provincia'     => $solicitud['provincia'] ?? null,
+                        'ciudad'        => $solicitud['ciudad'] ?? null,
                         'password_hash' => password_hash($autoPassword, PASSWORD_DEFAULT),
                         'password_plain'=> $autoPassword,
                         'ip_registro'   => $solicitud['ip_solicitante'] ?? ''

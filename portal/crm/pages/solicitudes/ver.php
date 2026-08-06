@@ -126,7 +126,8 @@ $miAsignacion = reset($misAsignaciones);
                         </p>
                     </div>
                     <div class="sv-data-group"><label>Fecha Nac.</label><p><?php echo $solicitud['fecha_nacimiento'] ? date('d/m/Y', strtotime($solicitud['fecha_nacimiento'])) : 'N/A'; ?></p></div>
-                    <div class="sv-data-group" style="grid-column: span 2;"><label>Dirección</label><p><?php echo htmlspecialchars($solicitud['direccion'] ?? 'N/A'); ?></p></div>
+                    <div class="sv-data-group"><label>Provincia</label><p><?php echo htmlspecialchars($solicitud['provincia'] ?? 'N/A'); ?></p></div>
+                    <div class="sv-data-group"><label>Ciudad / Localidad</label><p><?php echo htmlspecialchars($solicitud['ciudad'] ?? 'N/A'); ?></p></div>
                 </div>
             </div>
         </div>

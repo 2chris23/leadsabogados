@@ -57,16 +57,21 @@ $maxFileSize = $realLimitMB * 1024 * 1024;
 // Migración: agregar columna password_plain y fecha_nacimiento si no existen
 try { $db->query("ALTER TABLE portal_cuentas ADD COLUMN password_plain VARCHAR(100) DEFAULT NULL"); } catch (Throwable $e) {} 
 try { $db->query("ALTER TABLE portal_cuentas ADD COLUMN fecha_nacimiento DATE DEFAULT NULL"); } catch (Throwable $e) {} 
+try { $db->query("ALTER TABLE portal_cuentas ADD COLUMN provincia VARCHAR(100) DEFAULT NULL, ADD COLUMN ciudad VARCHAR(255) DEFAULT NULL"); } catch (Throwable $e) {}
+try { $db->query("ALTER TABLE portal_cuentas DROP COLUMN direccion"); } catch (Throwable $e) {}
 try { $db->query("ALTER TABLE solicitudes ADD COLUMN fecha_nacimiento DATE DEFAULT NULL"); } catch (Throwable $e) {}
 try { $db->query("ALTER TABLE solicitudes ADD COLUMN dni_nif VARCHAR(50) DEFAULT NULL"); } catch (Throwable $e) {}
-try { $db->query("ALTER TABLE solicitudes ADD COLUMN direccion VARCHAR(255) DEFAULT NULL"); } catch (Throwable $e) {}
+try { $db->query("ALTER TABLE solicitudes ADD COLUMN provincia VARCHAR(100) DEFAULT NULL, ADD COLUMN ciudad VARCHAR(255) DEFAULT NULL"); } catch (Throwable $e) {}
+try { $db->query("ALTER TABLE solicitudes DROP COLUMN direccion"); } catch (Throwable $e) {}
 try { $db->query("ALTER TABLE clientes ADD COLUMN fecha_nacimiento DATE DEFAULT NULL"); } catch (Throwable $e) {}
 try { $db->query("ALTER TABLE clientes ADD COLUMN dni_nif VARCHAR(50) DEFAULT NULL"); } catch (Throwable $e) {}
+try { $db->query("ALTER TABLE clientes ADD COLUMN provincia VARCHAR(100) DEFAULT NULL, ADD COLUMN ciudad VARCHAR(255) DEFAULT NULL"); } catch (Throwable $e) {}
+try { $db->query("ALTER TABLE clientes DROP COLUMN direccion"); } catch (Throwable $e) {}
 
 // --- Procesar formulario ---
 $formExito = false;
 $formError = '';
-$formData = ['nombre'=>'','apellidos'=>'','email'=>'','telefono'=>'','dni_nif'=>'','direccion'=>'','fecha_nacimiento'=>'','tipo_problema'=>'','descripcion'=>''];
+$formData = ['nombre'=>'','apellidos'=>'','email'=>'','telefono'=>'','dni_nif'=>'','provincia'=>'','ciudad'=>'','fecha_nacimiento'=>'','tipo_problema'=>'','descripcion'=>''];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
     if (!hash_equals($csrfToken, $_POST['_token'] ?? '')) {
@@ -106,7 +111,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
             'apellidos'       => trim($_POST['apellidos'] ?? ''),
             'email'           => trim($_POST['email'] ?? ''),
             'telefono'        => trim($_POST['telefono'] ?? ''),
-            'direccion'       => trim($_POST['direccion'] ?? ''),
+            'provincia'       => trim($_POST['provincia'] ?? ''),
+            'ciudad'          => trim($_POST['ciudad'] ?? ''),
             'tipo_problema'   => trim($_POST['tipo_problema'] ?? '') ?: 'Otro',
             'descripcion'     => trim($_POST['descripcion'] ?? ''),
             'dni_nif'         => trim($_POST['dni_nif'] ?? ''),
@@ -148,7 +154,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
                     'descripcion'      => $formData['descripcion'],
                     'fecha_nacimiento' => $formData['fecha_nacimiento'],
                     'dni_nif'          => $formData['dni_nif'],
-                    'direccion'        => $formData['direccion'],
+                    'provincia'        => $formData['provincia'],
+                    'ciudad'           => $formData['ciudad'],
                     'estado'           => 'pendiente',
                     
                     'ip_solicitante'   => $_SERVER['REMOTE_ADDR'] ?? '',
@@ -216,7 +223,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
                 $_SESSION['landing_csrf'] = bin2hex(random_bytes(32));
                 $csrfToken = $_SESSION['landing_csrf'];
 
-                $formData = ['nombre'=>'','apellidos'=>'','email'=>'','telefono'=>'','dni_nif'=>'','direccion'=>'','tipo_problema'=>'','descripcion'=>''];
+                $formData = ['nombre'=>'','apellidos'=>'','email'=>'','telefono'=>'','dni_nif'=>'','provincia'=>'','ciudad'=>'','tipo_problema'=>'','descripcion'=>''];
 
             } catch (Exception $ex) {
                 if ($pdo->inTransaction()) $pdo->rollBack();
@@ -277,13 +284,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            min-height: 120px;
+            min-height: 80px;
             position: sticky;
             top: 0;
             z-index: 100;
             box-shadow: 0 2px 20px rgba(0,0,0,0.06);
         }
-        .nav-logo { width: 400px; height: auto; max-width: 100%; }
+        .nav-logo { width: 280px; height: auto; max-width: 100%; }
         .nav-menu { display: flex; align-items: center; gap: 32px; }
         .nav-menu a {
             font-size: 0.9375rem;
@@ -855,7 +862,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
                             <input type="<?php echo empty($formData['fecha_nacimiento']) ? 'text' : 'date'; ?>" name="fecha_nacimiento" class="inp" placeholder="Fecha de Nacimiento *" required onfocus="(this.type='date')" onblur="if(!this.value)this.type='text'" value="<?php echo esc($formData['fecha_nacimiento']); ?>">
                         </div>
                         <div class="col-12 col-md-4">
-                            <input type="text" name="direccion" class="inp" placeholder="Dirección *" required value="<?php echo esc($formData['direccion']); ?>">
+                            <?php $provincias = require CRM_ROOT . '/includes/provincias.php'; ?>
+                            <select name="provincia" class="inp" required style="appearance:none; padding-right:30px;">
+                                <option value="" disabled <?php echo empty($formData['provincia']) ? 'selected' : ''; ?>>Provincia *</option>
+                                <?php foreach($provincias as $prov): ?>
+                                    <option value="<?php echo htmlspecialchars($prov); ?>" <?php echo $formData['provincia'] === $prov ? 'selected' : ''; ?>><?php echo htmlspecialchars($prov); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-12">
+                            <input type="text" name="ciudad" class="inp" placeholder="Ciudad o Localidad *" required value="<?php echo esc($formData['ciudad']); ?>">
                         </div>
                     </div>
 
