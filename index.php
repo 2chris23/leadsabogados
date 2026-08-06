@@ -777,23 +777,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
 <div class="topbar">
     <span>Atención Legal Personalizada &bull; Sin compromiso</span>
     <div class="topbar-right">
-        
-        <a href="https://app.leadsabogados.com/portal" style="color:rgba(255,255,255,0.8)">Acceso Portal Cliente &rarr;</a>
     </div>
 </div>
 
 <!-- NAVBAR -->
-<nav class="navbar" id="top">
+<nav class="navbar" id="top" style="justify-content: center; gap: 30vw;">
     <a href="/"><img src="<?php echo $logoUrl; ?>" alt="leadsabogados.com" class="nav-logo"></a>
     <div class="nav-menu">
-        <a href="#contacto">Contáctanos</a>
-        <a href="#como-funciona">¿Cómo funciona?</a>
-        
         <a href="https://app.leadsabogados.com/portal" class="btn-portal">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
             <span>Mi Portal</span>
         </a>
-        
     </div>
 </nav>
 
