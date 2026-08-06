@@ -71,6 +71,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
         $formExito = true; 
     }
 
+    if (empty($formError) && isset($_POST['_ts'])) {
+        $elapsed = time() - (int)$_POST['_ts'];
+        // Si el formulario se envió en menos de 3 segundos, es probable que sea un bot
+        if ($elapsed < 3) {
+            $formExito = true; 
+        }
+    }
+
     if (empty($formError) && !$formExito) {
         $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
         $rlKey = 'rl_landing_' . md5($ip);
@@ -829,7 +837,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
                 <form action="index.php" method="POST" enctype="multipart/form-data">
                     <input type="hidden" name="consulta_submit" value="1">
                     <input type="hidden" name="_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
-                    <input type="text" name="website_url" style="display:none" tabindex="-1" autocomplete="off">
+                    <input type="hidden" name="_ts" value="<?php echo time(); ?>">
+                    <input type="text" name="website_url" style="position:absolute; left:-9999px;" tabindex="-1" autocomplete="off">
 
                     <div class="form-row">
                         <input type="text" name="nombre" class="inp" placeholder="Nombre *" value="<?php echo esc($formData['nombre']); ?>" required>
