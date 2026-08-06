@@ -440,12 +440,30 @@ $miAsignacion = reset($misAsignaciones);
                     <?php if($esMensual): ?>
                         <div style="font-size:0.75rem;font-weight:700;color:#64748b;text-transform:uppercase;">Esquema de Pago</div>
                         <div style="font-size:0.95rem;font-weight:800;color:#0f172a;margin-bottom:8px;">Plan Mensual</div>
-                    <?php elseif($esHitos): ?>
+                    <?php elseif($esHitos): 
+                        $tS = (float)($abogadoParams['tarifa_hitos_senal'] ?? 0);
+                        $tI = (float)($abogadoParams['tarifa_hitos_intermedio'] ?? 0);
+                        $tF = (float)($abogadoParams['tarifa_hitos_final'] ?? 0);
+                        $tTotal = $tS + $tI + $tF;
+                        
+                        if ($ha > 0 && $tTotal > 0 && abs($ha - $tTotal) > 0.01) {
+                            $mult = $ha / $tTotal;
+                            $tS = round($tS * $mult, 2);
+                            $tI = round($tI * $mult, 2);
+                            $tF = $ha - $tS - $tI; 
+                        } elseif ($ha > 0 && $tTotal == 0) {
+                            $tS = round($ha * 0.4, 2);
+                            $tI = round($ha * 0.3, 2);
+                            $tF = $ha - $tS - $tI;
+                        } elseif ($ha == 0) {
+                            $ha = $tTotal;
+                        }
+                    ?>
                         <div style="font-size:0.75rem;font-weight:800;color:#64748b;text-transform:uppercase;margin-bottom:8px;">Pago por Hitos</div>
                         <div style="text-align:left;font-size:0.8rem;color:#334155;">
-                            <div style="display:flex;justify-content:space-between;margin-bottom:4px;border-bottom:1px dashed #cbd5e1;padding-bottom:4px;"><span>Señal (Anticipo):</span> <strong style="color:#0f172a;"><?php echo number_format((float)($abogadoParams['tarifa_hitos_senal'] ?? 0), 2); ?> €</strong></div>
-                            <div style="display:flex;justify-content:space-between;margin-bottom:4px;border-bottom:1px dashed #cbd5e1;padding-bottom:4px;"><span>Intermedio:</span> <strong style="color:#0f172a;"><?php echo number_format((float)($abogadoParams['tarifa_hitos_intermedio'] ?? 0), 2); ?> €</strong></div>
-                            <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><span>Final:</span> <strong style="color:#0f172a;"><?php echo number_format((float)($abogadoParams['tarifa_hitos_final'] ?? 0), 2); ?> €</strong></div>
+                            <div style="display:flex;justify-content:space-between;margin-bottom:4px;border-bottom:1px dashed #cbd5e1;padding-bottom:4px;"><span>Señal (Anticipo):</span> <strong style="color:#0f172a;"><?php echo number_format($tS, 2); ?> €</strong></div>
+                            <div style="display:flex;justify-content:space-between;margin-bottom:4px;border-bottom:1px dashed #cbd5e1;padding-bottom:4px;"><span>Intermedio:</span> <strong style="color:#0f172a;"><?php echo number_format($tI, 2); ?> €</strong></div>
+                            <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><span>Final:</span> <strong style="color:#0f172a;"><?php echo number_format($tF, 2); ?> €</strong></div>
                         </div>
                     <?php else: ?>
                         <div style="font-size:0.75rem;font-weight:700;color:#64748b;text-transform:uppercase;">Honorarios Base</div>
