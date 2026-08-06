@@ -591,7 +591,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
         .video-body {
             position: relative; z-index: 3;
             max-width: 1200px; margin: 0 auto;
-            padding: 100px 80px;
+            padding: 200px 80px;
             display: grid;
             grid-template-columns: 42% 58%;
             gap: 80px;
@@ -761,7 +761,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
                 -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.05) 15%, black 40%);
                 background-position: center top;
             }
-            .video-body { grid-template-columns: 1fr; padding: 60px 32px; gap: 40px; }
+            .video-body { grid-template-columns: 1fr; padding: 120px 32px; gap: 40px; }
             .steps-grid { grid-template-columns: 1fr; }
             .steps-grid::before { display: none; }
             .stats-inner { grid-template-columns: 1fr; }
