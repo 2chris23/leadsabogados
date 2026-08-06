@@ -284,34 +284,33 @@ include CRM_ROOT . '/templates/layout/header.php';
             </div>
 
             <?php if (!empty($solicitudes)): ?>
-            <div class="mb-24"><div style="font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase;">Solicitudes Asignadas</div></div>
-            <div class="row gy-24 mb-32">
-                <?php foreach ($solicitudes as $sol): 
-                    $badgeClass = match($sol['estado']) {
-                        'pendiente' => 'bg-warning-50 text-warning-main',
-                        'aceptada'  => 'bg-success-50 text-success-main',
-                        'denegada'  => 'bg-danger-50 text-danger-main',
-                        default     => 'bg-neutral-200 text-neutral-600'
-                    };
-                    $solUrl = APP_URL . '/index.php?page=solicitudes/ver&id=' . $sol['id'];
-                ?>
-                <div class="col-md-6 col-xxl-4">
-                    <div class="card radius-24 border-0 shadow-sm bg-white p-24" style="cursor:pointer;transition:.2s" onmouseover="this.style.boxShadow='0 8px 30px rgba(0,0,0,.12)'" onmouseout="this.style.boxShadow=''" onclick="window.location='<?php echo $solUrl; ?>'">
-                        <div class="d-flex justify-content-between mb-16">
-                            <span class="badge <?php echo $badgeClass; ?> px-12 py-6 radius-8 fw-bold text-xs"><?php echo ucfirst($sol['estado']); ?></span>
-                            <span class="text-xs text-secondary-light"><?php echo date('d M', strtotime($sol['created_at'])); ?></span>
+            <div class="mb-24"><div style="font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase;">Notificaciones de Solicitudes</div></div>
+            <div class="card radius-16 border-0 shadow-sm bg-white mb-32 overflow-hidden">
+                <div class="card-body p-0">
+                    <?php foreach ($solicitudes as $idx => $sol): 
+                        $badgeClass = match($sol['estado']) {
+                            'pendiente' => 'text-warning-main',
+                            'aceptada'  => 'text-success-main',
+                            'denegada'  => 'text-danger-main',
+                            default     => 'text-neutral-600'
+                        };
+                        $borderBottom = ($idx < count($solicitudes) - 1) ? 'border-bottom border-neutral-100' : '';
+                    ?>
+                    <div class="d-flex align-items-center justify-content-between p-16 <?php echo $borderBottom; ?> hover-bg-neutral-50" style="transition:background 0.2s">
+                        <div class="d-flex align-items-center gap-12" style="min-width:0;">
+                            <div class="text-neutral-400 d-flex align-items-center justify-content-center">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                            </div>
+                            <div class="text-sm fw-medium text-neutral-700 text-truncate">
+                                La solicitud de <strong><?php echo e($sol['nombre'] . ' ' . $sol['apellidos']); ?></strong> ha sido marcada como <span class="<?php echo $badgeClass; ?> fw-bold"><?php echo ucfirst($sol['estado']); ?></span>
+                            </div>
                         </div>
-                        <div class="bg-neutral-50 p-12 radius-16 mb-20 d-flex align-items-center gap-2">
-                            <div class="w-24-px h-24-px bg-primary-600 text-white rounded-circle d-flex align-items-center justify-content-center text-xs fw-bold"><?php echo strtoupper(substr($sol['nombre'],0,1)); ?></div>
-                            <span class="text-sm fw-semibold"><?php echo e($sol['nombre'] . ' ' . $sol['apellidos']); ?></span>
-                        </div>
-
-                        <div class="d-flex pt-12 border-top" onclick="event.stopPropagation()">
-                            <a href="<?php echo $solUrl; ?>" class="btn btn-sm btn-outline-primary flex-grow-1 radius-12 fw-bold">Ver Solicitud</a>
+                        <div class="text-xs text-neutral-400 fw-medium flex-shrink-0 ms-3">
+                            <?php echo date('Y-m-d', strtotime($sol['created_at'])); ?>
                         </div>
                     </div>
+                    <?php endforeach; ?>
                 </div>
-                <?php endforeach; ?>
             </div>
             <?php endif; ?>
 
