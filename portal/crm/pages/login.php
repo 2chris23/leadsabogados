@@ -58,65 +58,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * { font-family: 'Inter', sans-serif; }
-        body { margin: 0; padding: 0; min-height: 100vh; }
+        body { margin: 0; padding: 20px; min-height: 100vh; background: #f4f7fb; display: flex; align-items: center; justify-content: center; }
 
         .login-wrapper {
-            display: flex;
-            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            width: 100%;
+            max-width: 1263px;
+            min-height: 688px;
+            background: #fff;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15);
         }
 
         .login-image-side {
-            flex: 1;
             position: relative;
-            display: none;
             overflow: hidden;
         }
 
-        @media (min-width: 992px) {
-            .login-image-side { display: block; }
+        @media (max-width: 991px) {
+            .login-wrapper { grid-template-columns: 1fr; max-width: 500px; min-height: auto; }
+            .login-image-side { display: none; }
         }
 
         .login-image-side img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-        }
-
-        .login-image-overlay {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(30, 82, 171, 0.85) 0%, rgba(46, 110, 221, 0.7) 100%);
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            padding: 60px;
-        }
-
-        .login-image-overlay h2 {
-            color: #fff;
-            font-size: 2.25rem;
-            font-weight: 800;
-            line-height: 1.2;
-            margin-bottom: 16px;
-            letter-spacing: -0.02em;
-        }
-
-        .login-image-overlay p {
-            color: rgba(255,255,255,0.8);
-            font-size: 1.0625rem;
-            line-height: 1.6;
-            max-width: 480px;
+            filter: brightness(0.9);
         }
 
         .login-form-side {
-            flex: 0 0 520px;
-            max-width: 520px;
-            width: 100%;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            padding: 60px 48px;
+            padding: 50px;
             background: #fff;
+            color: #1a1a2e;
             box-sizing: border-box;
         }
 
@@ -126,8 +105,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         @media (max-width: 991.98px) {
             .login-form-side {
-                flex: 1;
-                max-width: 100%;
                 padding: 40px 24px;
             }
         }
@@ -140,9 +117,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .login-logo img {
-            width: 350px;
-            height: auto;
-            max-width: 100%;
+            width: 200px;
+            height: 100px;
             object-fit: contain;
         }
 
@@ -329,11 +305,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div class="login-wrapper">
     <!-- Imagen Lateral -->
     <div class="login-image-side">
-        <img src="<?php echo APP_URL; ?>/assets/images/steptodown.com753320.jpg?v=<?php echo time(); ?>" alt="Consulta jurídica">
-        <div class="login-image-overlay">
-            <h2>Gestión Jurídica<br>Profesional</h2>
-            <p>Panel de administración exclusivo para abogados y personal autorizado del despacho.</p>
-        </div>
+        <img src="<?php echo APP_URL; ?>/assets/images/login_bg.png?v=<?php echo time(); ?>" alt="Fondo Login">
     </div>
 
     <!-- Formulario -->
