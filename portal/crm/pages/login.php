@@ -131,7 +131,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .login-title {
-            font-size: 1.35rem;
+            font-size: 1.35rem !important;
             font-weight: 800;
             color: #1a1a2e;
             margin-bottom: 8px;
@@ -312,7 +312,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Formulario -->
     <div class="login-form-side">
         <div class="login-logo">
-            <img src="<?php echo APP_URL; ?>/assets/images/logo.png?v=<?php echo time(); ?>" alt="Logo" style="max-height:64px;">
+            <img src="<?php echo APP_URL; ?>/assets/images/logo.png?v=<?php echo time(); ?>" alt="Logo">
         </div>
 
         <h1 class="login-title">Iniciar Sesión</h1>
