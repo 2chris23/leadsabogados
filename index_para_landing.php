@@ -52,7 +52,9 @@ $videoUrl = '/portal/crm/assets/images/family_video.jpg';
 try { $db->query("ALTER TABLE portal_cuentas ADD COLUMN password_plain VARCHAR(100) DEFAULT NULL"); } catch (Throwable $e) {} 
 try { $db->query("ALTER TABLE portal_cuentas ADD COLUMN fecha_nacimiento DATE DEFAULT NULL"); } catch (Throwable $e) {} 
 try { $db->query("ALTER TABLE solicitudes ADD COLUMN fecha_nacimiento DATE DEFAULT NULL"); } catch (Throwable $e) {}
+try { $db->query("ALTER TABLE solicitudes ADD COLUMN dni_nif VARCHAR(50) DEFAULT NULL"); } catch (Throwable $e) {}
 try { $db->query("ALTER TABLE clientes ADD COLUMN fecha_nacimiento DATE DEFAULT NULL"); } catch (Throwable $e) {}
+try { $db->query("ALTER TABLE clientes ADD COLUMN dni_nif VARCHAR(50) DEFAULT NULL"); } catch (Throwable $e) {}
 
 // --- Procesar formulario ---
 $formExito = false;
@@ -92,7 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
             'direccion'       => trim($_POST['direccion'] ?? ''),
             'tipo_problema'   => trim($_POST['tipo_problema'] ?? '') ?: 'Otro',
             'descripcion'     => trim($_POST['descripcion'] ?? ''),
-            'dni_nif'         => 'No provisto',
+            'dni_nif'         => trim($_POST['dni_nif'] ?? ''),
             'fecha_nacimiento'=> trim($_POST['fecha_nacimiento'] ?? '') ?: null
         ];
 
@@ -130,6 +132,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
                     'tipo_problema'    => $formData['tipo_problema'],
                     'descripcion'      => $formData['descripcion'],
                     'fecha_nacimiento' => $formData['fecha_nacimiento'],
+                    'dni_nif'          => $formData['dni_nif'],
                     'estado'           => 'pendiente',
                     
                     'ip_solicitante'   => $_SERVER['REMOTE_ADDR'] ?? '',
