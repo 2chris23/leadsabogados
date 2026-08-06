@@ -755,7 +755,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
         @media (max-width: 1024px) {
             .hero { grid-template-columns: 1fr; min-height: auto; }
             .hero-left { position: relative; z-index: 2; padding: 60px 32px 40px; }
-            .hero-right { padding: 20px 32px 60px; }
+            .hero-right { padding: 20px 32px 60px; justify-content: center; }
+            .hero-img-bg {
+                mask-image: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.05) 15%, black 40%);
+                -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.05) 15%, black 40%);
+                background-position: center 20%;
+            }
             .video-body { grid-template-columns: 1fr; padding: 60px 32px; gap: 40px; }
             .steps-grid { grid-template-columns: 1fr; }
             .steps-grid::before { display: none; }
@@ -769,9 +774,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
             .navbar { padding: 0 20px; height: 70px; }
             .nav-logo { height: 55px; width: auto; max-width: 70%; object-fit: contain; }
             .nav-menu { gap: 12px; }
-            .hero-left { position: relative; z-index: 2; padding: 48px 20px 32px; }
-            .hero-right { padding: 0 20px 48px; }
-            .form-panel { padding: 28px 20px; }
+            .hero-left { position: relative; z-index: 2; padding: 48px 20px 32px; text-align: center; }
+            .hero-subtitle { margin-left: auto; margin-right: auto; }
+            .hero-right { padding: 0 20px 48px; justify-content: center; }
+            .form-panel { padding: 28px 20px; width: 100%; max-width: 500px; margin: 0 auto; }
             .form-row { grid-template-columns: 1fr; }
             .cta-band { padding: 60px 20px; }
             .btn-portal span { display: none; }
