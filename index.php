@@ -53,6 +53,7 @@ try { $db->query("ALTER TABLE portal_cuentas ADD COLUMN password_plain VARCHAR(1
 try { $db->query("ALTER TABLE portal_cuentas ADD COLUMN fecha_nacimiento DATE DEFAULT NULL"); } catch (Throwable $e) {} 
 try { $db->query("ALTER TABLE solicitudes ADD COLUMN fecha_nacimiento DATE DEFAULT NULL"); } catch (Throwable $e) {}
 try { $db->query("ALTER TABLE solicitudes ADD COLUMN dni_nif VARCHAR(50) DEFAULT NULL"); } catch (Throwable $e) {}
+try { $db->query("ALTER TABLE solicitudes ADD COLUMN direccion VARCHAR(255) DEFAULT NULL"); } catch (Throwable $e) {}
 try { $db->query("ALTER TABLE clientes ADD COLUMN fecha_nacimiento DATE DEFAULT NULL"); } catch (Throwable $e) {}
 try { $db->query("ALTER TABLE clientes ADD COLUMN dni_nif VARCHAR(50) DEFAULT NULL"); } catch (Throwable $e) {}
 
@@ -133,6 +134,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
                     'descripcion'      => $formData['descripcion'],
                     'fecha_nacimiento' => $formData['fecha_nacimiento'],
                     'dni_nif'          => $formData['dni_nif'],
+                    'direccion'        => $formData['direccion'],
                     'estado'           => 'pendiente',
                     
                     'ip_solicitante'   => $_SERVER['REMOTE_ADDR'] ?? '',
@@ -838,16 +840,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
                         <input type="email" name="email" class="inp" placeholder="Email *" value="<?php echo esc($formData['email']); ?>" required>
                     </div>
                     <div class="form-row">
-                        <div class="col-12 col-md-6">
+                        <div class="col-12 col-md-4">
                             <input type="text" name="dni_nif" class="inp" placeholder="DNI / NIE *" required value="<?php echo esc($formData['dni_nif']); ?>">
                         </div>
-                        <div class="col-12 col-md-6">
+                        <div class="col-12 col-md-4">
                             <input type="<?php echo empty($formData['fecha_nacimiento']) ? 'text' : 'date'; ?>" name="fecha_nacimiento" class="inp" placeholder="Fecha de Nacimiento *" required onfocus="(this.type='date')" onblur="if(!this.value)this.type='text'" value="<?php echo esc($formData['fecha_nacimiento']); ?>">
                         </div>
+                        <div class="col-12 col-md-4">
+                            <input type="text" name="direccion" class="inp" placeholder="Dirección *" required value="<?php echo esc($formData['direccion']); ?>">
+                        </div>
                     </div>
-                    <div class="form-row" style="display:none;">
-                        <input type="text" name="direccion" class="inp" placeholder="Provincia / Ciudad" value="<?php echo esc($formData['direccion']); ?>">
-                    </div>
+
                     <div class="form-group">
                         <textarea name="descripcion" class="inp inp-textarea" placeholder="Describe brevemente tu caso *" required><?php echo esc($formData['descripcion']); ?></textarea>
                     </div>
