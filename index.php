@@ -771,16 +771,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
         }
         @media (max-width: 768px) {
             .topbar { display: none; }
-            .navbar { padding: 0 20px; height: 70px; }
-            .nav-logo { height: 55px; width: auto; max-width: 70%; object-fit: contain; }
-            .nav-menu { gap: 12px; }
-            .hero-left { position: relative; z-index: 2; padding: 48px 20px 32px; text-align: center; }
+            .navbar { padding: 0 16px; height: auto; min-height: 70px; }
+            .nav-logo { width: 220px; height: auto; max-width: 60%; }
+            .nav-menu { gap: 8px; }
+            .btn-portal { font-size: 0.8rem; padding: 0 8px; }
+            /* .btn-portal span { display: none; } eliminamos esto para que se vea el texto */
+            .hero-left { position: relative; z-index: 2; padding: 48px 20px 180px; text-align: center; }
             .hero-subtitle { margin-left: auto; margin-right: auto; }
             .hero-right { padding: 0 20px 48px; justify-content: center; }
             .form-panel { padding: 28px 20px; width: 100%; max-width: 500px; margin: 0 auto; }
             .form-row { grid-template-columns: 1fr; }
             .cta-band { padding: 60px 20px; }
-            .btn-portal span { display: none; }
         }
     </style>
 </head>
