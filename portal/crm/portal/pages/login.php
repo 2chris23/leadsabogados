@@ -133,16 +133,21 @@ $crmUrl = APP_URL . '/portal/crm';
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Inter', sans-serif; min-height: 100vh; background: #0f172a; color: #fff; }
+        body { font-family: 'Inter', sans-serif; min-height: 100vh; background: #0f172a; color: #fff; display: flex; align-items: center; justify-content: center; padding: 20px; }
 
         .portal-login {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            min-height: 100vh;
+            grid-template-columns: 1.1fr 0.9fr;
+            width: 100%;
+            max-width: 1100px;
+            background: #fff;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
         }
 
         @media (max-width: 991px) {
-            .portal-login { grid-template-columns: 1fr; }
+            .portal-login { grid-template-columns: 1fr; max-width: 500px; }
             .portal-visual { display: none; }
         }
 
@@ -164,7 +169,7 @@ $crmUrl = APP_URL . '/portal/crm';
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            padding: 48px;
+            padding: 40px;
         }
 
         .portal-visual-logo {
@@ -228,13 +233,13 @@ $crmUrl = APP_URL . '/portal/crm';
             display: flex;
             flex-direction: column;
             justify-content: center;
-            padding: 60px;
+            padding: 50px;
             background: #fff;
             color: #1a1a2e;
         }
 
         @media (max-width: 991px) {
-            .portal-form-side { padding: 40px 24px; min-height: 100vh; }
+            .portal-form-side { padding: 40px 24px; }
         }
 
         .portal-form-inner {
@@ -497,10 +502,7 @@ $crmUrl = APP_URL . '/portal/crm';
                     </div>
                 </div>
                 <div class="field">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                        <label style="margin-bottom:0;">Contraseña</label>
-                        <a href="index.php?page=forgot-password" style="font-size:0.8125rem; color:#2563eb; font-weight:600; text-decoration:none;">¿Olvidaste tu contraseña?</a>
-                    </div>
+                    <label>Contraseña</label>
                     <div class="field-input">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                         <input type="password" name="password" id="pw" placeholder="Su contraseña de acceso" required>
