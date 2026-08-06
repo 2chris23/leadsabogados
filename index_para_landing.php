@@ -734,7 +734,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
         .footer-copy { color: var(--gray); font-size: 0.875rem; }
         .footer-right { display: flex; align-items: center; gap: 20px; }
         .footer-portal { display: inline-flex; align-items: center; gap: 8px; background: #f8fafc; border: 1px solid var(--border); color: var(--navy); padding: 12px 24px; border-radius: 8px; font-size: 0.9375rem; font-weight: 600; transition: all .2s; } .footer-portal:hover { background: #f1f5f9; color: var(--blue2); }
-        .footer-portal:hover { background: rgba(255,255,255,0.15); color: #fff; }
+        
 
         /* ============ RESPONSIVE ============ */
         @media (max-width: 1024px) {
