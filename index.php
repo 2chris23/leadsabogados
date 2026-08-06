@@ -80,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
             $_SESSION[$rlKey . '_c'] = 0;
             $rlCount = 0;
         }
-        if ($rlCount >= 3) {
+        if ($rlCount >= 50) {
             $formError = 'Ha excedido el límite de envíos. Intente más tarde.';
         }
     }
