@@ -45,7 +45,7 @@ function esc($s) { return htmlspecialchars($s ?? '', ENT_QUOTES, 'UTF-8'); }
 $db = Database::getInstance();
 $crmUrl = APP_URL;
 $logoUrl = '/portal/crm/assets/images/logo.png?v=' . time();
-$heroUrl = '/portal/crm/assets/images/hero_woman_highres.png?v=' . time();
+$heroUrl = '/portal/crm/assets/images/hero_woman_highres.png?v=' . (time() + 1000);
 $videoUrl = '/portal/crm/assets/images/family_video.jpg';
 
 // Calcular limite real de subida
