@@ -544,11 +544,11 @@ $extColors = ['PDF'=>['#fef2f2','#dc2626'],'DOC'=>['#e8f0fe','#2e6edd'],'DOCX'=>
         <?php echo $caso['estado'] === 'archivado' ? 'Desarchivar' : 'Archivar'; ?>
       </button>
     </form>
+    <?php endif; ?>
     <button class="cv-btn cv-btn-primary" style="width:auto;padding:8px 16px;font-size:.8125rem" data-bs-toggle="modal" data-bs-target="#editarCasoModal">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
       Editar
     </button>
-    <?php endif; ?>
   </div>
 </div>
 
@@ -1416,6 +1416,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="row gy-3">
                     <div class="col-sm-8"><label class="form-label">Título</label><input type="text" name="titulo" class="form-control" value="<?php echo e($caso['titulo']); ?>" required></div>
                     <div class="col-sm-4"><label class="form-label">Tipo de Caso</label><input type="text" name="tipo_caso" id="inputTipoCaso" class="form-control" value="<?php echo e($caso['tipo_caso']); ?>" placeholder="Ej: Penal, Civil..."></div>
+                    
+                    <?php if(RoleGuard::esAdmin()): ?>
                     <div class="col-sm-6"><label class="form-label fw-semibold" style="font-size:.8125rem">Abogado Asignado</label>
                         <?php
                         $abSel = $caso['abogado_id'] ?? '';
@@ -1440,6 +1442,10 @@ document.addEventListener('DOMContentLoaded', () => {
                           <input type="hidden" name="abogado_id" id="csModalHid" value="<?php echo $abSel; ?>">
                         </div>
                     </div>
+                    <?php else: ?>
+                    <input type="hidden" name="abogado_id" value="<?php echo $caso['abogado_id'] ?? ''; ?>">
+                    <?php endif; ?>
+
                     <?php if(RoleGuard::esAdmin()): ?>
                     <div class="col-sm-6">
                         <label class="form-label">Cobro Cliente (&euro;)</label>
