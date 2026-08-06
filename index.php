@@ -52,7 +52,9 @@ $videoUrl = '/portal/crm/assets/images/family_video.jpg';
 try { $db->query("ALTER TABLE portal_cuentas ADD COLUMN password_plain VARCHAR(100) DEFAULT NULL"); } catch (Throwable $e) {} 
 try { $db->query("ALTER TABLE portal_cuentas ADD COLUMN fecha_nacimiento DATE DEFAULT NULL"); } catch (Throwable $e) {} 
 try { $db->query("ALTER TABLE solicitudes ADD COLUMN fecha_nacimiento DATE DEFAULT NULL"); } catch (Throwable $e) {}
+try { $db->query("ALTER TABLE solicitudes ADD COLUMN dni_nif VARCHAR(50) DEFAULT NULL"); } catch (Throwable $e) {}
 try { $db->query("ALTER TABLE clientes ADD COLUMN fecha_nacimiento DATE DEFAULT NULL"); } catch (Throwable $e) {}
+try { $db->query("ALTER TABLE clientes ADD COLUMN dni_nif VARCHAR(50) DEFAULT NULL"); } catch (Throwable $e) {}
 
 // --- Procesar formulario ---
 $formExito = false;
