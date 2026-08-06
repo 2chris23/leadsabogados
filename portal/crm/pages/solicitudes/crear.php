@@ -20,14 +20,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $dni_nif = trim($_POST['dni_nif'] ?? '');
     $fecha_nacimiento = trim($_POST['fecha_nacimiento'] ?? '') ?: null;
     $direccion = trim($_POST['direccion'] ?? '');
-    $tipo_problema = trim($_POST['tipo_problema'] ?? '');
+    $tipo_problema = trim($_POST['tipo_problema'] ?? '') ?: 'Otro';
     $descripcion = trim($_POST['descripcion'] ?? '');
     
     $errores = [];
     if (!$nombre) $errores[] = 'El nombre es obligatorio';
     if (!$apellidos) $errores[] = 'Los apellidos son obligatorios';
     if (!$email || !filter_var($email, FILTER_VALIDATE_EMAIL)) $errores[] = 'Email inválido';
-    if (!$tipo_problema) $errores[] = 'El tipo de problema es obligatorio';
     
     if (empty($errores)) {
         try {
@@ -107,10 +106,6 @@ include CRM_ROOT . '/templates/layout/header.php';
                         <div class="col-sm-12">
                             <label class="form-label fw-semibold">Dirección</label>
                             <input type="text" name="direccion" class="form-control radius-8" value="<?php echo e($_POST['direccion'] ?? ''); ?>">
-                        </div>
-                        <div class="col-sm-12">
-                            <label class="form-label fw-semibold">Tipo de Consulta <span class="text-danger">*</span></label>
-                            <input type="text" name="tipo_problema" class="form-control radius-8" placeholder="Ej: Civil, Penal, Laboral, Familiar..." value="<?php echo e($_POST['tipo_problema'] ?? ''); ?>" required>
                         </div>
                         <div class="col-sm-12">
                             <label class="form-label fw-semibold">Descripción del Caso</label>
