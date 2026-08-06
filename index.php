@@ -280,17 +280,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
         .navbar {
             background: #fff;
             border-bottom: 1px solid var(--border);
-            padding: 15px 40px;
+            padding: 0 40px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            min-height: 90px;
+            height: 90px;
             position: sticky;
             top: 0;
             z-index: 100;
             box-shadow: 0 2px 20px rgba(0,0,0,0.06);
         }
-        .nav-logo { width: 320px; height: auto; max-width: 100%; }
+        .nav-logo { height: 75px; width: auto; max-width: 100%; object-fit: contain; }
         .nav-menu { display: flex; align-items: center; gap: 32px; }
         .nav-menu a {
             font-size: 0.9375rem;
@@ -766,8 +766,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
         }
         @media (max-width: 768px) {
             .topbar { display: none; }
-            .navbar { padding: 15px 20px; min-height: 80px; }
-            .nav-logo { width: 220px; height: auto; max-width: 70%; }
+            .navbar { padding: 0 20px; height: 70px; }
+            .nav-logo { height: 55px; width: auto; max-width: 70%; object-fit: contain; }
             .nav-menu { gap: 12px; }
             .hero-left { position: relative; z-index: 2; padding: 48px 20px 32px; }
             .hero-right { padding: 0 20px 48px; }
