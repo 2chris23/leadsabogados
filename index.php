@@ -224,7 +224,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>leadsabogados.com — Asesoría Jurídica Profesional</title>
-    <meta name="description" content="Tu despacho de confianza. Cuéntanos tu caso y un abogado experto lo revisará de forma gratuita y sin compromiso.">
+    <meta name="description" content="Tu despacho de confianza. Cuéntanos tu caso y un abogado experto lo revisará de forma confidencial y sin compromiso.">
     <link rel="icon" type="image/png" href="/portal/crm/assets/images/favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -778,7 +778,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
 <nav class="navbar" id="top">
     <a href="/"><img src="<?php echo $logoUrl; ?>" alt="leadsabogados.com" class="nav-logo"></a>
     <div class="nav-menu">
-        <a href="#contacto">Consulta gratis</a>
+        <a href="#contacto">Contáctanos</a>
         <a href="#como-funciona">¿Cómo funciona?</a>
         
         <a href="https://app.leadsabogados.com/portal" class="btn-portal">
@@ -927,7 +927,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
         <div class="step">
             <div class="step-num">03</div>
             <h4>Hablamos contigo</h4>
-            <p>Nos ponemos en contacto contigo en menos de 24h con una solución clara.</p>
+            <p>Nos ponemos en contacto contigo a la brevedad posible con una solución clara.</p>
         </div>
     </div>
 </section>
@@ -942,7 +942,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:6px"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                 Entrar al Portal del Cliente
             </a>
-            <a href="#contacto" class="btn-outline-white">Primera consulta gratis &rarr;</a>
+            <a href="#contacto" class="btn-outline-white">Solicitar información \&rarr;</a>
         </div>
     </div>
 </section>

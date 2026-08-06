@@ -224,7 +224,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>leadsabogados.com — Asesoría Jurídica Profesional</title>
-    <meta name="description" content="Tu despacho de confianza. Cuéntanos tu caso y un abogado experto lo revisará de forma gratuita y sin compromiso.">
+    <meta name="description" content="Tu despacho de confianza. Cuéntanos tu caso y un abogado experto lo revisará de forma confidencial y sin compromiso.">
     <link rel="icon" type="image/png" href="/portal/crm/assets/images/favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -304,7 +304,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
 
         /* ============ HERO ============ */
         .hero {
-            background: var(--navy);
+            background: #f4f7fb;
             min-height: 92vh;
             display: grid;
             grid-template-columns: 42% 58%;
@@ -321,20 +321,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
             z-index: 5;
         }
         .hero-eyebrow {
-            display: inline-flex;
+            display: none;
             align-items: center;
             gap: 8px;
             background: rgba(59,130,246,0.15);
             border: 1px solid rgba(59,130,246,0.3);
+            padding: 8px 16px;
             border-radius: 99px;
-            padding: 6px 14px;
-            font-size: 0.75rem;
+            font-size: 0.8125rem;
             font-weight: 700;
             color: #93c5fd;
-            letter-spacing: 0.08em;
             text-transform: uppercase;
+            letter-spacing: 0.05em;
             margin-bottom: 24px;
-            width: fit-content;
         }
         .hero-eyebrow-dot {
             width: 6px; height: 6px; border-radius: 50%; background: #3b82f6;
@@ -348,15 +347,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
             font-family: 'Playfair Display', serif;
             font-size: clamp(2.5rem, 4vw, 3.75rem);
             font-weight: 800;
-            color: #fff;
+            color: var(--navy);
             line-height: 1.1;
             margin-bottom: 24px;
             letter-spacing: -0.02em;
         }
-        .hero-title em { font-style: italic; color: #93c5fd; }
+        .hero-title em { font-style: italic; color: var(--blue); }
         .hero-subtitle {
             font-size: 1.0625rem;
-            color: rgba(255,255,255,0.65);
+            color: var(--gray);
             line-height: 1.7;
             margin-bottom: 40px;
             max-width: 440px;
@@ -372,15 +371,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
             align-items: center;
             gap: 12px;
             font-size: 0.9375rem;
-            color: rgba(255,255,255,0.85);
-            font-weight: 500;
+            color: var(--navy); font-weight: 500;
         }
         .badge-icon {
             width: 36px; height: 36px; border-radius: 8px;
-            background: rgba(59,130,246,0.2);
-            border: 1px solid rgba(59,130,246,0.35);
+            background: var(--blue);
+            border: none;
             display: flex; align-items: center; justify-content: center;
-            color: #93c5fd; flex-shrink: 0;
+            color: #fff; flex-shrink: 0;
         }
         .hero-divider {
             width: 48px; height: 2px;
@@ -415,26 +413,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
         }
         .hero-img-bg {
             position: absolute;
-            inset: 0;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
             background-size: cover;
-            background-position: left center; /* Pushes image leftwards so she is not behind the form */
+            background-position: right center;
             background-repeat: no-repeat;
             mask-image: linear-gradient(to right, transparent 0%, black 30%);
             -webkit-mask-image: linear-gradient(to right, transparent 0%, black 30%);
-            z-index: 0;
+            z-index: 1;
         }
         
         .form-panel {
-            background: #fff;
-            border-radius: 20px;
-            box-shadow: 0 30px 80px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.08);
-            padding: 44px 40px;
-            width: 100%;
-            max-width: 440px;
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
             position: relative;
-            z-index: 2;
+            z-index: 10;
         }
         .form-panel-header {
             margin-bottom: 28px;
@@ -781,7 +778,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
 <nav class="navbar" id="top">
     <a href="/"><img src="<?php echo $logoUrl; ?>" alt="leadsabogados.com" class="nav-logo"></a>
     <div class="nav-menu">
-        <a href="#contacto">Consulta gratis</a>
+        <a href="#contacto">Contáctanos</a>
         <a href="#como-funciona">¿Cómo funciona?</a>
         
         <a href="https://app.leadsabogados.com/portal" class="btn-portal">
@@ -800,17 +797,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
             Atención 100% confidencial
         </div>
         <h1 class="hero-title">Tu caso merece<br>la mejor <em>solución legal</em></h1>
-        <p class="hero-subtitle">Cuéntanos qué ha ocurrido y un abogado especialista revisará tu situación de forma confidencial, rápida y sin ningún compromiso.</p>
+        <p class="hero-subtitle">Abogados expertos que te acompañan y defienden tus derechos.<br>Revisamos tu caso de forma confidencial y sin compromiso.</p>
         <div class="hero-divider"></div>
         <div class="hero-badges">
             
             <div class="hero-badge">
                 <div class="badge-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
-                Confidencialidad absoluta en tu caso
+                Confidencialidad 100% garantizada
             </div>
             <div class="hero-badge">
                 <div class="badge-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
-                Sin compromiso — tú decides si continúas
+                Sin compromiso alguno
             </div>
         </div>
         
@@ -930,7 +927,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
         <div class="step">
             <div class="step-num">03</div>
             <h4>Hablamos contigo</h4>
-            <p>Nos ponemos en contacto contigo en menos de 24h con una solución clara.</p>
+            <p>Nos ponemos en contacto contigo a la brevedad posible con una solución clara.</p>
         </div>
     </div>
 </section>
@@ -945,7 +942,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:6px"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                 Entrar al Portal del Cliente
             </a>
-            <a href="#contacto" class="btn-outline-white">Primera consulta gratis &rarr;</a>
+            <a href="#contacto" class="btn-outline-white">Solicitar información \&rarr;</a>
         </div>
     </div>
 </section>
