@@ -963,15 +963,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
 </section>
 
 <!-- FOOTER -->
-<footer class="footer">
-    <img src="<?php echo $logoUrl; ?>" alt="leadsabogados.com" class="footer-logo">
+<footer class="footer" style="text-align: center; justify-content: center; flex-direction: column; gap: 15px;">
+    <img src="<?php echo $logoUrl; ?>" alt="leadsabogados.com" class="footer-logo" style="margin: 0;">
     <span class="footer-copy">© <?php echo date('Y'); ?> leadsabogados.com · Todos los derechos reservados</span>
-    <div class="footer-right">
-        <a href="https://app.leadsabogados.com/portal" class="footer-portal">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            Portal del Cliente
-        </a>
-    </div>
 </footer>
 
 <script>
