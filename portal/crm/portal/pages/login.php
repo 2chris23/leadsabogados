@@ -524,9 +524,7 @@ $crmUrl = APP_URL . '/portal/crm';
                 <p><a href="/">← Volver al sitio principal</a></p>
             </div>
 
-            <div class="separator">¿Primera vez?</div>
 
-            <a href="index.php?page=register" class="register-link">Crear una Cuenta Nueva</a>
         </div>
     </div>
 </div>

@@ -69,15 +69,7 @@ if ($page === 'login') {
     exit;
 }
 
-// Registro
-if ($page === 'register') {
-    if (clienteLogueado()) {
-        header('Location: ' . portalUrl() . '/index.php?page=dashboard');
-        exit;
-    }
-    require_once PORTAL_ROOT . '/pages/register.php';
-    exit;
-}
+
 
 // Recuperar contraseña
 if ($page === 'forgot-password') {
