@@ -133,17 +133,18 @@ $crmUrl = APP_URL . '/portal/crm';
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Inter', sans-serif; min-height: 100vh; background: #0f172a; color: #fff; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        body { font-family: 'Inter', sans-serif; min-height: 100vh; background: #f4f7fb; color: #1a1a2e; display: flex; align-items: center; justify-content: center; padding: 20px; }
 
         .portal-login {
             display: grid;
             grid-template-columns: 1.1fr 0.9fr;
             width: 100%;
-            max-width: 1100px;
+            max-width: 1263px;
+            min-height: 688px;
             background: #fff;
             border-radius: 24px;
             overflow: hidden;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15);
         }
 
         @media (max-width: 991px) {
