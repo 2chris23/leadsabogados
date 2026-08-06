@@ -283,7 +283,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
             z-index: 100;
             box-shadow: 0 2px 20px rgba(0,0,0,0.06);
         }
-        .nav-logo { height: 52px; }
+        .nav-logo { height: 80px; width: auto; }
         .nav-menu { display: flex; align-items: center; gap: 32px; }
         .nav-menu a {
             font-size: 0.9375rem;
@@ -738,7 +738,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
 
         /* ============ FOOTER ============ */
         .footer { background: #ffffff; border-top: 1px solid var(--border); padding: 48px 80px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 24px; }
-        .footer-logo { height: 38px; }
+        .footer-logo { height: 75px; width: auto; }
         .footer-copy { color: var(--gray); font-size: 0.875rem; }
         .footer-right { display: flex; align-items: center; gap: 20px; }
         .footer-portal { display: inline-flex; align-items: center; gap: 8px; background: #f8fafc; border: 1px solid var(--border); color: var(--navy); padding: 12px 24px; border-radius: 8px; font-size: 0.9375rem; font-weight: 600; transition: all .2s; } .footer-portal:hover { background: #f1f5f9; color: var(--blue2); }
@@ -760,7 +760,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
         @media (max-width: 768px) {
             .topbar { display: none; }
             .navbar { padding: 0 20px; height: 68px; }
-            .nav-logo { height: 40px; }
+            .nav-logo { height: 60px; width: auto; }
             .nav-menu { gap: 12px; }
             .hero-left { position: relative; z-index: 2; padding: 48px 20px 32px; }
             .hero-right { padding: 0 20px 48px; }
