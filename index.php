@@ -280,17 +280,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
         .navbar {
             background: #fff;
             border-bottom: 1px solid var(--border);
-            padding: 15px 40px;
+            padding: 0 40px; /* Quitamos padding vertical para que no se sume a la altura del logo */
             display: flex;
             justify-content: space-between;
             align-items: center;
             min-height: 80px;
+            height: 80px; /* Forzamos altura máxima */
             position: sticky;
             top: 0;
             z-index: 100;
             box-shadow: 0 2px 20px rgba(0,0,0,0.06);
         }
-        .nav-logo { width: 280px; height: auto; max-width: 100%; }
+        .nav-logo { width: auto; height: 45px; max-width: 100%; }
         .nav-menu { display: flex; align-items: center; gap: 32px; }
         .nav-menu a {
             font-size: 0.9375rem;
@@ -766,8 +767,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
         }
         @media (max-width: 768px) {
             .topbar { display: none; }
-            .navbar { padding: 12px 16px; min-height: 70px; }
-            .nav-logo { width: 200px; height: auto; max-width: 70%; }
+            .navbar { padding: 0 16px; min-height: 70px; height: 70px; }
+            .nav-logo { width: auto; height: 35px; max-width: 70%; }
             .nav-menu { gap: 12px; }
             .hero-left { position: relative; z-index: 2; padding: 48px 20px 32px; }
             .hero-right { padding: 0 20px 48px; }
