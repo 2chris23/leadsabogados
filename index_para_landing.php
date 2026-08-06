@@ -45,7 +45,7 @@ function esc($s) { return htmlspecialchars($s ?? '', ENT_QUOTES, 'UTF-8'); }
 $db = Database::getInstance();
 $crmUrl = APP_URL;
 $logoUrl = '/portal/crm/assets/images/logo.png';
-$heroUrl = '/portal/crm/assets/images/hero_lawyer_left.jpg';
+$heroUrl = '/portal/crm/assets/images/hero_lawyer_new.jpg';
 $videoUrl = '/portal/crm/assets/images/family_video.jpg';
 
 // Migración: agregar columna password_plain y fecha_nacimiento si no existen
@@ -770,7 +770,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
 
 <!-- TOP ANNOUNCEMENT BAR -->
 <div class="topbar">
-    <span>Consulta gratuita · Sin compromiso · Respuesta en 24h</span>
+    <span>Atención Legal Personalizada &bull; Sin compromiso</span>
     <div class="topbar-right">
         
         <a href="https://app.leadsabogados.com/portal" style="color:rgba(255,255,255,0.8)">Acceso Portal Cliente &rarr;</a>
@@ -797,16 +797,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
     <div class="hero-left">
         <div class="hero-eyebrow">
             <span class="hero-eyebrow-dot"></span>
-            Consulta 100% gratuita y confidencial
+            Atención 100% confidencial
         </div>
         <h1 class="hero-title">Tu caso merece<br>la mejor <em>solución legal</em></h1>
-        <p class="hero-subtitle">Cuéntanos qué ha ocurrido y un abogado especialista revisará tu situación de forma gratuita, rápida y sin ningún compromiso.</p>
+        <p class="hero-subtitle">Cuéntanos qué ha ocurrido y un abogado especialista revisará tu situación de forma confidencial, rápida y sin ningún compromiso.</p>
         <div class="hero-divider"></div>
         <div class="hero-badges">
-            <div class="hero-badge">
-                <div class="badge-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-                Respuesta garantizada en menos de 24 horas
-            </div>
+            
             <div class="hero-badge">
                 <div class="badge-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
                 Confidencialidad absoluta en tu caso
@@ -823,7 +820,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
         <div class="hero-img-bg" style="background-image: url('<?php echo $heroUrl; ?>');"></div>
         <div class="form-panel">
             <div class="form-panel-header">
-                <span class="form-panel-tag">Consulta gratuita</span>
+                
                 <h2>Cuéntanos <span>tu caso</span></h2>
             </div>
 
