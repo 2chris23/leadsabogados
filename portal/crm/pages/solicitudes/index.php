@@ -327,8 +327,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         header('Location: ' . APP_URL . '/index.php?page=solicitudes');
         exit;
+    } // End if solicitudId > 0
     } // End if isset accion
-}
+} // End if POST
 
 include CRM_ROOT . '/templates/layout/header.php';
 
