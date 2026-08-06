@@ -370,26 +370,20 @@ include CRM_ROOT . '/templates/layout/header.php';
                         <div class="w-40-px h-40-px rounded-circle bg-white shadow-sm d-flex justify-content-center align-items-center text-primary-600 flex-shrink-0">
                             <iconify-icon icon="solar:map-point-outline" class="text-xl"></iconify-icon>
                         </div>
-                        <ul class="list-unstyled mb-0 d-flex flex-column gap-2">
-                            <li class="d-flex align-items-center gap-2">
-                                <span class="w-32-px h-32-px rounded-circle bg-warning-50 text-warning-main d-flex justify-content-center align-items-center flex-shrink-0">
-                                    <iconify-icon icon="solar:map-point-linear"></iconify-icon>
-                                </span>
-                                <div class="flex-grow-1">
-                                    <span class="d-block text-sm text-secondary-light">Provincia</span>
-                                    <span class="d-block fw-semibold text-neutral-800"><?php echo e($cliente['provincia'] ?: 'No especificada'); ?></span>
-                                </div>
-                            </li>
-                            <li class="d-flex align-items-center gap-2">
-                                <span class="w-32-px h-32-px rounded-circle bg-warning-50 text-warning-main d-flex justify-content-center align-items-center flex-shrink-0">
-                                    <iconify-icon icon="solar:city-linear"></iconify-icon>
-                                </span>
-                                <div class="flex-grow-1">
-                                    <span class="d-block text-sm text-secondary-light">Ciudad o Localidad</span>
-                                    <span class="d-block fw-semibold text-neutral-800"><?php echo e($cliente['ciudad'] ?: 'No especificada'); ?></span>
-                                </div>
-                            </li>
-                        </ul>
+                        <div>
+                            <span class="d-block text-xs text-secondary-light fw-medium text-uppercase tracking-wider mb-2">Provincia</span>
+                            <span class="d-block fw-semibold text-neutral-800"><?php echo e($cliente['provincia'] ?: 'No especificada'); ?></span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-start gap-12 p-16 radius-8 bg-neutral-50 border border-neutral-100 hover-bg-neutral-100 transition-2">
+                        <div class="w-40-px h-40-px rounded-circle bg-white shadow-sm d-flex justify-content-center align-items-center text-primary-600 flex-shrink-0">
+                            <iconify-icon icon="solar:city-outline" class="text-xl"></iconify-icon>
+                        </div>
+                        <div>
+                            <span class="d-block text-xs text-secondary-light fw-medium text-uppercase tracking-wider mb-2">Ciudad o Localidad</span>
+                            <span class="d-block fw-semibold text-neutral-800"><?php echo e($cliente['ciudad'] ?: 'No especificada'); ?></span>
+                        </div>
                     </div>
                     
                     <div class="d-flex align-items-start gap-12 p-16 radius-8 bg-neutral-50 border border-neutral-100 hover-bg-neutral-100 transition-2">

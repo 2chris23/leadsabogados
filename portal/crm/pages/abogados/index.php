@@ -101,21 +101,7 @@ include CRM_ROOT . '/templates/layout/header.php';
                             </div>
                         </div>
 
-                        <!-- Card Footer Actions (Top layer) -->
-                        <div class="row g-2 border-top pt-20 position-relative z-1">
-                            <div class="col-6">
-                                <a href="mailto:<?php echo e($abogado['email']); ?>" class="btn btn-outline-light-custom w-100 btn-sm radius-8 d-flex align-items-center justify-content-center gap-1 py-8">
-                                    <iconify-icon icon="solar:letter-outline" class="text-lg"></iconify-icon>
-                                    <span class="text-xs fw-bold">Mensaje</span>
-                                </a>
-                            </div>
-                            <div class="col-6">
-                                <a href="<?php echo APP_URL; ?>/index.php?page=abogados/ver&id=<?php echo $abogado['id']; ?>" class="btn btn-outline-light-custom w-100 btn-sm radius-8 d-flex align-items-center justify-content-center gap-1 py-8">
-                                    <iconify-icon icon="solar:user-outline" class="text-lg"></iconify-icon>
-                                    <span class="text-xs fw-bold">Perfil</span>
-                                </a>
-                            </div>
-                        </div>
+
                     </div>
                 </div>
             </div>
