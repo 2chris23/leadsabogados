@@ -839,8 +839,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
                             <input type="text" name="dni_nif" class="inp" placeholder="DNI / NIE *" required value="<?php echo esc($formData['dni_nif']); ?>">
                         </div>
                         <div class="col-12 col-md-6">
-                            <label style="font-size: 0.8rem; font-weight:600; color:var(--gray); margin-bottom:4px; display:block;">Fecha de Nacimiento *</label>
-                            <input type="date" name="fecha_nacimiento" class="inp" required value="<?php echo esc($formData['fecha_nacimiento']); ?>" style="color:var(--navy);">
+                            <input type="<?php echo empty($formData['fecha_nacimiento']) ? 'text' : 'date'; ?>" name="fecha_nacimiento" class="inp" placeholder="Fecha de Nacimiento *" required onfocus="(this.type='date')" onblur="if(!this.value)this.type='text'" value="<?php echo esc($formData['fecha_nacimiento']); ?>">
                         </div>
                     </div>
                     <div class="form-row" style="display:none;">
