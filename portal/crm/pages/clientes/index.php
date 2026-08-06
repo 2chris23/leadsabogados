@@ -288,10 +288,7 @@ if ($auth->esAbogado()) {
                     <div class="col-sm-6"><label class="form-label">Nombre <span class="text-danger">*</span></label><input type="text" name="nombre" class="form-control radius-8" required placeholder="Nombre"></div>
                     <div class="col-sm-6"><label class="form-label">Apellidos <span class="text-danger">*</span></label><input type="text" name="apellidos" class="form-control radius-8" required placeholder="Apellidos"></div>
                     <div class="col-sm-6"><label class="form-label">Email <span class="text-danger">*</span></label><input type="email" name="email" class="form-control radius-8" required placeholder="correo@ejemplo.com"></div>
-                    <div class="col-sm-6">
-                        <label class="form-label d-flex justify-content-between">Contraseña <span class="text-xs text-secondary-light fw-normal">(Opcional)</span></label>
-                        <input type="password" name="password" class="form-control radius-8" placeholder="Para acceso al portal">
-                    </div>
+
                     <div class="col-sm-6"><label class="form-label">Teléfono</label><input type="tel" name="telefono" class="form-control radius-8" placeholder="+34 600 000 000"></div>
                     <div class="col-sm-6"><label class="form-label">DNI / NIF</label><input type="text" name="dni_nif" class="form-control radius-8" placeholder="12345678A"></div>
                     <div class="col-sm-6">
@@ -305,7 +302,7 @@ if ($auth->esAbogado()) {
                         </select>
                     </div>
                     <div class="col-sm-6"><label class="form-label">Ciudad o Localidad</label><input type="text" name="ciudad" class="form-control radius-8" placeholder="Ciudad"></div>
-                    <div class="col-12"><label class="form-label">Notas internas</label><textarea name="notas" class="form-control radius-8" rows="2" placeholder="Información adicional..."></textarea></div>
+
                 </div>
             </div>
             <div class="modal-footer">
