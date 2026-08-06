@@ -85,11 +85,19 @@ foreach ($casos as &$c) {
     $totalHonorariosClientes += (float)$c['honorarios_totales'];
     
     $ha_real = (float)($c['honorarios_abogado'] ?? 0);
-    if ($ha_real == 0) {
+    $esVariable = isset($abogado['tarifa_es_variable']) ? (int)$abogado['tarifa_es_variable'] : 1;
+    
+    if ($esVariable === 0) {
         $uTipo = $abogado['tipo_pago_predeterminado'] ?? 'fijo';
-        if ($uTipo === 'hitos' || $uTipo === 'fijo') $ha_real = (float)$abogado['tarifa_fija_default'];
-        elseif ($uTipo === 'mensual') $ha_real = (float)$abogado['tarifa_mensual_default'];
-        elseif ($uTipo === 'exito') $ha_real = (float)$abogado['tarifa_exito_default'];
+        if ($uTipo === 'fijo') {
+            $ha_real = (float)($abogado['tarifa_fija_default'] ?? 0);
+        } elseif ($uTipo === 'hitos') {
+            $ha_real = (float)($abogado['tarifa_hitos_senal'] ?? 0) + (float)($abogado['tarifa_hitos_intermedio'] ?? 0) + (float)($abogado['tarifa_hitos_final'] ?? 0);
+        } elseif ($uTipo === 'mensual') {
+            $ha_real = (float)($abogado['tarifa_mensual_default'] ?? 0);
+        } elseif ($uTipo === 'exito') {
+            $ha_real = (float)($abogado['tarifa_exito_default'] ?? 0);
+        }
     }
     $bono = (float)($c['bono_abogado'] ?? 0);
     $c['_coste_abogado'] = $ha_real + $bono;
