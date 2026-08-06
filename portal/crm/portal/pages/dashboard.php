@@ -15,7 +15,7 @@ $cuenta = $db->fetchOne("SELECT * FROM portal_cuentas WHERE id = ?", [$portalId]
 
 // Solicitudes de este usuario
 $solicitudes = $db->fetchAll(
-    "SELECT * FROM solicitudes WHERE portal_cuenta_id = ? ORDER BY created_at DESC", 
+    "SELECT * FROM solicitudes WHERE portal_cuenta_id = ? AND estado != 'aceptada' ORDER BY created_at DESC", 
     [$portalId]
 );
 
@@ -172,7 +172,6 @@ $tiposConsulta = ['Civil','Penal','Laboral','Mercantil','Inmobiliario','Familia'
 <div class="topbar">
     <a href="index.php?page=dashboard" class="topbar-logo">
         <img src="../assets/images/logo.png?v=2" alt="Logo">
-        <span>Portal del Cliente</span>
     </a>
     <div class="topbar-right">
         <div class="topbar-avatar"><?php echo strtoupper(substr($nombre, 0, 1)); ?></div>
