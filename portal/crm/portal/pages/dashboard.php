@@ -170,16 +170,18 @@ $tiposConsulta = ['Civil','Penal','Laboral','Mercantil','Inmobiliario','Familia'
 
 <!-- Topbar -->
 <div class="topbar">
-    <a href="index.php?page=dashboard" class="topbar-logo">
-        <img src="../assets/images/logo.png?v=2" alt="Logo">
-    </a>
-    <div class="topbar-right">
-        <div class="topbar-avatar"><?php echo strtoupper(substr($nombre, 0, 1)); ?></div>
-        <div class="topbar-info">
-            <div class="topbar-name"><?php echo e($nombre . ' ' . $apellidos); ?></div>
-            <div class="topbar-role"><?php echo $esCliente ? 'Cliente' : 'Visitante'; ?></div>
+    <div style="max-width: 1100px; width: 100%; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
+        <a href="index.php?page=dashboard" class="topbar-logo">
+            <img src="../assets/images/logo.png?v=2" alt="Logo">
+        </a>
+        <div class="topbar-right">
+            <div class="topbar-avatar"><?php echo strtoupper(substr($nombre, 0, 1)); ?></div>
+            <div class="topbar-info">
+                <div class="topbar-name"><?php echo e($nombre . ' ' . $apellidos); ?></div>
+                <div class="topbar-role"><?php echo $esCliente ? 'Cliente' : 'Visitante'; ?></div>
+            </div>
+            <a href="index.php?page=logout" class="btn-logout">Salir</a>
         </div>
-        <a href="index.php?page=logout" class="btn-logout">Salir</a>
     </div>
 </div>
 

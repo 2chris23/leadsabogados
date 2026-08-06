@@ -13,11 +13,11 @@ $uploadsDir = PORTAL_ROOT . '/uploads/solicitudes/';
 if (!is_dir($uploadsDir)) mkdir($uploadsDir, 0755, true);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $tipo        = trim($_POST['tipo_problema'] ?? '');
+    $tipo        = 'Consulta General';
     $descripcion = trim($_POST['descripcion'] ?? '');
 
-    if (empty($tipo) || empty($descripcion)) {
-        $error = 'El tipo de consulta y la descripción son obligatorios.';
+    if (empty($descripcion)) {
+        $error = 'La descripción es obligatoria.';
     } else {
         $solId = $db->insert('solicitudes', [
             'nombre'           => $cuenta['nombre'],
@@ -76,8 +76,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$tiposConsulta = ['Civil','Penal','Laboral','Mercantil','Inmobiliario','Familia','Extranjería','Administrativo','Otro'];
-$selTipo = $_POST['tipo_problema'] ?? '';
+$tiposConsulta = [];
+$selTipo = '';
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -245,11 +245,14 @@ $selTipo = $_POST['tipo_problema'] ?? '';
 <body>
 
 <div class="topbar">
-    <a href="<?php echo portalUrl(); ?>/index.php?page=dashboard" class="topbar-back">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
-        Volver
-    </a>
-    <span class="topbar-title">Nueva Solicitud</span>
+    <div style="max-width: 680px; width: 100%; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
+        <a href="<?php echo portalUrl(); ?>/index.php?page=dashboard" class="topbar-back">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+            Volver
+        </a>
+        <span class="topbar-title">Nueva Solicitud</span>
+        <div style="width: 70px;"></div> <!-- spacer to center title if needed -->
+    </div>
 </div>
 
 <div class="main">
@@ -264,53 +267,8 @@ $selTipo = $_POST['tipo_problema'] ?? '';
         <form method="POST" action="<?php echo portalUrl(); ?>/index.php?page=nueva-solicitud"
               enctype="multipart/form-data" id="solForm">
 
-            <!-- Custom Select -->
-            <div class="fld">
-                <label>Tipo de Consulta <span class="r">*</span></label>
-                <div class="cs-wrap">
-                    <div class="cs-trigger <?php echo $selTipo ? 'has-value' : ''; ?>" id="csTrigger">
-                        <span id="csLabel"><?php echo $selTipo ?: 'Seleccione el área legal'; ?></span>
-                    </div>
-                    <svg class="cs-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-                    <div class="cs-dropdown" id="csDropdown">
-                        <?php
-                        $svgIcons = [
-                            'Civil'          => '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>',
-                            'Penal'          => '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
-                            'Laboral'        => '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="17"/><line x1="9" y1="14.5" x2="15" y2="14.5"/></svg>',
-                            'Mercantil'      => '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
-                            'Inmobiliario'   => '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
-                            'Familia'        => '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
-                            'Extranjería'    => '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>',
-                            'Administrativo' => '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><rect x="9" y="14" width="6" height="7"/></svg>',
-                            'Otro'           => '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>',
-                        ];
-                        $colores = [
-                            'Civil'=>'#e8f0fe','Penal'=>'#fef2f2','Laboral'=>'#fff7ed',
-                            'Mercantil'=>'#ecfdf5','Inmobiliario'=>'#f0fdf4','Familia'=>'#fdf4ff',
-                            'Extranjería'=>'#f0f9ff','Administrativo'=>'#f8fafc','Otro'=>'#f8fafc'
-                        ];
-                        $textColors = [
-                            'Civil'=>'#2e6edd','Penal'=>'#dc2626','Laboral'=>'#ea580c',
-                            'Mercantil'=>'#059669','Inmobiliario'=>'#16a34a','Familia'=>'#9333ea',
-                            'Extranjería'=>'#0284c7','Administrativo'=>'#475569','Otro'=>'#64748b'
-                        ];
-                        foreach ($tiposConsulta as $t):
-                        ?>
-                        <div class="cs-option <?php echo $selTipo === $t ? 'selected' : ''; ?>" data-value="<?php echo $t; ?>">
-                            <span class="cs-ico" style="background:<?php echo $colores[$t] ?? '#f8fafc'; ?>;color:<?php echo $textColors[$t] ?? '#64748b'; ?>"><?php echo $svgIcons[$t] ?? $svgIcons['Otro']; ?></span>
-                            <?php echo $t; ?>
-                        </div>
-                        <?php endforeach; ?>
-                    </div>
-                    <select name="tipo_problema" class="cs-hidden" id="csHidden" required>
-                        <option value="">Seleccione</option>
-                        <?php foreach ($tiposConsulta as $t): ?>
-                        <option value="<?php echo $t; ?>" <?php echo $selTipo === $t ? 'selected' : ''; ?>><?php echo $t; ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-            </div>
+            <!-- Campo Oculto de Tipo -->
+            <input type="hidden" name="tipo_problema" value="Consulta General">
 
             <!-- Descripción -->
             <div class="fld">
@@ -346,36 +304,7 @@ $selTipo = $_POST['tipo_problema'] ?? '';
 </div>
 
 <script>
-/* ── Custom Select ── */
-const trigger   = document.getElementById('csTrigger');
-const dropdown  = document.getElementById('csDropdown');
-const label     = document.getElementById('csLabel');
-const hidden    = document.getElementById('csHidden');
 
-trigger.addEventListener('click', () => {
-    trigger.classList.toggle('open');
-    dropdown.classList.toggle('open');
-});
-
-document.querySelectorAll('.cs-option').forEach(opt => {
-    opt.addEventListener('click', () => {
-        const val = opt.dataset.value;
-        label.textContent = val;
-        hidden.value = val;
-        trigger.classList.add('has-value');
-        trigger.classList.remove('open');
-        dropdown.classList.remove('open');
-        document.querySelectorAll('.cs-option').forEach(o => o.classList.remove('selected'));
-        opt.classList.add('selected');
-    });
-});
-
-document.addEventListener('click', e => {
-    if (!e.target.closest('.cs-wrap')) {
-        trigger.classList.remove('open');
-        dropdown.classList.remove('open');
-    }
-});
 
 /* ── File Drop Zone ── */
 const dropZone  = document.getElementById('dropZone');
