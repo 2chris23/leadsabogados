@@ -446,18 +446,9 @@ $miAsignacion = reset($misAsignaciones);
                         $tF = (float)($abogadoParams['tarifa_hitos_final'] ?? 0);
                         $tTotal = $tS + $tI + $tF;
                         
-                        if ($ha > 0 && $tTotal > 0 && abs($ha - $tTotal) > 0.01) {
-                            $mult = $ha / $tTotal;
-                            $tS = round($tS * $mult, 2);
-                            $tI = round($tI * $mult, 2);
-                            $tF = $ha - $tS - $tI; 
-                        } elseif ($ha > 0 && $tTotal == 0) {
-                            $tS = round($ha * 0.4, 2);
-                            $tI = round($ha * 0.3, 2);
-                            $tF = $ha - $tS - $tI;
-                        } elseif ($ha == 0) {
-                            $ha = $tTotal;
-                        }
+                        // User requested: ALWAYS show the exact configured hitos, no scaling.
+                        // For the total to add up perfectly, we must force $ha to equal $tTotal.
+                        $ha = $tTotal;
                     ?>
                         <div style="font-size:0.75rem;font-weight:800;color:#64748b;text-transform:uppercase;margin-bottom:8px;">Pago por Hitos</div>
                         <div style="text-align:left;font-size:0.8rem;color:#334155;">
