@@ -117,8 +117,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .login-logo img {
-            width: 200px;
-            height: 100px;
+            width: 280px;
+            height: auto;
+            max-height: 120px;
             object-fit: contain;
         }
 
@@ -130,7 +131,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .login-title {
-            font-size: 1.75rem;
+            font-size: 1.35rem;
             font-weight: 800;
             color: #1a1a2e;
             margin-bottom: 8px;
@@ -352,7 +353,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <div class="login-options">
                 <label><input type="checkbox" name="remember" value="1"> Recordarme</label>
-                <a href="<?php echo APP_URL; ?>/index.php?page=forgot-password">¿Olvidó su contraseña?</a>
             </div>
 
             <button type="submit" class="login-btn">Iniciar Sesión</button>
