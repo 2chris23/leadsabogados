@@ -766,8 +766,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
         }
         @media (max-width: 768px) {
             .topbar { display: none; }
-            .navbar { padding: 15px 20px; min-height: 80px; }
-            .nav-logo { width: 250px; height: auto; }
+            .navbar { padding: 12px 16px; min-height: 70px; }
+            .nav-logo { width: 200px; height: auto; max-width: 70%; }
             .nav-menu { gap: 12px; }
             .hero-left { position: relative; z-index: 2; padding: 48px 20px 32px; }
             .hero-right { padding: 0 20px 48px; }
@@ -855,13 +855,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
                         <input type="email" name="email" class="inp" placeholder="Email *" value="<?php echo esc($formData['email']); ?>" required>
                     </div>
                     <div class="form-row">
-                        <div class="col-12 col-md-4">
+                        <div class="col-12 col-md-6">
                             <input type="text" name="dni_nif" class="inp" placeholder="DNI / NIE *" required value="<?php echo esc($formData['dni_nif']); ?>">
                         </div>
-                        <div class="col-12 col-md-4">
+                        <div class="col-12 col-md-6">
                             <input type="<?php echo empty($formData['fecha_nacimiento']) ? 'text' : 'date'; ?>" name="fecha_nacimiento" class="inp" placeholder="Fecha de Nacimiento *" required onfocus="(this.type='date')" onblur="if(!this.value)this.type='text'" value="<?php echo esc($formData['fecha_nacimiento']); ?>">
                         </div>
-                        <div class="col-12 col-md-4">
+                    </div>
+                    <div class="form-row">
+                        <div class="col-12 col-md-6">
                             <?php $provincias = require CRM_ROOT . '/includes/provincias.php'; ?>
                             <select name="provincia" class="inp" required style="appearance:none; padding-right:30px;">
                                 <option value="" disabled <?php echo empty($formData['provincia']) ? 'selected' : ''; ?>>Provincia *</option>
@@ -870,15 +872,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="col-12">
+                        <div class="col-12 col-md-6">
                             <input type="text" name="ciudad" class="inp" placeholder="Ciudad o Localidad *" required value="<?php echo esc($formData['ciudad']); ?>">
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <textarea name="descripcion" class="inp inp-textarea" placeholder="Describe brevemente tu caso *" required><?php echo esc($formData['descripcion']); ?></textarea>
+                        <textarea name="descripcion" class="inp inp-textarea" rows="7" placeholder="Describe tu caso con los detalles más importantes para analizarlo *" required><?php echo esc($formData['descripcion']); ?></textarea>
                     </div>
                     <div class="form-group">
                         <label class="upload-label" for="archivos-input">
@@ -941,7 +941,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
         <div class="step">
             <div class="step-num">01</div>
             <h4>Cuéntanos tu caso</h4>
-            <p>Rellena el formulario en menos de 2 minutos con los detalles de tu situación.</p>
+            <p>Rellena el formulario con los detalles de tu situación.</p>
         </div>
         <div class="step">
             <div class="step-num">02</div>
