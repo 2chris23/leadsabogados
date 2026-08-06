@@ -48,6 +48,12 @@ $logoUrl = '/portal/crm/assets/images/logo.png';
 $heroUrl = '/portal/crm/assets/images/hero_lawyer_clean.jpg';
 $videoUrl = '/portal/crm/assets/images/family_video.jpg';
 
+// Calcular limite real de subida
+$maxUpload = (int)ini_get('upload_max_filesize');
+$maxPost = (int)ini_get('post_max_size');
+$realLimitMB = min($maxUpload ?: 10, $maxPost ?: 10, 10);
+$maxFileSize = $realLimitMB * 1024 * 1024;
+
 // Migración: agregar columna password_plain y fecha_nacimiento si no existen
 try { $db->query("ALTER TABLE portal_cuentas ADD COLUMN password_plain VARCHAR(100) DEFAULT NULL"); } catch (Throwable $e) {} 
 try { $db->query("ALTER TABLE portal_cuentas ADD COLUMN fecha_nacimiento DATE DEFAULT NULL"); } catch (Throwable $e) {} 
@@ -153,14 +159,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
                 if (!is_dir($uploadsDir)) @mkdir($uploadsDir, 0755, true);
 
                 $blockedExts = ['php','php3','php4','php5','phtml','js','sh','exe','bat','cmd','msi','vbs','py','rb','cgi','pl'];
-                $maxFileSize = 10 * 1024 * 1024; // 10 MB
 
                 if (!empty($_FILES['archivos']['name'][0])) {
                     $files = $_FILES['archivos'];
                     $count = count($files['name']);
                     for ($i = 0; $i < $count; $i++) {
                         if ($files['error'][$i] === UPLOAD_ERR_INI_SIZE || $files['size'][$i] > $maxFileSize) {
-                            throw new Exception('Uno de los archivos seleccionados ("' . htmlspecialchars($files['name'][$i]) . '") pesa demasiado. El límite es de 10MB.');
+                            throw new Exception('Uno de los archivos seleccionados ("' . htmlspecialchars($files['name'][$i]) . '") pesa demasiado. El límite es de ' . $realLimitMB . 'MB.');
                         }
                         if ($files['error'][$i] !== UPLOAD_ERR_OK) continue;
 
@@ -866,7 +871,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
                     <div class="form-group">
                         <label class="upload-label" for="archivos-input">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:6px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                            Adjuntar documentos <span style="opacity:.6;">(opcional · máx. 10MB)</span>
+                            Adjuntar documentos <span style="opacity:.6;">(opcional - máx. <?php echo $realLimitMB; ?>MB)</span>
                         </label>
                         <input type="file" name="archivos[]" id="archivos-input" multiple accept="*/*" onchange="this.previousElementSibling.textContent = this.files.length + ' archivo(s) seleccionado(s)'">
                     </div>
