@@ -161,7 +161,15 @@ $crmUrl = APP_URL . '/portal/crm';
         .portal-visual > img {
             width: 100%; height: 100%;
             object-fit: cover;
-            filter: brightness(0.4);
+            filter: brightness(0.9);
+        }
+
+        .portal-visual::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.8) 100%);
+            z-index: 1;
         }
 
         .portal-visual-content {
@@ -171,6 +179,7 @@ $crmUrl = APP_URL . '/portal/crm';
             flex-direction: column;
             justify-content: flex-end;
             padding: 40px;
+            z-index: 2;
         }
 
         .portal-visual-logo {
