@@ -198,6 +198,7 @@ $crmUrl = APP_URL . '/portal/crm';
             line-height: 1.15;
             letter-spacing: -0.03em;
             margin-bottom: 16px;
+            color: #fff;
         }
 
         .portal-visual-text h2 span {
@@ -459,10 +460,6 @@ $crmUrl = APP_URL . '/portal/crm';
     <div class="portal-visual">
         <img src="../assets/images/steptodown.com552020.jpg?v=<?php echo time(); ?>" alt="Justicia">
         <div class="portal-visual-content">
-            <div class="portal-visual-logo">
-                <img src="../assets/images/logo.png?v=<?php echo time(); ?>" alt="Logo">
-                
-            </div>
 
             <div>
                 <div class="portal-visual-text">
@@ -482,9 +479,8 @@ $crmUrl = APP_URL . '/portal/crm';
     <!-- Formulario -->
     <div class="portal-form-side">
         <div class="portal-form-inner">
-            <div class="portal-badge">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                Portal Seguro del Cliente
+            <div class="portal-form-logo" style="margin-bottom: 24px;">
+                <img src="../assets/images/logo.png?v=<?php echo time(); ?>" alt="Logo" style="width: 200px; height: 100px; object-fit: contain;">
             </div>
 
             <h1>Bienvenido</h1>
