@@ -12,7 +12,8 @@ RoleGuard::verificarAccesoCaso($id);
 $caso = $db->fetchOne(
     "SELECT c.*, cl.nombre as cliente_nombre, cl.apellidos as cliente_apellidos, cl.email as cliente_email, cl.telefono as cliente_telefono, cl.dni_nif as cliente_dni, cl.direccion as cliente_direccion, cl.fecha_nacimiento as cliente_fecha_nacimiento,
             u.nombre as abogado_nombre, u.apellidos as abogado_apellidos,
-            u.tipo_pago_predeterminado as u_tipo_pago, u.tarifa_fija_default as u_tarifa_fija, u.tarifa_mensual_default as u_tarifa_mensual, u.tarifa_exito_default as u_tarifa_exito
+            u.tipo_pago_predeterminado as u_tipo_pago, u.tarifa_fija_default as u_tarifa_fija, u.tarifa_mensual_default as u_tarifa_mensual, u.tarifa_exito_default as u_tarifa_exito,
+            u.tarifa_hitos_senal as u_tarifa_hitos_senal, u.tarifa_hitos_intermedio as u_tarifa_hitos_intermedio, u.tarifa_hitos_final as u_tarifa_hitos_final, u.tarifa_es_variable as u_tarifa_es_variable
      FROM casos c
      JOIN clientes cl ON c.cliente_id = cl.id
      LEFT JOIN usuarios_internos u ON c.abogado_id = u.id
@@ -1205,11 +1206,19 @@ document.addEventListener('DOMContentLoaded', () => {
         <!-- FILA 2: PANEL ABOGADO -->
         <?php
             $honorarios_abogado_real = (float)($caso['honorarios_abogado'] ?? 0);
-            if ($honorarios_abogado_real == 0 && !empty($caso['abogado_id'])) {
+            $esVariable = isset($caso['u_tarifa_es_variable']) ? (int)$caso['u_tarifa_es_variable'] : 1;
+            
+            if ($esVariable === 0 && !empty($caso['abogado_id'])) {
                 $uTipo = $caso['u_tipo_pago'] ?? 'fijo';
-                if ($uTipo === 'hitos' || $uTipo === 'fijo') $honorarios_abogado_real = (float)$caso['u_tarifa_fija'];
-                elseif ($uTipo === 'mensual') $honorarios_abogado_real = (float)$caso['u_tarifa_mensual'];
-                elseif ($uTipo === 'exito') $honorarios_abogado_real = (float)$caso['u_tarifa_exito'];
+                if ($uTipo === 'fijo') {
+                    $honorarios_abogado_real = (float)$caso['u_tarifa_fija'];
+                } elseif ($uTipo === 'hitos') {
+                    $honorarios_abogado_real = (float)($caso['u_tarifa_hitos_senal'] ?? 0) + (float)($caso['u_tarifa_hitos_intermedio'] ?? 0) + (float)($caso['u_tarifa_hitos_final'] ?? 0);
+                } elseif ($uTipo === 'mensual') {
+                    $honorarios_abogado_real = (float)$caso['u_tarifa_mensual'];
+                } elseif ($uTipo === 'exito') {
+                    $honorarios_abogado_real = (float)$caso['u_tarifa_exito'];
+                }
             }
             $bono           = (float)($caso['bono_abogado'] ?? 0);
             $totalAbogado   = $honorarios_abogado_real + $bono;
@@ -1327,11 +1336,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 <?php
                     // Calcular el máximo a pagar
                     $honorarios_abogado_real = (float)($caso['honorarios_abogado'] ?? 0);
-                    if ($honorarios_abogado_real == 0 && !empty($caso['abogado_id'])) {
+                    $esVariable = isset($caso['u_tarifa_es_variable']) ? (int)$caso['u_tarifa_es_variable'] : 1;
+                    
+                    if ($esVariable === 0 && !empty($caso['abogado_id'])) {
                         $uTipo = $caso['u_tipo_pago'] ?? 'fijo';
-                        if ($uTipo === 'hitos' || $uTipo === 'fijo') $honorarios_abogado_real = (float)$caso['u_tarifa_fija'];
-                        elseif ($uTipo === 'mensual') $honorarios_abogado_real = (float)$caso['u_tarifa_mensual'];
-                        elseif ($uTipo === 'exito') $honorarios_abogado_real = (float)$caso['u_tarifa_exito'];
+                        if ($uTipo === 'fijo') {
+                            $honorarios_abogado_real = (float)$caso['u_tarifa_fija'];
+                        } elseif ($uTipo === 'hitos') {
+                            $honorarios_abogado_real = (float)($caso['u_tarifa_hitos_senal'] ?? 0) + (float)($caso['u_tarifa_hitos_intermedio'] ?? 0) + (float)($caso['u_tarifa_hitos_final'] ?? 0);
+                        } elseif ($uTipo === 'mensual') {
+                            $honorarios_abogado_real = (float)$caso['u_tarifa_mensual'];
+                        } elseif ($uTipo === 'exito') {
+                            $honorarios_abogado_real = (float)$caso['u_tarifa_exito'];
+                        }
                     }
                     $maxPagoAbogado = max(0, ($honorarios_abogado_real + (float)$caso['bono_abogado']) - $totalPagadoAbogado);
                 ?>

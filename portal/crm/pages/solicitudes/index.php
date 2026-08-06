@@ -214,9 +214,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
                 } else {
                     $honorariosAbogadoCaso = $solicitud['honorarios_abogado'] ?? 0;
                     if ($abogadoActual) {
-                        $tipoPago = $db->fetchColumn("SELECT tipo_pago_predeterminado FROM usuarios_internos WHERE id = ?", [$abogadoActual]);
-                        if ($tipoPago === 'mensual') {
-                            $honorariosAbogadoCaso = 0;
+                        $abogadoRow = $db->fetchOne("SELECT tipo_pago_predeterminado, tarifa_es_variable, tarifa_fija_default, tarifa_mensual_default, tarifa_exito_default, tarifa_hitos_senal, tarifa_hitos_intermedio, tarifa_hitos_final FROM usuarios_internos WHERE id = ?", [$abogadoActual]);
+                        if ($abogadoRow && (int)$abogadoRow['tarifa_es_variable'] === 0) {
+                            $tipoPago = $abogadoRow['tipo_pago_predeterminado'];
+                            if ($tipoPago === 'mensual') {
+                                $honorariosAbogadoCaso = (float)$abogadoRow['tarifa_mensual_default'];
+                            } elseif ($tipoPago === 'fijo') {
+                                $honorariosAbogadoCaso = (float)$abogadoRow['tarifa_fija_default'];
+                            } elseif ($tipoPago === 'exito') {
+                                $honorariosAbogadoCaso = (float)$abogadoRow['tarifa_exito_default'];
+                            } elseif ($tipoPago === 'hitos') {
+                                $honorariosAbogadoCaso = (float)$abogadoRow['tarifa_hitos_senal'] + (float)$abogadoRow['tarifa_hitos_intermedio'] + (float)$abogadoRow['tarifa_hitos_final'];
+                            }
                         }
                     }
 

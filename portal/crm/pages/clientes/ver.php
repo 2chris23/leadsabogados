@@ -266,6 +266,7 @@ if ($auth->esAbogado()) {
 $casos = $db->fetchAll(
     "SELECT c.*, u.nombre as abogado_nombre, u.apellidos as abogado_apellidos,
         u.tipo_pago_predeterminado, u.tarifa_mensual_default, u.tarifa_fija_default, u.tarifa_exito_default,
+        u.tarifa_hitos_senal, u.tarifa_hitos_intermedio, u.tarifa_hitos_final, u.tarifa_es_variable,
         (SELECT SUM(p.cantidad) FROM pagos p WHERE p.caso_id = c.id AND (p.tipo_pago IS NULL OR p.tipo_pago != 'pago_abogado')) as total_pagado_cliente,
         (SELECT SUM(p.cantidad) FROM pagos p WHERE p.caso_id = c.id AND p.tipo_pago = 'pago_abogado') as total_pagado_abogado
      FROM casos c LEFT JOIN usuarios_internos u ON c.abogado_id = u.id 
@@ -280,12 +281,22 @@ foreach ($casos as &$cTemp) {
     
     // Honorarios abogado
     $ha_real = (float)($cTemp['honorarios_abogado'] ?? 0);
-    if ($ha_real == 0 && !empty($cTemp['abogado_id'])) {
+    $esVariable = isset($cTemp['tarifa_es_variable']) ? (int)$cTemp['tarifa_es_variable'] : 1;
+    
+    // Si la tarifa NO es variable (es decir, tarifa fija, hitos, etc.), anulamos lo que haya en honorarios_abogado
+    if ($esVariable === 0 && !empty($cTemp['abogado_id'])) {
         $uTipo = $cTemp['tipo_pago_predeterminado'] ?? 'fijo';
-        if ($uTipo === 'hitos' || $uTipo === 'fijo') $ha_real = (float)($cTemp['tarifa_fija_default'] ?? 0);
-        elseif ($uTipo === 'mensual') $ha_real = (float)($cTemp['tarifa_mensual_default'] ?? 0);
-        elseif ($uTipo === 'exito') $ha_real = (float)($cTemp['tarifa_exito_default'] ?? 0);
+        if ($uTipo === 'fijo') {
+            $ha_real = (float)($cTemp['tarifa_fija_default'] ?? 0);
+        } elseif ($uTipo === 'hitos') {
+            $ha_real = (float)($cTemp['tarifa_hitos_senal'] ?? 0) + (float)($cTemp['tarifa_hitos_intermedio'] ?? 0) + (float)($cTemp['tarifa_hitos_final'] ?? 0);
+        } elseif ($uTipo === 'mensual') {
+            $ha_real = (float)($cTemp['tarifa_mensual_default'] ?? 0);
+        } elseif ($uTipo === 'exito') {
+            $ha_real = (float)($cTemp['tarifa_exito_default'] ?? 0);
+        }
     }
+    
     $bono = (float)($cTemp['bono_abogado'] ?? 0);
     
     $cTemp['_honorarios_abogado'] = $ha_real + $bono;
