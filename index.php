@@ -51,6 +51,8 @@ $videoUrl = '/portal/crm/assets/images/family_video.jpg';
 // Migración: agregar columna password_plain y fecha_nacimiento si no existen
 try { $db->query("ALTER TABLE portal_cuentas ADD COLUMN password_plain VARCHAR(100) DEFAULT NULL"); } catch (Throwable $e) {} 
 try { $db->query("ALTER TABLE portal_cuentas ADD COLUMN fecha_nacimiento DATE DEFAULT NULL"); } catch (Throwable $e) {} 
+try { $db->query("ALTER TABLE solicitudes ADD COLUMN fecha_nacimiento DATE DEFAULT NULL"); } catch (Throwable $e) {}
+try { $db->query("ALTER TABLE clientes ADD COLUMN fecha_nacimiento DATE DEFAULT NULL"); } catch (Throwable $e) {}
 
 // --- Procesar formulario ---
 $formExito = false;
@@ -91,7 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
             'tipo_problema'   => trim($_POST['tipo_problema'] ?? '') ?: 'Otro',
             'descripcion'     => trim($_POST['descripcion'] ?? ''),
             'dni_nif'         => 'No provisto',
-            'fecha_nacimiento'=> null
+            'fecha_nacimiento'=> trim($_POST['fecha_nacimiento'] ?? '') ?: null
         ];
 
         $autoPassword = substr(str_shuffle('ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$'), 0, 10);
@@ -127,6 +129,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
                     'telefono'         => $formData['telefono'] ?: null,
                     'tipo_problema'    => $formData['tipo_problema'],
                     'descripcion'      => $formData['descripcion'],
+                    'fecha_nacimiento' => $formData['fecha_nacimiento'],
                     'estado'           => 'pendiente',
                     
                     'ip_solicitante'   => $_SERVER['REMOTE_ADDR'] ?? '',
@@ -831,10 +834,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
                         <input type="tel" name="telefono" class="inp" placeholder="Teléfono *" value="<?php echo esc($formData['telefono']); ?>" required>
                         <input type="email" name="email" class="inp" placeholder="Email *" value="<?php echo esc($formData['email']); ?>" required>
                     </div>
-                    <div class="form-group">
-                        <input type="text" name="dni_nif" class="inp" placeholder="DNI / NIE *" value="<?php echo esc($formData['dni_nif']); ?>" required>
+                    <div class="form-row">
+                        <div class="col-12 col-md-6">
+                            <input type="text" name="dni_nif" class="inp" placeholder="DNI / NIE *" required value="<?php echo esc($formData['dni_nif']); ?>">
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label style="font-size: 0.8rem; font-weight:600; color:var(--gray); margin-bottom:4px; display:block;">Fecha de Nacimiento *</label>
+                            <input type="date" name="fecha_nacimiento" class="inp" required value="<?php echo esc($formData['fecha_nacimiento']); ?>" style="color:var(--navy);">
+                        </div>
                     </div>
-                    <div class="form-group">
+                    <div class="form-row" style="display:none;">
                         <input type="text" name="direccion" class="inp" placeholder="Provincia / Ciudad" value="<?php echo esc($formData['direccion']); ?>">
                     </div>
                     <div class="form-group">
