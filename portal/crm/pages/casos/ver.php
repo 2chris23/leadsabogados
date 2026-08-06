@@ -10,7 +10,7 @@ RoleGuard::verificarAccesoCaso($id);
 
 
 $caso = $db->fetchOne(
-    "SELECT c.*, cl.nombre as cliente_nombre, cl.apellidos as cliente_apellidos, cl.email as cliente_email, cl.telefono as cliente_telefono, cl.dni_nif as cliente_dni, cl.direccion as cliente_direccion,
+    "SELECT c.*, cl.nombre as cliente_nombre, cl.apellidos as cliente_apellidos, cl.email as cliente_email, cl.telefono as cliente_telefono, cl.dni_nif as cliente_dni, cl.direccion as cliente_direccion, cl.fecha_nacimiento as cliente_fecha_nacimiento,
             u.nombre as abogado_nombre, u.apellidos as abogado_apellidos,
             u.tipo_pago_predeterminado as u_tipo_pago, u.tarifa_fija_default as u_tarifa_fija, u.tarifa_mensual_default as u_tarifa_mensual, u.tarifa_exito_default as u_tarifa_exito
      FROM casos c
@@ -713,7 +713,8 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="cv-field"><label>Cliente</label><p><a href="<?php echo APP_URL; ?>/index.php?page=clientes/ver&id=<?php echo $caso['cliente_id']; ?>" style="color:#2e6edd;font-weight:600;text-decoration:none"><?php echo e($caso['cliente_nombre'].' '.$caso['cliente_apellidos']); ?></a></p></div>
           <div class="cv-field"><label>Teléfono</label><p><?php echo $caso['cliente_telefono'] ? e($caso['cliente_telefono']) : '—'; ?></p></div>
           <div class="cv-field"><label>Email</label><p><?php echo $caso['cliente_email'] ? e($caso['cliente_email']) : '—'; ?></p></div>
-          <div class="cv-field"><label>DNI / NIF</label><p><?php echo $caso['cliente_dni'] ? e($caso['cliente_dni']) : '—'; ?></p></div>
+          <div class="cv-field"><label>DNI / NIF</label><p><?php echo $caso['cliente_dni'] ? e($caso['cliente_dni']) : '-'; ?></p></div>
+          <div class="cv-field"><label>Fecha Nac.</label><p><?php echo $caso['cliente_fecha_nacimiento'] ? date('d/m/Y', strtotime($caso['cliente_fecha_nacimiento'])) : '-'; ?></p></div>
           <div class="cv-field" style="grid-column: 1 / -1;"><label>Dirección</label><p><?php echo $caso['cliente_direccion'] ? e($caso['cliente_direccion']) : '—'; ?></p></div>
         </div>
         <?php if($caso['descripcion']): ?>
