@@ -230,7 +230,7 @@ class RoleGuard {
 
         // Pagos — solo administradores o si tiene permiso explícito en BD (no fallback por defecto)
         $puedeVerPagos = false;
-        if (!empty($permisos)) {
+        if ($rol !== 'abogado' && !empty($permisos)) {
             $puedeVerPagos = !empty($permisos['pagos.ver']) || !empty($permisos['pagos.registrar']);
         }
         if ($puedeVerPagos) {
