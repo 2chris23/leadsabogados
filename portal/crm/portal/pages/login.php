@@ -164,14 +164,6 @@ $crmUrl = APP_URL . '/portal/crm';
             filter: brightness(0.9);
         }
 
-        .portal-visual::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.8) 100%);
-            z-index: 1;
-        }
-
         .portal-visual-content {
             position: absolute;
             inset: 0;
@@ -468,21 +460,6 @@ $crmUrl = APP_URL . '/portal/crm';
     <!-- Visual -->
     <div class="portal-visual">
         <img src="../assets/images/login_bg.png?v=<?php echo time(); ?>" alt="Fondo Login">
-        <div class="portal-visual-content">
-
-            <div>
-                <div class="portal-visual-text">
-                    <h2>Su caso, <span>siempre<br>a su alcance.</span></h2>
-                    <p>Consulte el estado de su expediente, revise pagos y suba documentos desde cualquier lugar, en cualquier momento.</p>
-                </div>
-                <div style="height: 40px;"></div>
-                <div class="portal-visual-stats">
-                    <div><strong>100%</strong><span>Confidencial</span></div>
-                    <div><strong>24/7</strong><span>Disponible</span></div>
-                    <div><strong>Seguro</strong><span>Cifrado SSL</span></div>
-                </div>
-            </div>
-        </div>
     </div>
 
     <!-- Formulario -->
