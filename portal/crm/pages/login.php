@@ -140,8 +140,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .login-logo img {
-            height: 85px;
-            width: auto;
+            width: 350px;
+            height: auto;
+            max-width: 100%;
             object-fit: contain;
         }
 
