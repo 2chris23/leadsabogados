@@ -775,7 +775,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
             .nav-logo { width: 220px; height: auto; max-width: none; object-fit: contain; }
             .nav-menu { gap: 4px; }
             .btn-portal { font-size: 0.75rem; padding: 0 6px; white-space: nowrap; }
-            .hero-left { position: relative; z-index: 2; padding: 48px 20px 420px; text-align: center; }
+            .hero-img-bg { display: none !important; }
+            .hero-left { position: relative; z-index: 2; padding: 48px 20px; text-align: center; }
             .hero-subtitle { margin-left: auto; margin-right: auto; }
             .hero-right { padding: 0 20px 48px; justify-content: center; }
             .form-panel { padding: 28px 20px; width: 100%; max-width: 500px; margin: 0 auto; }
