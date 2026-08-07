@@ -112,13 +112,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .login-logo {
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 12px;
             margin-bottom: 48px;
         }
 
         .login-logo img {
-            width: 200px !important;
-            height: 100px !important;
+            width: 280px !important;
+            height: auto !important;
             object-fit: contain;
         }
 

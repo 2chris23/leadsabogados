@@ -465,8 +465,8 @@ $crmUrl = APP_URL . '/portal/crm';
     <!-- Formulario -->
     <div class="portal-form-side">
         <div class="portal-form-inner">
-            <div class="portal-form-logo" style="margin-bottom: 24px;">
-                <img src="../assets/images/logo.png?v=<?php echo time(); ?>" alt="Logo" style="width: 200px; height: 100px; object-fit: contain;">
+            <div class="portal-form-logo" style="margin-bottom: 24px; text-align: center;">
+                <img src="../assets/images/logo.png?v=<?php echo time(); ?>" alt="Logo" style="width: 280px; height: auto; object-fit: contain;">
             </div>
 
             <h1>Bienvenido</h1>
