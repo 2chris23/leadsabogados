@@ -160,8 +160,7 @@ $crmUrl = APP_URL . '/portal/crm';
 
         .portal-visual > img {
             width: 100%; height: 100%;
-            object-fit: cover;
-            object-position: left center;
+            object-fit: fill;
             filter: brightness(0.9);
         }
 
