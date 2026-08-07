@@ -137,9 +137,9 @@ $crmUrl = APP_URL . '/portal/crm';
 
         .portal-login {
             display: grid;
-            grid-template-columns: 1.1fr 0.9fr;
+            grid-template-columns: 1.4fr 0.8fr;
             width: 100%;
-            max-width: 1263px;
+            max-width: 1350px;
             min-height: 688px;
             background: #fff;
             border-radius: 24px;
@@ -161,7 +161,7 @@ $crmUrl = APP_URL . '/portal/crm';
         .portal-visual > img {
             width: 100%; height: 100%;
             object-fit: cover;
-            object-position: 20% center;
+            object-position: center;
             filter: brightness(0.9);
         }
 
