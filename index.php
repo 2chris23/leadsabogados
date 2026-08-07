@@ -772,9 +772,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
         @media (max-width: 768px) {
             .topbar { display: none; }
             .navbar { padding: 0 12px; height: auto; min-height: 70px; }
-            .nav-logo { width: 220px; height: auto; max-width: none; object-fit: contain; }
-            .nav-menu { gap: 4px; }
-            .btn-portal { font-size: 0.75rem; padding: 0 6px; white-space: nowrap; }
+            .nav-logo { width: 150px; height: auto; max-width: 100%; object-fit: contain; }
+            .nav-menu { gap: 8px; }
+            .btn-portal { font-size: 0.8125rem; padding: 6px 12px; white-space: nowrap; }
             .hero-img-bg { display: none !important; }
             .hero-left { position: relative; z-index: 2; padding: 48px 20px; text-align: center; }
             .hero-subtitle { margin-left: auto; margin-right: auto; }
