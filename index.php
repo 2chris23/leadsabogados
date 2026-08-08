@@ -282,7 +282,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
             border-bottom: 1px solid var(--border);
             padding: 0 40px;
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
+            gap: 20vw;
             align-items: center;
             height: 90px;
             position: sticky;
@@ -771,7 +772,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
         }
         @media (max-width: 768px) {
             .topbar { display: none; }
-            .navbar { padding: 0 12px; height: auto; min-height: 70px; }
+            .navbar { padding: 0 12px; height: auto; min-height: 70px; justify-content: space-between; gap: 0; }
             .nav-logo { width: 300px; height: auto; max-width: 100%; object-fit: contain; }
             .nav-menu { gap: 4px; }
             .btn-portal { font-size: 0.75rem; padding: 4px 6px; white-space: nowrap; }
@@ -795,7 +796,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
 </div>
 
 <!-- NAVBAR -->
-<nav class="navbar" id="top" style="justify-content: center; gap: 30vw;">
+<nav class="navbar" id="top">
     <a href="/"><img src="<?php echo $logoUrl; ?>" alt="leadsabogados.com" class="nav-logo"></a>
     <div class="nav-menu">
         <a href="https://app.leadsabogados.com/portal" class="btn-portal">
