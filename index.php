@@ -772,7 +772,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['consulta_submit'])) {
         @media (max-width: 768px) {
             .topbar { display: none; }
             .navbar { padding: 0 12px; height: auto; min-height: 70px; }
-            .nav-logo { width: 228px; height: auto; max-width: 100%; object-fit: contain; }
+            .nav-logo { width: 274px; height: auto; max-width: 100%; object-fit: contain; }
             .nav-menu { gap: 4px; }
             .btn-portal { font-size: 0.75rem; padding: 4px 6px; white-space: nowrap; }
             .hero-img-bg { display: none !important; }
