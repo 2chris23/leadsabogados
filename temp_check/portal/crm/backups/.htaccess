@@ -1,3 +1,0 @@
-# Deny all access to backup files - only accessible via PHP download handler
-Order deny,allow
-Deny from all

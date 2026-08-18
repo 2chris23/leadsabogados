@@ -1,2 +1,0 @@
-# Bloquear todo acceso web directo — este directorio es servido SOLO por PHP
-Deny from all
